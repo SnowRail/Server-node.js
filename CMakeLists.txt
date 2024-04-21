@@ -27,5 +27,5 @@ target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC -g -Wall -Werror)
 
 # Link with WinSock library
 if(WIN32)
-  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE wsock32 ws2_32)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE wsock32 ws2_32 -static-libstdc++ -static-libgcc)
 endif()
