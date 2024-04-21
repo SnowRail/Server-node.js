@@ -6,6 +6,7 @@
 // #pragma comment(lib, "ws2_32.lib")
 
 int main() {
+    std::cout << "Server started" << std::endl;
     // Winsock ÃÊ±âÈ­
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
