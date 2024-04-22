@@ -1,12 +1,12 @@
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
 #include <iostream>
-#define SERVERPORT 8080
+#define SERVERPORT 5001
 
 // #pragma comment(lib, "ws2_32.lib")
 
 int main() {
-    std::cout << "Server started" << std::endl;
+    std::cout << "Server started on " << SERVERPORT << std::endl;
     // Winsock ÃÊ±âÈ­
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
