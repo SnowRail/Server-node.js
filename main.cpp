@@ -1,7 +1,7 @@
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
 #include <iostream>
-#define SERVERPORT 5001
+#define SERVERPORT 51234
 
 // #pragma comment(lib, "ws2_32.lib")
 
