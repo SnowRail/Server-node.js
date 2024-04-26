@@ -20,7 +20,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 SET ( CMAKE_VERBOSE_MAKEFILE true ) 
 
 # Add the executable target
-add_executable(${CMAKE_PROJECT_NAME} main.cpp)
+add_executable(${CMAKE_PROJECT_NAME} server.cpp)
 
 # Compile options - Wall(Show all warnings), Werror(Warning as error
 target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC -g -Wall -Werror)
