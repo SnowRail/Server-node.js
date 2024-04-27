@@ -1,5 +1,6 @@
 const net = require('net');
-const {ByteReader} = require('../Network');
+const { ByteReader } = require('../Network');
+const Protocol = require('./Protocol');
 const sockets = new Set();
 
 const server = net.createServer((socket) =>
@@ -9,15 +10,18 @@ const server = net.createServer((socket) =>
 
     socket.on('data',(data)=> 
     {
-        console.log('클라이언트 메시지 : ',data.toString());
+        const byteReader = new ByteReader(data);
+        const protocol = byteReader.readByte();
+        console.log('클라이언트 메시지 : ', data.toString());
 
-        sockets.forEach((clientSocket)=>
-        {
-            if(clientSocket !== socket)
-            {
-                clientSocket.write(data);
-            }
-        });
+        switch(protocol){
+            case Protocol.PlayerConnect:
+                socket.write(sockets);
+                broadcast("newPlayer", socket);
+            case Protocol.PlayerMove:
+                broadcast(data, socket);
+        }
+
     });
 
     socket.on('end',() =>
