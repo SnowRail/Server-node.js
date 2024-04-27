@@ -41,7 +41,7 @@ jobs:
             - name: build server files
               working-directory: ./
               run: |
-                npm install -y
+                npm
               #   npm run start  
 
             - name: zip file
