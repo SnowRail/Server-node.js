@@ -12,7 +12,7 @@ const server = net.createServer((socket) =>
 
     const buffer = Buffer.alloc(8);
     const bytewriter = new ByteWriter(buffer);
-    bytewriter.writeInt(Protocol.PlayerConnect);
+    bytewriter.writeInt(Protocol.s_PlayerConnect);
     bytewriter.writeInt(sockets.size)
     socket.write(buffer);
     broadcast("newPlayer", socket);
@@ -26,14 +26,9 @@ const server = net.createServer((socket) =>
         
         console.log('bytereader : ' , byteReader.readInt());
         switch(protocol){
-            case Protocol.PlayerConnect:
-                parseInstantiate(socket,data);
-                console.log('player connect');
-                break;
-            case Protocol.PlayerCheckConn:
-
-            case Protocol.PlayerPosition:
-                console.log('PlayerPosition :' , Protocol.c_PlayerPosition);
+            case Protocol.c_PlayerPosition:
+                console.log('PlayerID :' , byteReader.readInt());
+                console.log('PlayerPosition :' , byteReader.readInt());
                 broadcast(data, socket);
                 break;
             
@@ -62,15 +57,6 @@ function broadcast(message, sender) {
         socket.write(message);
     });
 }
-
-function parseInstantiate(socket,data){
-    const byteReader = new ByteReader(data,4);
-    // const protocol = byteReader.readByte();
-    
-    const clientID = byteReader.readInt();
-    console.log("clientID : ",clientID);
-}
-
 
 server.listen(30303,() => 
 {
