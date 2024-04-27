@@ -1,6 +1,8 @@
 const net = require('net');
 const { ByteReader } = require('../Network');
 const Protocol = require('./Protocol');
+const NetworkObjectManager = require('./NetworkObjectManager');
+const UnityInstance = require('./UnityInstance');
 const sockets = new Set();
 
 const server = net.createServer((socket) =>
@@ -8,16 +10,19 @@ const server = net.createServer((socket) =>
     console.log('새로운 클라이언트 접속 : ', socket.remoteAddress,socket.remotePort);
     sockets.add(socket);
 
+    socket.write(sockets.toString());
+    broadcast("newPlayer", socket);
+
     socket.on('data',(data)=> 
     {
         const byteReader = new ByteReader(data);
         const protocol = byteReader.readByte();
         console.log('클라이언트 메시지 : ', data.toString());
-
+        console.log('protocol :',protocol.toString() );
         switch(protocol){
             case Protocol.PlayerConnect:
-                socket.write(sockets);
-                broadcast("newPlayer", socket);
+                parseInstantiate(socket,data);
+                console.log('player connect');
             case Protocol.PlayerMove:
                 broadcast(data, socket);
         }
@@ -45,6 +50,15 @@ function broadcast(message, sender) {
         socket.write(message);
     });
 }
+
+function parseInstantiate(socket,data){
+    const byteReader = new ByteReader(data);
+    const protocol = byteReader.readByte();
+    
+    const clientID = byteReader.readInt();
+    const position = byteReader.readInt();
+}
+
 
 server.listen(30303,() => 
 {
