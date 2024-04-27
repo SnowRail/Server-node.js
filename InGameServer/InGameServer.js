@@ -1,4 +1,5 @@
 const net = require('net');
+const {ByteReader} = require('../Network');
 const sockets = new Set();
 
 const server = net.createServer((socket) =>
