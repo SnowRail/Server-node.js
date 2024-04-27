@@ -1,18 +1,39 @@
 const net = require('net');
+const sockets = new Set();
 
-const server = net.createServer((socket) => {
-  console.log('클라이언트 연결됨: ' + socket.remoteAddress + ':' + socket.remotePort);
+const server = net.createServer((socket) =>
+{
+    console.log('새로운 클라이언트 접속 : ', socket.remoteAddress,socket.remotePort);
+    sockets.add(socket);
 
-  socket.on('data', (data) => {
-    console.log('수신 데이터: ' + data.toString());
-    socket.write('수신한 데이터를 다시 전송합니다: ' + data);
-  });
+    socket.on('data',(data)=> 
+    {
+        console.log('클라이언트 메시지 : ',data.toString());
 
-  socket.on('end', () => {
-    console.log('클라이언트 연결 종료됨: ' + socket.remoteAddress + ':' + socket.remotePort);
-  });
+        sockets.forEach((clientSocket)=>
+        {
+            if(clientSocket !== socket)
+            {
+                clientSocket.write(data);
+            }
+        });
+    });
+
+    socket.on('end',() =>
+    {
+        console.log('클라이언트 접속 종료 : ', socket.remoteAddress,socket.remotePort);
+        sockets.delete(socket);
+    });
+
+
+    socket.on('error',(err)=>
+    {
+        console.error('소켓 에러 : ', err);
+        sockets.delete(socket);
+    });
 });
 
-server.listen(30303, () => {
-  console.log('#@! 서버 시작됨: ' + server.address().address + ':' + server.address().port);
+server.listen(30303,() => 
+{
+    console.log('TCP 서버가 30303번 포트에서 실행 중입니다.')
 });
