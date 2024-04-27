@@ -34,7 +34,19 @@ const server = net.createServer((socket) =>
     });
 });
 
+function broadcast(message, sender) {
+    sockets.forEach((socket) => {
+        if (socket == sender) return;
+
+        socket.write(message);
+    });
+}
+
 server.listen(30303,() => 
 {
     console.log('TCP 서버가 30303번 포트에서 실행 중입니다.')
 });
+
+module.exports = {
+    broadcast
+};
