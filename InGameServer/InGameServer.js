@@ -1,5 +1,5 @@
 const net = require('net');
-const { ByteReader } = require('../Network');
+const { ByteReader, ByteWriter } = require('../Network');
 const Protocol = require('./Protocol');
 const NetworkObjectManager = require('./NetworkObjectManager');
 const UnityInstance = require('./UnityInstance');
@@ -10,9 +10,14 @@ const server = net.createServer((socket) =>
     console.log('새로운 클라이언트 접속 : ', socket.remoteAddress,socket.remotePort);
     sockets.add(socket);
 
-    socket.write(sockets.size.toString());
-    console.log('소켓 사이즈 : ', sockets.size);
+    const buffer = Buffer.alloc(8);
+    const bytewriter = new ByteWriter(buffer);
+    bytewriter.writeInt(Protocol.PlayerConnect);
+    bytewriter.writeInt(sockets.size)
+    socket.write(buffer);
     broadcast("newPlayer", socket);
+    
+    
 
     socket.on('data',(data)=> 
     {
@@ -24,8 +29,14 @@ const server = net.createServer((socket) =>
             case Protocol.PlayerConnect:
                 parseInstantiate(socket,data);
                 console.log('player connect');
-            case Protocol.PlayerMove:
+                break;
+            case Protocol.PlayerCheckConn:
+
+            case Protocol.PlayerPosition:
+                console.log('PlayerPosition :' , Protocol.c_PlayerPosition);
                 broadcast(data, socket);
+                break;
+            
         }
 
     });
