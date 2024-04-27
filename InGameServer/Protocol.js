@@ -1,6 +1,7 @@
 const Protocol = {
-    PlayerConnect: 30,
-    PlayerMove: 31
+    s_PlayerConnect: 30,
+    c_PlayerCheckConn : 31,
+    c_PlayerPosition: 32
 };
 
 module.exports = Protocol;
