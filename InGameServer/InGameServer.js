@@ -10,15 +10,16 @@ const server = net.createServer((socket) =>
     console.log('새로운 클라이언트 접속 : ', socket.remoteAddress,socket.remotePort);
     sockets.add(socket);
 
-    socket.write(sockets.toString());
+    socket.write(sockets.size.toString());
+    console.log('소켓 사이즈 : ', sockets.size);
     broadcast("newPlayer", socket);
 
     socket.on('data',(data)=> 
     {
         const byteReader = new ByteReader(data);
-        const protocol = byteReader.readByte();
-        console.log('클라이언트 메시지 : ', data.toString());
-        console.log('protocol :',protocol.toString() );
+        const protocol = byteReader.readInt();
+        
+        console.log('bytereader : ' , byteReader.readInt());
         switch(protocol){
             case Protocol.PlayerConnect:
                 parseInstantiate(socket,data);
@@ -52,11 +53,11 @@ function broadcast(message, sender) {
 }
 
 function parseInstantiate(socket,data){
-    const byteReader = new ByteReader(data);
-    const protocol = byteReader.readByte();
+    const byteReader = new ByteReader(data,4);
+    // const protocol = byteReader.readByte();
     
     const clientID = byteReader.readInt();
-    const position = byteReader.readInt();
+    console.log("clientID : ",clientID);
 }
 
 
