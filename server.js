@@ -14,5 +14,5 @@ const server = net.createServer((socket) => {
 });
 
 server.listen(30303, () => {
-  console.log('#@ 서버 시작됨: ' + server.address().address + ':' + server.address().port);
+  console.log('#@! 서버 시작됨: ' + server.address().address + ':' + server.address().port);
 });
