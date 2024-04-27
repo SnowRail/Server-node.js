@@ -1,7 +1,7 @@
 {
   "name": "nodeserver",
   "version": "1.0.0",
-  "description": "깃허브 액션 테스트용",
+  "description": "Node.js 서버",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

@@ -5,9 +5,7 @@ name: deploy
 
 on:
     push:
-        branches: [develop]
-    pull_request:
-        branches: [develop]
+        branches: [main]
 
 jobs:
     build:
@@ -63,5 +61,4 @@ jobs:
                 --application-name nodejs-server-codedeploy
                 --deployment-config-name CodeDeployDefault.OneAtATime
                 --deployment-group-name nodejs-server-group
-                --ignore-application-stop-failures
                 --s3-location bucket=nodejs-server-build,bundleType=zip,key=deploy/nodejs-server.zip
