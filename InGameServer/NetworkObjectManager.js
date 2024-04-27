@@ -1,4 +1,4 @@
-const UnityInstance = require('./UnityInstance');
+const UnityInstance = require('./UnityClass/UnityInstance');
 let m_PlayerLists = [];
 
 function getObjects(){

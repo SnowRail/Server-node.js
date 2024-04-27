@@ -1,4 +1,5 @@
 const Offset = require('./Offset');
+const {Vector2} = require('../InGameServer/UnityClass');
 // const { Vector3, Quaternion } = require('');
 
 class ByteReader extends Offset {

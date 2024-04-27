@@ -2,7 +2,7 @@ const net = require('net');
 const { ByteReader, ByteWriter } = require('../Network');
 const Protocol = require('./Protocol');
 const NetworkObjectManager = require('./NetworkObjectManager');
-const UnityInstance = require('./UnityInstance');
+const UnityInstance = require('./UnityClass/UnityInstance');
 const sockets = new Set();
 
 const server = net.createServer((socket) =>
@@ -24,11 +24,11 @@ const server = net.createServer((socket) =>
         const byteReader = new ByteReader(data);
         const protocol = byteReader.readInt();
         
-        console.log('bytereader : ' , byteReader.readInt());
+        
         switch(protocol){
             case Protocol.c_PlayerPosition:
                 console.log('PlayerID :' , byteReader.readInt());
-                console.log('PlayerPosition :' , byteReader.readInt());
+                console.log('PlayerPosition :' , byteReader.readVector2());
                 broadcast(data, socket);
                 break;
             
