@@ -15,6 +15,12 @@ class ByteReader extends Offset {
 
         return value;
     }
+
+    readBytes(){
+        const value = Buffer.from(this.data);
+        const str = value.toString('utf8',1);
+        return str;
+    }
 }
 
 module.exports = ByteReader;
