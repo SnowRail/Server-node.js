@@ -3,12 +3,13 @@ function Offset(data, initOffset = 0) {
     this.offset = initOffset;
 }
 
-Offset.prototype.ResetOffset(() => {
-    this.offset = 0;
-})
 
-Offset.prototype.MoveOffset((offset) => {
+Offset.prototype.ResetOffset = function() {
+    this.offset = 0;
+}
+
+Offset.prototype.MoveOffset = function(offset) {
     this.offset = offset;
-})
+}
 
 module.exports = Offset
