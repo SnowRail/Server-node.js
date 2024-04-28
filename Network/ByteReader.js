@@ -1,30 +1,38 @@
 const Offset = require('./Offset');
-const {Vector2} = require('../InGameServer/UnityClass');
+const {Vector2, Vector3} = require('../InGameServer/UnityClass');
+const { intSize, floatSize } = require('../InGameServer/typeSize');
 // const { Vector3, Quaternion } = require('');
 
 class ByteReader extends Offset {
     readInt() {
         const value = this.data.readInt32LE(this.offset);
-        this.offset += 4; // intSize
+        this.offset += intSize; // intSize
 
         return value;
     }
 
     readVector2(){
-        const x = this.data.readFloatLE(this.offset + (4 * 0));
-        const y = this.data.readFloatLE(this.offset + (4 * 1));
-        this.offset += 4*2;
+        const x = this.data.readFloatLE(this.offset + (floatSize * 0));
+        const y = this.data.readFloatLE(this.offset + (floatSize * 1));
+        this.offset += floatSize * 2;
 
         return new Vector2(x,y);
     }
 
     readVector3(){
-        const x = this.data.readFloatLE(this.offset + (4 * 0));
-        const y = this.data.readFloatLE(this.offset + (4 * 1));
-        const z = this.data.readFloatLE(this.offset + (4 * 2));
-        this.offset += 4*3;
+        const x = this.data.readFloatLE(this.offset + (floatSize * 0));
+        const y = this.data.readFloatLE(this.offset + (floatSize * 1));
+        const z = this.data.readFloatLE(this.offset + (floatSize * 2));
+        this.offset += floatSize * 3;
 
-        return new Vector2(x,y);
+        return new Vector3(x,y,z);
+    }
+
+    readQuaternion(){
+        const x = this.data.readFloatLE(this.offset + (floatSize * 0));
+        const y = this.data.readFloatLE(this.offset + (floatSize * 1));
+        const z = this.data.readFloatLE(this.offset + (floatSize * 2));
+        const w = this.data.readFloatLE(this.offset + (floatSize * 3));
     }
 
     readByte() {
