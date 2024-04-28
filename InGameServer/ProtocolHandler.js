@@ -30,7 +30,7 @@ function FirstConn(socket,id){
     })
     socket.write(sendData);
 
-    const userInstance = new UnityInstance(userCount,new Vector2(0,0));
+    const userInstance = new UnityInstance(id,new Vector2(0,0));
     NetworkObjectManager.addObject(userInstance);
 }
 
