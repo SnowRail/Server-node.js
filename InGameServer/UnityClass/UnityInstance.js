@@ -1,12 +1,10 @@
 class UnityInstance
 {
-    constructor(instanceType, clientID,localID,postion,rotation)
+    constructor(clientID,position)
     {
-        this.instanceType = instanceType;
         this.clientID = clientID;
-        this.localID = localID;
-        this.postion = postion;
-        this.rotation = rotation;
+        this.position = position;
+        // this.rotation = rotation;
     }
 }
 
