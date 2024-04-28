@@ -18,6 +18,15 @@ class ByteReader extends Offset {
         return new Vector2(x,y);
     }
 
+    readVector3(){
+        const x = this.data.readFloatLE(this.offset + (4 * 0));
+        const y = this.data.readFloatLE(this.offset + (4 * 1));
+        const z = this.data.readFloatLE(this.offset + (4 * 2));
+        this.offset += 4*3;
+
+        return new Vector2(x,y);
+    }
+
     readByte() {
         const value = this.data[this.offset];
         this.offset++;
