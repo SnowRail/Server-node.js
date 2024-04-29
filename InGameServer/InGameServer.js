@@ -8,7 +8,6 @@ const SocketManager = require('./SoketManager');
 
 const {
     FirstConn,
-    broadcast,
     UpdatePlayerPos,
     DestroyPlayer
 } = require('./ProtocolHandler');
@@ -33,8 +32,6 @@ const server = net.createServer((socket) =>
 
     FirstConn(socket,num);
     
-    
-
     socket.on('data',(data)=> 
     {
         const byteReader = new ByteReader(data);
@@ -42,21 +39,19 @@ const server = net.createServer((socket) =>
         
         
         switch(protocol){
-            case Protocol.c_PlayerPosition:
+            case Protocol.PlayerMove:
                 const id = byteReader.readInt();
                 const playerPos = byteReader.readVector2();
 
                 UpdatePlayerPos(socket,id, playerPos);
                 break;
-            
         }
-
     });
 
     socket.on('end',() =>
     {
         console.log('클라이언트 접속 종료 : ', socket.remoteAddress,socket.remotePort);
-        DestroyPlayer(socket,socket.clientID);
+        PlayerDisconnect(socket,socket.clientID);
         SocketManager.removeSocket(socket);
     });
 

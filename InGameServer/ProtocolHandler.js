@@ -14,14 +14,14 @@ function FirstConn(socket,id){
     
     const myData = Buffer.alloc(intSize*2 + vector2Size);
     const bwmy = new ByteWriter(myData);
-    bwmy.writeInt(Protocol.s_NewUser);
+    bwmy.writeInt(Protocol.OtherPlayerConnect);
     bwmy.writeByte(id);
     bwmy.writeVector2(new Vector2(0,0));
     broadcast(myData,socket);
 
     const sendData = Buffer.alloc((intSize*3) + (intSize+vector2Size)*userCount);
     const bw = new ByteWriter(sendData);
-    bw.writeInt(Protocol.s_PlayerConnect);
+    bw.writeInt(Protocol.LoadGameScene);
     bw.writeInt(id);
     bw.writeInt(userCount);
     userList.forEach((element)=>{
@@ -38,7 +38,7 @@ function UpdatePlayerPos(socket,id, pos)
 {
     const sendData = Buffer.alloc((intSize*2) + (floatSize*2));
     const bw = new ByteWriter(sendData);
-    bw.writeInt(Protocol.s_PlayerPosition);
+    bw.writeInt(Protocol.PlayerMove);
     bw.writeInt(id);
     bw.writeVector2(pos);
     broadcast(sendData, socket);
@@ -51,10 +51,10 @@ function UpdatePlayerPos(socket,id, pos)
     })
 }
 
-function DestroyPlayer(socket, id){
+function PlayerDisconnect(socket, id){
     const buffer = Buffer.allocUnsafe(intSize*2);
     const bw = new ByteWriter(buffer);
-    bw.writeInt(Protocol.s_DestroyPlayer);
+    bw.writeInt(Protocol.PlayerDisconnect);
     bw.writeInt(id); 
     broadcast(buffer,socket);
     NetworkObjectManager.removeObjectByID(id);
@@ -76,5 +76,5 @@ module.exports = {
     FirstConn,
     broadcast,
     UpdatePlayerPos,
-    DestroyPlayer
+    DestroyPlayer: PlayerDisconnect
 };
