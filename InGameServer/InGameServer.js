@@ -31,11 +31,6 @@ const server = net.createServer((socket) =>
     console.log('새로운 클라이언트 접속 : ', socket.name);
     console.log('클라이언트 ID : ' + socket.clientID);
 
-    // const buffer = Buffer.alloc(intSize*2);
-    // const bytewriter = new ByteWriter(buffer);
-    // bytewriter.writeInt(Protocol.s_PlayerConnect);
-    // bytewriter.writeInt(sockets.size-1)
-    // socket.write(buffer);
     FirstConn(socket,num);
     
     
@@ -49,10 +44,8 @@ const server = net.createServer((socket) =>
         switch(protocol){
             case Protocol.c_PlayerPosition:
                 const id = byteReader.readInt();
-                const playerPos = byteReader.readVector2()
-                // console.log('PlayerID :' , id);
-                // console.log('PlayerPosition :' , playerPos);
-            
+                const playerPos = byteReader.readVector2();
+
                 UpdatePlayerPos(socket,id, playerPos);
                 break;
             

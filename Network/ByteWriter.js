@@ -7,6 +7,11 @@ class ByteWriter extends Offset {
         this.offset += intSize;
     }
 
+    writeFloat(value) {
+        this.data.writeFloatLE(value, this.offset);
+        this.offset += floatSize;
+    }
+
     writeVector2(value){
         this.data.writeFloatLE(value.x, this.offset + (floatSize * 0));
         this.data.writeFloatLE(value.y, this.offset + (floatSize * 1));
