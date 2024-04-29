@@ -1,10 +1,10 @@
 const NetworkObjectManager = require('./NetworkObjectManager');
 const { ByteReader, ByteWriter } = require('../Network');
-const { intSize, floatSize, vector2Size } = require('./typeSize');
+const { intSize, floatSize, vector3Size } = require('./typeSize');
 const UnityInstance = require('./UnityClass/UnityInstance');
 const SocketManager = require('./SoketManager');
 const Protocol = require('./Protocol');
-const { Vector2 } = require('./UnityClass');
+const { Vector3 } = require('./UnityClass');
 
 
 function FirstConn(socket,id){
@@ -39,7 +39,7 @@ function UpdatePlayerPos(socket,id, pos)
     const bw = new ByteWriter(sendData);
     bw.writeInt(Protocol.PlayerMove);
     bw.writeInt(id);
-    bw.writeVector2(pos);
+    bw.writeVector3(pos);
     broadcast(sendData, socket);
     const userList = NetworkObjectManager.getObjects();
     userList.forEach((element)=>{
