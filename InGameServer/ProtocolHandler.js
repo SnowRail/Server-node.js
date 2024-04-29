@@ -51,6 +51,14 @@ function UpdatePlayerPos(socket,id, pos)
     })
 }
 
+function DestroyPlayer(socket, id){
+    const buffer = Buffer.allocUnsafe(intSize*2);
+    const bw = new ByteWriter(buffer);
+    bw.writeInt(Protocol.s_DestroyPlayer);
+    bw.writeInt(id); 
+    broadcast(buffer,socket);
+    NetworkObjectManager.removeObjectByID(id);
+}
 
 function broadcast(message, sender) {
     const sockets = SocketManager.getSockets();
@@ -68,4 +76,5 @@ module.exports = {
     FirstConn,
     broadcast,
     UpdatePlayerPos,
+    DestroyPlayer
 };

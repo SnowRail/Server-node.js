@@ -6,11 +6,11 @@ const UnityInstance = require('./UnityClass/UnityInstance');
 const { intSize, floatSize } = require('./typeSize');
 const SocketManager = require('./SoketManager');
 
-
 const {
     FirstConn,
     broadcast,
     UpdatePlayerPos,
+    DestroyPlayer
 } = require('./ProtocolHandler');
 
 const idList = [];
@@ -50,8 +50,8 @@ const server = net.createServer((socket) =>
             case Protocol.c_PlayerPosition:
                 const id = byteReader.readInt();
                 const playerPos = byteReader.readVector2()
-                console.log('PlayerID :' , id);
-                console.log('PlayerPosition :' , playerPos);
+                // console.log('PlayerID :' , id);
+                // console.log('PlayerPosition :' , playerPos);
             
                 UpdatePlayerPos(socket,id, playerPos);
                 break;
@@ -63,6 +63,7 @@ const server = net.createServer((socket) =>
     socket.on('end',() =>
     {
         console.log('클라이언트 접속 종료 : ', socket.remoteAddress,socket.remotePort);
+        DestroyPlayer(socket,socket.clientID);
         SocketManager.removeSocket(socket);
     });
 
