@@ -42,6 +42,8 @@ const server = net.createServer((socket) =>
                 const id = byteReader.readInt();
                 const playerPos = byteReader.readVector3();
 
+                console.log("update send id: " , id, "pos : ", playerPos);
+
                 UpdatePlayerPos(socket, id, playerPos);
                 break;
         }

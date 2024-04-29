@@ -29,7 +29,7 @@ function FirstConn(socket,id){
     });
     socket.write(sendData);
 
-    const userInstance = new UnityInstance(id,new Vector3(0,0,0));
+    const userInstance = new UnityInstance(id, new Vector3(0,0,0));
     NetworkObjectManager.addObject(userInstance);
 }
 
@@ -45,9 +45,10 @@ function UpdatePlayerPos(socket,id, pos)
     userList.forEach((element)=>{
         if(element.clientID == id)
         {
+            console.log("pos update succ id: ", id);
             element.position = pos;  // break 사용할 수 있도록 변경하면 좋을듯
         }
-    })
+    });
 }
 
 function PlayerDisconnect(socket, id){
