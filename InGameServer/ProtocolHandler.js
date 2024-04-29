@@ -1,6 +1,6 @@
 const NetworkObjectManager = require('./NetworkObjectManager');
 const { ByteReader, ByteWriter } = require('../Network');
-const { intSize, floatSize, vector3Size } = require('./typeSize');
+const { intSize, floatSize, vector3Size, byteSize } = require('./typeSize');
 const UnityInstance = require('./UnityClass/UnityInstance');
 const SocketManager = require('./SoketManager');
 const Protocol = require('./Protocol');
@@ -12,15 +12,15 @@ function FirstConn(socket,id){
     const userList = NetworkObjectManager.getObjects();
     const userCount = userList.length;
     
-    const myData = Buffer.alloc(intSize*2);
+    const myData = Buffer.alloc(byteSize + intSize);
     const bwmy = new ByteWriter(myData);
-    bwmy.writeInt(Protocol.OtherPlayerConnect);
-    bwmy.writeByte(id);
+    bwmy.writeByte(Protocol.OtherPlayerConnect);
+    bwmy.writeInt(id);
     broadcast(myData,socket);
 
-    const sendData = Buffer.alloc((intSize*3) + (intSize+vector3Size)*userCount);
+    const sendData = Buffer.alloc(byteSize + (intSize*2) + (intSize+vector3Size)*userCount);
     const bw = new ByteWriter(sendData);
-    bw.writeInt(Protocol.LoadGameScene);
+    bw.writeByte(Protocol.LoadGameScene);
     bw.writeInt(id);
     bw.writeInt(userCount);
     userList.forEach((element)=>{
@@ -35,9 +35,9 @@ function FirstConn(socket,id){
 
 function UpdatePlayerPos(socket,id, pos)
 {
-    const sendData = Buffer.alloc((intSize*2) + (floatSize*2));
+    const sendData = Buffer.alloc(byteSize + intSize + vector3Size);
     const bw = new ByteWriter(sendData);
-    bw.writeInt(Protocol.PlayerMove);
+    bw.writeByte(Protocol.PlayerMove);
     bw.writeInt(id);
     bw.writeVector3(pos);
     broadcast(sendData, socket);
@@ -51,9 +51,9 @@ function UpdatePlayerPos(socket,id, pos)
 }
 
 function PlayerDisconnect(socket, id){
-    const buffer = Buffer.allocUnsafe(intSize*2);
+    const buffer = Buffer.allocUnsafe(byteSize + intSize);
     const bw = new ByteWriter(buffer);
-    bw.writeInt(Protocol.PlayerDisconnect);
+    bw.writeByte(Protocol.PlayerDisconnect);
     bw.writeInt(id); 
     broadcast(buffer,socket);
     NetworkObjectManager.removeObjectByID(id);
@@ -75,5 +75,5 @@ module.exports = {
     FirstConn,
     broadcast,
     UpdatePlayerPos,
-    DestroyPlayer: PlayerDisconnect
+    PlayerDisconnect,
 };
