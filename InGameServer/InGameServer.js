@@ -45,13 +45,13 @@ const server = net.createServer((socket) =>
 
                 console.log("update dirc id: " , moveId, "pos : ", playerDirection);
 
-                UpdatePlayerDirection(socket, id, playerDirection);
+                UpdatePlayerDirection(socket, moveId, playerDirection);
                 break;
             case Protocol.SyncPosition:
                 const syncId = byteReader.readInt();
                 const playerPos = byteReader.readVector3();
 
-                console.log("update pos id: " , moveId, "pos : ", playerPos);
+                console.log("update pos id: " , syncId, "pos : ", playerPos);
 
                 UpdatePlayerPos(socket, syncId, playerPos);
                 break;
