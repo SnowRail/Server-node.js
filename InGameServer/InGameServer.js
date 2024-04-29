@@ -41,7 +41,7 @@ const server = net.createServer((socket) =>
         switch(protocol){
             case Protocol.PlayerMove:
                 const id = byteReader.readInt();
-                const playerPos = byteReader.readVector2();
+                const playerPos = byteReader.readVector3();
 
                 UpdatePlayerPos(socket,id, playerPos);
                 break;
