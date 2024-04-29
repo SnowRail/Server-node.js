@@ -1,10 +1,10 @@
 const NetworkObjectManager = require('./NetworkObjectManager');
 const { ByteReader, ByteWriter } = require('../Network');
-const { intSize, floatSize, vector2Size } = require('./typeSize');
+const { intSize, floatSize, vector3Size, byteSize } = require('./typeSize');
 const UnityInstance = require('./UnityClass/UnityInstance');
 const SocketManager = require('./SoketManager');
 const Protocol = require('./Protocol');
-const { Vector2 } = require('./UnityClass');
+const { Vector3 } = require('./UnityClass');
 
 
 function FirstConn(socket,id){
@@ -12,49 +12,59 @@ function FirstConn(socket,id){
     const userList = NetworkObjectManager.getObjects();
     const userCount = userList.length;
     
-    const myData = Buffer.alloc(intSize*2 + vector2Size);
+    const myData = Buffer.alloc(byteSize + intSize);
     const bwmy = new ByteWriter(myData);
-    bwmy.writeInt(Protocol.OtherPlayerConnect);
-    bwmy.writeByte(id);
-    bwmy.writeVector2(new Vector2(0,0));
+    bwmy.writeByte(Protocol.OtherPlayerConnect);
+    bwmy.writeInt(id);
     broadcast(myData,socket);
 
-    const sendData = Buffer.alloc((intSize*3) + (intSize+vector2Size)*userCount);
+    const sendData = Buffer.alloc(byteSize + (intSize*2) + (intSize+vector3Size)*userCount);
     const bw = new ByteWriter(sendData);
-    bw.writeInt(Protocol.LoadGameScene);
+    bw.writeByte(Protocol.LoadGameScene);
     bw.writeInt(id);
     bw.writeInt(userCount);
     userList.forEach((element)=>{
         bw.writeInt(element.clientID);
-        bw.writeVector2(element.position);
-    })
+        bw.writeVector3(element.position);
+    });
     socket.write(sendData);
 
-    const userInstance = new UnityInstance(id,new Vector2(0,0));
+    const userInstance = new UnityInstance(id, new Vector3(0,0,0));
     NetworkObjectManager.addObject(userInstance);
 }
 
 function UpdatePlayerPos(socket,id, pos)
 {
-    const sendData = Buffer.alloc((intSize*2) + (floatSize*2));
+    const sendData = Buffer.alloc(byteSize + intSize + vector3Size);
     const bw = new ByteWriter(sendData);
-    bw.writeInt(Protocol.PlayerMove);
+    bw.writeByte(Protocol.SyncPosition);
     bw.writeInt(id);
-    bw.writeVector2(pos);
+    bw.writeVector3(pos);
     broadcast(sendData, socket);
     const userList = NetworkObjectManager.getObjects();
     userList.forEach((element)=>{
         if(element.clientID == id)
         {
+            console.log("pos update succ id: ", id);
             element.position = pos;  // break 사용할 수 있도록 변경하면 좋을듯
         }
-    })
+    });
+}
+
+function UpdatePlayerDirection(socket,id, direction)
+{
+    const sendData = Buffer.alloc(byteSize + intSize + vector3Size);
+    const bw = new ByteWriter(sendData);
+    bw.writeByte(Protocol.PlayerMove);
+    bw.writeInt(id);
+    bw.writeVector3(direction);
+    broadcast(sendData, socket);
 }
 
 function PlayerDisconnect(socket, id){
-    const buffer = Buffer.allocUnsafe(intSize*2);
+    const buffer = Buffer.allocUnsafe(byteSize + intSize);
     const bw = new ByteWriter(buffer);
-    bw.writeInt(Protocol.PlayerDisconnect);
+    bw.writeByte(Protocol.PlayerDisconnect);
     bw.writeInt(id); 
     broadcast(buffer,socket);
     NetworkObjectManager.removeObjectByID(id);
@@ -76,5 +86,6 @@ module.exports = {
     FirstConn,
     broadcast,
     UpdatePlayerPos,
-    DestroyPlayer: PlayerDisconnect
+    UpdatePlayerDirection,
+    PlayerDisconnect,
 };

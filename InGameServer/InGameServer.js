@@ -9,7 +9,8 @@ const SocketManager = require('./SoketManager');
 const {
     FirstConn,
     UpdatePlayerPos,
-    DestroyPlayer
+    UpdatePlayerDirection,
+    PlayerDisconnect
 } = require('./ProtocolHandler');
 
 const idList = [];
@@ -35,15 +36,24 @@ const server = net.createServer((socket) =>
     socket.on('data',(data)=> 
     {
         const byteReader = new ByteReader(data);
-        const protocol = byteReader.readInt();
-        
+        const protocol = byteReader.readByte();
         
         switch(protocol){
             case Protocol.PlayerMove:
-                const id = byteReader.readInt();
-                const playerPos = byteReader.readVector2();
+                const moveId = byteReader.readInt();
+                const playerDirection = byteReader.readVector3();
 
-                UpdatePlayerPos(socket,id, playerPos);
+                console.log("update dirc id: " , moveId, "pos : ", playerDirection);
+
+                UpdatePlayerDirection(socket, moveId, playerDirection);
+                break;
+            case Protocol.SyncPosition:
+                const syncId = byteReader.readInt();
+                const playerPos = byteReader.readVector3();
+
+                console.log("update pos id: " , syncId, "pos : ", playerPos);
+
+                UpdatePlayerPos(socket, syncId, playerPos);
                 break;
         }
     });
@@ -59,6 +69,7 @@ const server = net.createServer((socket) =>
     socket.on('error',(err)=>
     {
         console.error('소켓 에러 : ', err);
+        PlayerDisconnect(socket,socket.clientID);
         SocketManager.removeSocket(socket);
     });
 });
