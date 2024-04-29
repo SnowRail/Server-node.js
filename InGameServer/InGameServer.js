@@ -10,7 +10,7 @@ const {
     FirstConn,
     broadcast,
     UpdatePlayerPos,
-    DestroyPlayer,
+    DestroyPlayer
 } = require('./ProtocolHandler');
 
 const idList = [];
@@ -63,8 +63,8 @@ const server = net.createServer((socket) =>
     socket.on('end',() =>
     {
         console.log('클라이언트 접속 종료 : ', socket.remoteAddress,socket.remotePort);
-        SocketManager.removeSocket(socket);
         DestroyPlayer(socket,socket.clientID);
+        SocketManager.removeSocket(socket);
     });
 
 
