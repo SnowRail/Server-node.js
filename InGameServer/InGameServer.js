@@ -58,6 +58,7 @@ const server = net.createServer((socket) =>
     socket.on('error',(err)=>
     {
         console.error('소켓 에러 : ', err);
+        PlayerDisconnect(socket,socket.clientID);
         SocketManager.removeSocket(socket);
     });
 });
