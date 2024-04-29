@@ -12,25 +12,24 @@ function FirstConn(socket,id){
     const userList = NetworkObjectManager.getObjects();
     const userCount = userList.length;
     
-    const myData = Buffer.alloc(intSize*2 + vector2Size);
+    const myData = Buffer.alloc(intSize*2 + vector3Size);
     const bwmy = new ByteWriter(myData);
     bwmy.writeInt(Protocol.OtherPlayerConnect);
     bwmy.writeByte(id);
-    bwmy.writeVector2(new Vector2(0,0));
     broadcast(myData,socket);
 
-    const sendData = Buffer.alloc((intSize*3) + (intSize+vector2Size)*userCount);
+    const sendData = Buffer.alloc((intSize*3) + (intSize+vector3Size)*userCount);
     const bw = new ByteWriter(sendData);
     bw.writeInt(Protocol.LoadGameScene);
     bw.writeInt(id);
     bw.writeInt(userCount);
     userList.forEach((element)=>{
         bw.writeInt(element.clientID);
-        bw.writeVector2(element.position);
-    })
+        bw.writeVector3(element.position);
+    });
     socket.write(sendData);
 
-    const userInstance = new UnityInstance(id,new Vector2(0,0));
+    const userInstance = new UnityInstance(id,new Vector3(0,0,0));
     NetworkObjectManager.addObject(userInstance);
 }
 
