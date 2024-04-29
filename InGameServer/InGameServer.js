@@ -9,6 +9,7 @@ const SocketManager = require('./SoketManager');
 const {
     FirstConn,
     UpdatePlayerPos,
+    UpdatePlayerDirection,
     PlayerDisconnect
 } = require('./ProtocolHandler');
 
@@ -39,12 +40,20 @@ const server = net.createServer((socket) =>
         
         switch(protocol){
             case Protocol.PlayerMove:
-                const id = byteReader.readInt();
+                const moveId = byteReader.readInt();
+                const playerDirection = byteReader.readVector3();
+
+                console.log("update dirc id: " , moveId, "pos : ", playerDirection);
+
+                UpdatePlayerDirection(socket, id, playerDirection);
+                break;
+            case Protocol.SyncPosition:
+                const syncId = byteReader.readInt();
                 const playerPos = byteReader.readVector3();
 
-                console.log("update send id: " , id, "pos : ", playerPos);
+                console.log("update pos id: " , moveId, "pos : ", playerPos);
 
-                UpdatePlayerPos(socket, id, playerPos);
+                UpdatePlayerPos(socket, syncId, playerPos);
                 break;
         }
     });

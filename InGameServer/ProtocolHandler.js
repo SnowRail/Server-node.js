@@ -37,7 +37,7 @@ function UpdatePlayerPos(socket,id, pos)
 {
     const sendData = Buffer.alloc(byteSize + intSize + vector3Size);
     const bw = new ByteWriter(sendData);
-    bw.writeByte(Protocol.PlayerMove);
+    bw.writeByte(Protocol.SyncPosition);
     bw.writeInt(id);
     bw.writeVector3(pos);
     broadcast(sendData, socket);
@@ -49,6 +49,16 @@ function UpdatePlayerPos(socket,id, pos)
             element.position = pos;  // break 사용할 수 있도록 변경하면 좋을듯
         }
     });
+}
+
+function UpdatePlayerDirection(socket,id, direction)
+{
+    const sendData = Buffer.alloc(byteSize + intSize + vector3Size);
+    const bw = new ByteWriter(sendData);
+    bw.writeByte(Protocol.PlayerMove);
+    bw.writeInt(id);
+    bw.writeVector3(direction);
+    broadcast(sendData, socket);
 }
 
 function PlayerDisconnect(socket, id){
@@ -76,5 +86,6 @@ module.exports = {
     FirstConn,
     broadcast,
     UpdatePlayerPos,
+    UpdatePlayerDirection,
     PlayerDisconnect,
 };
