@@ -9,7 +9,7 @@ const SocketManager = require('./SoketManager');
 const {
     FirstConn,
     UpdatePlayerPos,
-    DestroyPlayer
+    PlayerDisconnect
 } = require('./ProtocolHandler');
 
 const idList = [];
@@ -35,15 +35,14 @@ const server = net.createServer((socket) =>
     socket.on('data',(data)=> 
     {
         const byteReader = new ByteReader(data);
-        const protocol = byteReader.readInt();
-        
+        const protocol = byteReader.readByte();
         
         switch(protocol){
             case Protocol.PlayerMove:
                 const id = byteReader.readInt();
                 const playerPos = byteReader.readVector3();
 
-                UpdatePlayerPos(socket,id, playerPos);
+                UpdatePlayerPos(socket, id, playerPos);
                 break;
         }
     });
