@@ -12,7 +12,7 @@ function FirstConn(socket,id){
     const userList = NetworkObjectManager.getObjects();
     const userCount = userList.length;
     
-    const myData = Buffer.alloc(intSize*2 + vector3Size);
+    const myData = Buffer.alloc(intSize*2);
     const bwmy = new ByteWriter(myData);
     bwmy.writeInt(Protocol.OtherPlayerConnect);
     bwmy.writeByte(id);
