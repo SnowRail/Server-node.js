@@ -6,6 +6,7 @@ const SocketManager = require('./SoketManager');
 const Protocol = require('./Protocol');
 const { Vector3 } = require('./UnityClass');
 
+let Goal = false;
 
 function FirstConn(socket,id){
     
@@ -88,13 +89,15 @@ function CountDown() {
 }
 
 function PlayerGoal(socket, id){
-    const buffer = Buffer.allocUnsafe(byteSize+intSize);
-    const bw = new ByteWriter(buffer);
-    bw.writeByte(Protocol.GameEnd);
-    bw.writeInt(id);
-    broadcast(buffer,socket);
-
-    
+    if(Goal === false)
+    {
+        const buffer = Buffer.allocUnsafe(byteSize+intSize);
+        const bw = new ByteWriter(buffer);
+        bw.writeByte(Protocol.GameEnd);
+        bw.writeInt(id);
+        broadcast(buffer,socket);
+        Goal = true;
+    }
 }
 
 
