@@ -7,6 +7,8 @@ const Protocol = require('./Protocol');
 const { Vector3 } = require('./UnityClass');
 
 let Goal = false;
+let Start = false;
+
 
 function FirstConn(socket,id){
     
@@ -46,7 +48,6 @@ function UpdatePlayerPos(socket,id, pos)
     userList.forEach((element)=>{
         if(element.clientID == id)
         {
-            console.log("pos update succ id: ", id);
             element.position = pos;  // break 사용할 수 있도록 변경하면 좋을듯
         }
     });
@@ -86,6 +87,17 @@ function CountDown() {
             count--;
         }
     }, 1000);
+}
+
+function GameStart(socket){
+    if(Start === false)
+    {
+        const buffer = Buffer.allocUnsafe(byteSize);
+        const bw = new ByteWriter(buffer);
+        bw.writeByte(Protocol.GameStart);
+        broadcastAll(buffer,socket);
+        Start = true;
+    }
 }
 
 function PlayerGoal(socket, id){
@@ -130,4 +142,5 @@ module.exports = {
     PlayerDisconnect,
     CountDown,
     PlayerGoal,
+    GameStart,
 };
