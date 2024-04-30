@@ -70,6 +70,15 @@ function PlayerDisconnect(socket, id){
     NetworkObjectManager.removeObjectByID(id);
 }
 
+function PlayerGoal(socket, id){
+    const buffer = Buffer.allocUnsafe(byteSize+intSize);
+    const bw = new ByteWriter(buffer);
+    bw.writeByte(Protocol.PlayerGoal);
+    bw.writeInt(id);
+    broadcast(buffer,socket);
+}
+
+
 function broadcast(message, sender) {
     const sockets = SocketManager.getSockets();
 
@@ -79,6 +88,8 @@ function broadcast(message, sender) {
         socket.write(message);
     });
 }
+
+
 
 
 
