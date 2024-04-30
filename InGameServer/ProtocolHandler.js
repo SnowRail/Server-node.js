@@ -90,9 +90,11 @@ function CountDown() {
 function PlayerGoal(socket, id){
     const buffer = Buffer.allocUnsafe(byteSize+intSize);
     const bw = new ByteWriter(buffer);
-    bw.writeByte(Protocol.PlayerGoal);
+    bw.writeByte(Protocol.GameEnd);
     bw.writeInt(id);
     broadcast(buffer,socket);
+
+    
 }
 
 
