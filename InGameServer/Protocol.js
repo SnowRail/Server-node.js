@@ -14,6 +14,8 @@ const Protocol = {
     PlayerGoal : 53, // 플레이어 골인
     GameEndCountDown : 54, // 1등 도착 후 카운트 다운 시작
     GameEnd : 55, // 게임 종료
+
+    ResetServer : 100,
 };
 
 module.exports = Protocol;
