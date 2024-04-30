@@ -131,6 +131,12 @@ function PlayerGoal(socket, id){
 }
 
 
+function ResetServer(){
+    Goal = false;
+    Start = false;
+    console.log("ResetServer");
+}
+
 function broadcast(message, sender) {
     const sockets = SocketManager.getSockets();
 
@@ -160,4 +166,5 @@ module.exports = {
     PlayerDisconnect,
     PlayerGoal,
     GameStartCountDown,
+    ResetServer,
 };
