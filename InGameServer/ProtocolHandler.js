@@ -4,32 +4,62 @@ const { intSize, floatSize, vector3Size, byteSize } = require('./typeSize');
 const UnityInstance = require('./UnityClass/UnityInstance');
 const SocketManager = require('./SoketManager');
 const Protocol = require('./Protocol');
+const { 
+    Packet, 
+    SyncPositionPacket, 
+    PlayerMovePacket, 
+    CountDownPacket, 
+    LoadGameScenePacket } = require('./Packet');
 const { Vector3 } = require('./UnityClass');
 
 let Goal = false;
 let Start = false;
 
 
-function FirstConn(socket,id){
-    
+function FirstConn(socket, id){ 
+    // first 전송 - 아이디, otherplayerconnect
+
+    // const myData = Buffer.alloc(intSize + byteSize);
+    const myData = Buffer.alloc(intSize);
+    const bwmy = new ByteWriter(myData);
+    //bwmy.writeByte(Protocol.OtherPlayerConnect);
+    //bwmy.writeInt(id);
+
+    const otherConnect = new Packet(Protocol.OtherPlayerConnect, id);
+    const otherConnectJson = JSON.stringify(otherConnect);
+    const otherConnectByte = Buffer.from(otherConnectJson);
+    const otherConnectSize = otherConnectByte.length;
+    bwmy.writeInt(otherConnectSize);
+    const sendData1 = Buffer.concat([myData, otherConnectByte]);
+
+    broadcast(sendData1, socket);
+
+    // second 전송 - loadgamescene
+
+    // const sendData2 = Buffer.alloc(byteSize + (intSize*2) + (intSize)*userCount);
+    const loadData = Buffer.alloc(intSize);
+    const bw = new ByteWriter(loadData);
+    //bw.writeByte(Protocol.LoadGameScene);
+    //bw.writeInt(id);
+    //bw.writeInt(userCount);
     const userList = NetworkObjectManager.getObjects();
     const userCount = userList.length;
-    
-    const myData = Buffer.alloc(byteSize + intSize);
-    const bwmy = new ByteWriter(myData);
-    bwmy.writeByte(Protocol.OtherPlayerConnect);
-    bwmy.writeInt(id);
-    broadcast(myData,socket);
 
-    const sendData = Buffer.alloc(byteSize + (intSize*2) + (intSize)*userCount);
-    const bw = new ByteWriter(sendData);
-    bw.writeByte(Protocol.LoadGameScene);
-    bw.writeInt(id);
-    bw.writeInt(userCount);
+    let idList = [];
+
     userList.forEach((element)=>{
-        bw.writeInt(element.clientID);
+        //bw.writeInt(element.clientID);
+        idList.push(element.clientID);
     });
-    socket.write(sendData);
+
+    const loadGameScene = new LoadGameScenePacket(id, userCount, idList);
+    const loadGameSceneJson = JSON.stringify(loadGameScene);
+    const loadGameSceneByte = Buffer.from(loadGameSceneJson);
+    const loadGameSceneSize = loadGameSceneByte.length;
+    bw.writeInt(loadGameSceneSize);
+    const sendData2 = Buffer.concat([loadData, loadGameSceneByte]);
+
+    socket.write(sendData2);
 
     const userInstance = new UnityInstance(id, new Vector3(0,0,0), new Vector3(0,0,0));
     NetworkObjectManager.addObject(userInstance);
@@ -38,14 +68,20 @@ function FirstConn(socket,id){
 function UpdatePlayerPos(socket, id, pos, rot)
 {
     // const sendData = Buffer.alloc(byteSize + intSize + vector3Size * 2);
-    const sendData = Buffer.alloc(byteSize);
-    const bw = new ByteWriter(sendData);
+    const buffer = Buffer.alloc(byteSize);
+    const bw = new ByteWriter(buffer);
     
-    const data = "{'protocol':'${Protocol.SyncPosition}','id':'${id}','position':'${pos}','rotation':'${rot}'";
     //bw.writeByte(Protocol.SyncPosition);
     //bw.writeInt(id);
     //bw.writeVector3(pos);
     //bw.writeVector3(rot);
+
+    const syncPosition = new SyncPositionPacket(id, pos, rot);
+    const syncPositionJson = JSON.stringify(syncPosition);
+    const syncPositionByte = Buffer.from(syncPositionJson);
+    const syncPositionSize = syncPositionByte.length;
+    bw.writeInt(syncPositionSize);
+    const sendData = Buffer.concat([buffer, syncPositionByte]);
 
     broadcast(sendData, socket);
     const userList = NetworkObjectManager.getObjects();
@@ -58,7 +94,7 @@ function UpdatePlayerPos(socket, id, pos, rot)
     });
 }
 
-function UpdatePlayerDirection(socket,id, direction)
+function UpdatePlayerDirection(socket, id, direction)
 {
     const sendData = Buffer.alloc(byteSize + intSize + vector3Size);
     const bw = new ByteWriter(sendData);
@@ -123,7 +159,7 @@ function GameStartCountDown(protocol){
     }
 }
 
-function PlayerGoal(socket, id){
+function PlayerGoal(id){
     if(Goal === false)
     {
         const buffer = Buffer.allocUnsafe(byteSize+intSize);
