@@ -117,4 +117,5 @@ module.exports = {
     UpdatePlayerDirection,
     PlayerDisconnect,
     CountDown,
+    PlayerGoal,
 };
