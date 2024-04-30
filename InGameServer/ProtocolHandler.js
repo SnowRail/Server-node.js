@@ -32,23 +32,25 @@ function FirstConn(socket,id){
     });
     socket.write(sendData);
 
-    const userInstance = new UnityInstance(id, new Vector3(0,0,0));
+    const userInstance = new UnityInstance(id, new Vector3(0,0,0), new Vector3(0,0,0));
     NetworkObjectManager.addObject(userInstance);
 }
 
-function UpdatePlayerPos(socket,id, pos)
+function UpdatePlayerPos(socket, id, pos, rot)
 {
-    const sendData = Buffer.alloc(byteSize + intSize + vector3Size);
+    const sendData = Buffer.alloc(byteSize + intSize + vector3Size * 2);
     const bw = new ByteWriter(sendData);
     bw.writeByte(Protocol.SyncPosition);
     bw.writeInt(id);
     bw.writeVector3(pos);
+    bw.writeVector3(rot);
     broadcast(sendData, socket);
     const userList = NetworkObjectManager.getObjects();
     userList.forEach((element)=>{
         if(element.clientID == id)
         {
             element.position = pos;  // break 사용할 수 있도록 변경하면 좋을듯
+            element.rotation = rot;
         }
     });
 }
