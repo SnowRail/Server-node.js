@@ -14,6 +14,7 @@ const {
     PlayerDisconnect,
     PlayerGoal,
     GameStartCountDown,
+    ResetServer,
 } = require('./ProtocolHandler');
 
 const idList = [];
@@ -60,6 +61,9 @@ const server = net.createServer((socket) =>
                 PlayerGoal(socket, goalId);
                 break;
             case Protocol.GameEndCountDown:
+                break;
+            case Protocol.ResetServer:
+                ResetServer()
                 break;
         }
     });
