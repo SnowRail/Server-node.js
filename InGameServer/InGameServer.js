@@ -10,7 +10,9 @@ const {
     FirstConn,
     UpdatePlayerPos,
     UpdatePlayerDirection,
-    PlayerDisconnect
+    PlayerDisconnect,
+    PlayerGoal,
+    CountDown,
 } = require('./ProtocolHandler');
 
 const idList = [];
@@ -54,6 +56,14 @@ const server = net.createServer((socket) =>
                 console.log("update pos id: " , syncId, "pos : ", playerPos);
 
                 UpdatePlayerPos(socket, syncId, playerPos);
+                break;
+            case Protocol.PlayerGoal:
+                const goalId = byteReader.readInt();   
+
+                PlayerGoal(socket, goalId);
+                break;
+            case Protocol.GameEndCountDown:
+                CountDown();
                 break;
         }
     });
