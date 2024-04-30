@@ -28,7 +28,6 @@ function FirstConn(socket,id){
     bw.writeInt(userCount);
     userList.forEach((element)=>{
         bw.writeInt(element.clientID);
-        //bw.writeVector3(element.position);
     });
     socket.write(sendData);
 
@@ -38,13 +37,16 @@ function FirstConn(socket,id){
 
 function UpdatePlayerPos(socket, id, pos, rot)
 {
-    const sendData = Buffer.alloc(byteSize + intSize + vector3Size * 2);
+    // const sendData = Buffer.alloc(byteSize + intSize + vector3Size * 2);
+    const sendData = Buffer.alloc(byteSize);
     const bw = new ByteWriter(sendData);
-    bw.writeByte(Protocol.SyncPosition);
-    bw.writeInt(id);
-    bw.writeVector3(pos);
-    bw.writeVector3(rot);
-    console.log("UpdatePlayerPos : ", id, rot);
+    
+    const data = "{'protocol':'${Protocol.SyncPosition}','id':'${id}','position':'${pos}','rotation':'${rot}'";
+    //bw.writeByte(Protocol.SyncPosition);
+    //bw.writeInt(id);
+    //bw.writeVector3(pos);
+    //bw.writeVector3(rot);
+
     broadcast(sendData, socket);
     const userList = NetworkObjectManager.getObjects();
     userList.forEach((element)=>{
@@ -157,9 +159,6 @@ function broadcastAll(message) {
         socket.write(message);
     });
 }
-
-
-
 
 
 module.exports = {
