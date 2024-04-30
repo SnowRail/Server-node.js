@@ -11,8 +11,6 @@ const {
     CountDownPacket, 
     LoadGameScenePacket } = require('./Packet');
 const { Vector3 } = require('./UnityClass');
-const {Packet, SyncPositionPacket, PlayerMovePacket,CountDownPacket} = require('./Packet');
-
 
 let Goal = false;
 let Start = false;
