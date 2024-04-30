@@ -44,6 +44,7 @@ function UpdatePlayerPos(socket, id, pos, rot)
     bw.writeInt(id);
     bw.writeVector3(pos);
     bw.writeVector3(rot);
+    console.log("UpdatePlayerPos : ", id, rot);
     broadcast(sendData, socket);
     const userList = NetworkObjectManager.getObjects();
     userList.forEach((element)=>{
