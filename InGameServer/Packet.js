@@ -22,8 +22,8 @@ class SyncPositionPacket extends Packet {
 }
 
 class PlayerMovePacket extends Packet {
-    constructor(playerDirection) {
-        super(Protocol.PlayerMove);
+    constructor(playerDirection, id) {
+        super(Protocol.PlayerMove, id);
         this.direction = playerDirection;
     }
 }
