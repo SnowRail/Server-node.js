@@ -6,7 +6,6 @@ const UnityInstance = require('./UnityClass/UnityInstance');
 const { intSize, floatSize } = require('./typeSize');
 const SocketManager = require('./SoketManager');
 
-
 const {
     FirstConn,
     UpdatePlayerPos,
@@ -16,7 +15,6 @@ const {
     GameStartCountDown,
     ResetServer,
 } = require('./ProtocolHandler');
-const { json } = require('express');
 
 const idList = [];
 
