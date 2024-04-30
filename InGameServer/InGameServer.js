@@ -63,7 +63,7 @@ const server = net.createServer((socket) =>
                 break;
             case Protocol.PlayerGoal:
                 const goalId = jsonData.id;
-                PlayerGoal(socket, goalId);
+                PlayerGoal(goalId);
                 break;
             case Protocol.GameEndCountDown:
                 break;

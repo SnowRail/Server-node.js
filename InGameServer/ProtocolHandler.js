@@ -5,6 +5,8 @@ const UnityInstance = require('./UnityClass/UnityInstance');
 const SocketManager = require('./SoketManager');
 const Protocol = require('./Protocol');
 const { Vector3 } = require('./UnityClass');
+const {Packet, SyncPositionPacket, PlayerMovePacket,CountDownPacket} = require('./Packet');
+
 
 let Goal = false;
 let Start = false;
@@ -58,29 +60,61 @@ function UpdatePlayerPos(socket, id, pos, rot)
     });
 }
 
-function UpdatePlayerDirection(socket,id, direction)
+function UpdatePlayerDirection(socket, id, direction)
 {
-    const sendData = Buffer.alloc(byteSize + intSize + vector3Size);
-    const bw = new ByteWriter(sendData);
-    bw.writeByte(Protocol.PlayerMove);
-    bw.writeInt(id);
-    bw.writeVector3(direction);
-    broadcast(sendData, socket);
+    const json = new PlayerMovePacket(direction , id);
+    const jsonString = JSON.stringify(json);
+    const jsonLength = Buffer.byteLength(jsonString,'utf8');
+    const lengthBuffer = Buffer.alloc(intSize);
+    lengthBuffer.writeUint32BE(jsonLength);
+
+    const jsonBuffer = Buffer.from(jsonString,'utf8');
+    const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
+    broadcast(dataBuffer,socket);
+
+    // const sendData = Buffer.alloc(byteSize + intSize + vector3Size);
+    // const bw = new ByteWriter(sendData);
+    // bw.writeByte(Protocol.PlayerMove);
+    // bw.writeInt(id);
+    // bw.writeVector3(direction);
+    // broadcast(sendData, socket);
 }
 
 function PlayerDisconnect(socket, id){
-    const buffer = Buffer.allocUnsafe(byteSize + intSize);
-    const bw = new ByteWriter(buffer);
-    bw.writeByte(Protocol.PlayerDisconnect);
-    bw.writeInt(id); 
-    broadcast(buffer,socket);
+
+    const json = new Packet(Protocol.PlayerDisconnect,id);
+    const jsonString = JSON.stringify(json);
+    const jsonLength = Buffer.byteLength(jsonString,'utf8');
+    const lengthBuffer = Buffer.alloc(intSize);
+    lengthBuffer.writeUint32BE(jsonLength);
+
+    const jsonBuffer = Buffer.from(jsonString,'utf8');
+    const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
+
+    broadcast(dataBuffer,socket);
+
+    // const buffer = Buffer.allocUnsafe(byteSize + intSize);
+    // const bw = new ByteWriter(buffer);
+    // bw.writeByte(Protocol.PlayerDisconnect);
+    // bw.writeInt(id); 
+    // broadcast(buffer,socket);
     NetworkObjectManager.removeObjectByID(id);
 }
 
 function CountDown(protocol) {
     let count;
-    const buffer = Buffer.allocUnsafe(byteSize);
-    const bw = new ByteWriter(buffer);
+    
+    const json = new Packet(protocol);
+    const jsonString = JSON.stringify(json);
+    const jsonLength = Buffer.byteLength(jsonString,'utf8');
+    const lengthBuffer = Buffer.alloc(intSize);
+    lengthBuffer.writeUint32BE(jsonLength);
+
+    const jsonBuffer = Buffer.from(jsonString,'utf8');
+    const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
+
+    // const buffer = Buffer.allocUnsafe(byteSize);
+    // const bw = new ByteWriter(buffer);
     if(protocol === Protocol.GameStart)
     {
         count = 3; // 테스트를 위해 빠르게 끝냄
@@ -97,8 +131,9 @@ function CountDown(protocol) {
             console.log("카운트다운 종료~");
             if(protocol === Protocol.GameStart)
             {
-                bw.writeByte(Protocol.GameStart);
-                broadcastAll(buffer);
+                broadcastAll(dataBuffer);
+                // bw.writeByte(Protocol.GameStart);
+                // broadcastAll(buffer);
             }
             else if(protocol === Protocol.GameEnd)
             {
@@ -114,23 +149,42 @@ function CountDown(protocol) {
 function GameStartCountDown(protocol){
     if(Start === false)
     {
-        const buffer = Buffer.allocUnsafe(byteSize);
-        const bw = new ByteWriter(buffer);
-        bw.writeByte(Protocol.GameStartCountDown);
-        broadcastAll(buffer);
+        const json = new Packet(protocol);
+        const jsonString = JSON.stringify(json);
+        const jsonLength = Buffer.byteLength(jsonString,'utf8');
+        const lengthBuffer = Buffer.alloc(intSize);
+        lengthBuffer.writeUint32BE(jsonLength);
+        
+        const jsonBuffer = Buffer.from(jsonString,'utf8');
+        const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
+        broadcastAll(dataBuffer);
+        // const buffer = Buffer.allocUnsafe(byteSize);
+        // const bw = new ByteWriter(buffer);
+        // bw.writeByte(Protocol.GameStartCountDown);
+        // broadcastAll(buffer);
         Start = true;
         CountDown(protocol);
     }
 }
 
-function PlayerGoal(socket, id){
+function PlayerGoal(id){
     if(Goal === false)
     {
-        const buffer = Buffer.allocUnsafe(byteSize+intSize);
-        const bw = new ByteWriter(buffer);
-        bw.writeByte(Protocol.GameEnd);
-        bw.writeInt(id);
-        broadcastAll(buffer);
+        const json = new Packet(Protocol.GameEnd,id);
+        const jsonString = JSON.stringify(json);
+        const jsonLength = Buffer.byteLength(jsonString,'utf8');
+        const lengthBuffer = Buffer.alloc(intSize);
+        lengthBuffer.writeUint32BE(jsonLength);
+
+        const jsonBuffer = Buffer.from(jsonString,'utf8');
+        const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
+        broadcastAll(dataBuffer);
+
+        // const buffer = Buffer.allocUnsafe(byteSize+intSize);
+        // const bw = new ByteWriter(buffer);
+        // bw.writeByte(Protocol.GameEnd);
+        // bw.writeInt(id);
+        // broadcastAll(dataBuffer);
         Goal = true;
     }
 }

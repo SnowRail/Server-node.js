@@ -1,5 +1,5 @@
 class Packet {
-    constructor(protocol, id = 0) {
+    constructor(protocol, id = -1) {
         this.protocol = protocol;
         this.id = id;
     }
@@ -14,8 +14,8 @@ class SyncPositionPacket extends Packet {
 }
 
 class PlayerMovePacket extends Packet {
-    constructor(playerDirection) {
-        super(Protocol.PlayerMove);
+    constructor(playerDirection, id) {
+        super(Protocol.PlayerMove, id);
         this.direction = playerDirection;
     }
 }
