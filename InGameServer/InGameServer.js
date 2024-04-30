@@ -51,7 +51,8 @@ const server = net.createServer((socket) =>
             case Protocol.SyncPosition:
                 const syncId = byteReader.readInt();
                 const playerPos = byteReader.readVector3();
-                UpdatePlayerPos(socket, syncId, playerPos);
+                const playerRot = byteReader.readVector3();
+                UpdatePlayerPos(socket, syncId, playerPos, playerRot);
                 break;
             case Protocol.GameStart:
                 GameStartCountDown(protocol);
