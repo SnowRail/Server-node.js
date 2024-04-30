@@ -95,7 +95,7 @@ function PlayerGoal(socket, id){
         const bw = new ByteWriter(buffer);
         bw.writeByte(Protocol.GameEnd);
         bw.writeInt(id);
-        broadcast(buffer,socket);
+        broadcastAll(buffer,socket);
         Goal = true;
     }
 }
@@ -111,13 +111,20 @@ function broadcast(message, sender) {
     });
 }
 
+function broadcastAll(message, sender) {
+    const sockets = SocketManager.getSockets();
+
+    sockets.forEach((socket) => {
+        socket.write(message);
+    });
+}
+
 
 
 
 
 module.exports = {
     FirstConn,
-    broadcast,
     UpdatePlayerPos,
     UpdatePlayerDirection,
     PlayerDisconnect,
