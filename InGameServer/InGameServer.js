@@ -13,8 +13,7 @@ const {
     UpdatePlayerDirection,
     PlayerDisconnect,
     PlayerGoal,
-    CountDown,
-    GameStart,
+    GameStartCountDown,
 } = require('./ProtocolHandler');
 
 const idList = [];
@@ -54,14 +53,13 @@ const server = net.createServer((socket) =>
                 UpdatePlayerPos(socket, syncId, playerPos);
                 break;
             case Protocol.GameStart:
-                GameStart(socket);
+                GameStartCountDown(protocol);
                 break;
             case Protocol.PlayerGoal:
                 const goalId = byteReader.readInt();   
                 PlayerGoal(socket, goalId);
                 break;
             case Protocol.GameEndCountDown:
-                CountDown();
                 break;
         }
     });

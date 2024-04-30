@@ -72,16 +72,33 @@ function PlayerDisconnect(socket, id){
     NetworkObjectManager.removeObjectByID(id);
 }
 
-function CountDown() {
-    let count = 1; // 테스트를 위해 빠르게 끝냄
-
+function CountDown(protocol) {
+    let count;
+    const buffer = Buffer.allocUnsafe(byteSize);
+    const bw = new ByteWriter(buffer);
+    if(protocol === Protocol.GameStart)
+    {
+        count = 3; // 테스트를 위해 빠르게 끝냄
+    }
+    else if(protocol === Protocol.GameEnd)
+    {
+        count = 5;
+    }
     const countDown = setInterval(() => {
         console.log(count);
 
         if (count === 0) {
             clearInterval(countDown);
             console.log("카운트다운 종료~");
-            // broadcast(GameEnd);
+            if(protocol === Protocol.GameStart)
+            {
+                bw.writeByte(Protocol.GameStart);
+                broadcastAll(buffer);
+            }
+            else if(protocol === Protocol.GameEnd)
+            {
+                // todo
+            }
         }
         else{
             count--;
@@ -89,14 +106,15 @@ function CountDown() {
     }, 1000);
 }
 
-function GameStart(socket){
+function GameStartCountDown(protocol){
     if(Start === false)
     {
         const buffer = Buffer.allocUnsafe(byteSize);
         const bw = new ByteWriter(buffer);
-        bw.writeByte(Protocol.GameStart);
-        broadcastAll(buffer,socket);
+        bw.writeByte(Protocol.GameStartCountDown);
+        broadcastAll(buffer);
         Start = true;
+        CountDown(protocol);
     }
 }
 
@@ -107,7 +125,7 @@ function PlayerGoal(socket, id){
         const bw = new ByteWriter(buffer);
         bw.writeByte(Protocol.GameEnd);
         bw.writeInt(id);
-        broadcastAll(buffer,socket);
+        broadcastAll(buffer);
         Goal = true;
     }
 }
@@ -123,7 +141,7 @@ function broadcast(message, sender) {
     });
 }
 
-function broadcastAll(message, sender) {
+function broadcastAll(message) {
     const sockets = SocketManager.getSockets();
 
     sockets.forEach((socket) => {
@@ -140,7 +158,6 @@ module.exports = {
     UpdatePlayerPos,
     UpdatePlayerDirection,
     PlayerDisconnect,
-    CountDown,
     PlayerGoal,
-    GameStart,
+    GameStartCountDown,
 };
