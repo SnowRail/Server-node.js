@@ -43,7 +43,8 @@ const server = net.createServer((socket) =>
         const jsonData = JSON.parse(jsonstring.toString());
         const protocol = jsonData.protocol;
         
-        
+        console.log('protocol : ', protocol);
+
         switch(protocol){
             case Protocol.PlayerMove:
                 const moveId = jsonData.id;
