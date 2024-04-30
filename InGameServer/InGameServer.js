@@ -16,6 +16,7 @@ const {
     GameStartCountDown,
     ResetServer,
 } = require('./ProtocolHandler');
+const { json } = require('express');
 
 const idList = [];
 
@@ -39,26 +40,29 @@ const server = net.createServer((socket) =>
     
     socket.on('data',(data)=> 
     {
-        const byteReader = new ByteReader(data);
-        const protocol = byteReader.readByte();
+        const offset = 4;
+        const jsonstring = data.substring(offset);
+        const jsonData = JSON.parse(jsonstring.toString());
+        const protocol = jsonData.protocol;
+        
         
         switch(protocol){
             case Protocol.PlayerMove:
-                const moveId = byteReader.readInt();
-                const playerDirection = byteReader.readVector3();
+                const moveId = jsonData.id;
+                const playerDirection = jsonData.direction;
                 UpdatePlayerDirection(socket, moveId, playerDirection);
                 break;
             case Protocol.SyncPosition:
-                const syncId = byteReader.readInt();
-                const playerPos = byteReader.readVector3();
-                const playerRot = byteReader.readVector3();
+                const syncId = jsonData.id;
+                const playerPos = jsonData.position;
+                const playerRot = jsonData.rotation;
                 UpdatePlayerPos(socket, syncId, playerPos, playerRot);
                 break;
             case Protocol.GameStart:
                 GameStartCountDown(protocol);
                 break;
             case Protocol.PlayerGoal:
-                const goalId = byteReader.readInt();   
+                const goalId = jsonData.id;
                 PlayerGoal(socket, goalId);
                 break;
             case Protocol.GameEndCountDown:
@@ -67,6 +71,35 @@ const server = net.createServer((socket) =>
                 ResetServer()
                 break;
         }
+
+        // const byteReader = new ByteReader(data);
+        // const protocol = byteReader.readByte();
+        
+        // switch(protocol){
+        //     case Protocol.PlayerMove:
+        //         const moveId = byteReader.readInt();
+        //         const playerDirection = byteReader.readVector3();
+        //         UpdatePlayerDirection(socket, moveId, playerDirection);
+        //         break;
+        //     case Protocol.SyncPosition:
+        //         const syncId = byteReader.readInt();
+        //         const playerPos = byteReader.readVector3();
+        //         const playerRot = byteReader.readVector3();
+        //         UpdatePlayerPos(socket, syncId, playerPos, playerRot);
+        //         break;
+        //     case Protocol.GameStart:
+        //         GameStartCountDown(protocol);
+        //         break;
+        //     case Protocol.PlayerGoal:
+        //         const goalId = byteReader.readInt();   
+        //         PlayerGoal(socket, goalId);
+        //         break;
+        //     case Protocol.GameEndCountDown:
+        //         break;
+        //     case Protocol.ResetServer:
+        //         ResetServer()
+        //         break;
+        // }
     });
 
     socket.on('end',() =>
