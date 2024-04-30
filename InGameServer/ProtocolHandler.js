@@ -22,28 +22,25 @@ function FirstConn(socket, id){
     // first 전송 - 아이디, otherplayerconnect
 
     // const myData = Buffer.alloc(intSize + byteSize);
-    const myData = Buffer.alloc(intSize);
-    const bwmy = new ByteWriter(myData);
+    // const myData = Buffer.alloc(intSize);
+    // const bwmy = new ByteWriter(myData);
     //bwmy.writeByte(Protocol.OtherPlayerConnect);
     //bwmy.writeInt(id);
 
-    const otherConnect = new Packet(Protocol.OtherPlayerConnect, id);
-    const otherConnectJson = JSON.stringify(otherConnect);
-    const otherConnectByte = Buffer.from(otherConnectJson);
-    const otherConnectSize = otherConnectByte.length;
-    bwmy.writeInt(otherConnectSize);
-    const sendData1 = Buffer.concat([myData, otherConnectByte]);
+    const json1 = new Packet(Protocol.OtherPlayerConnect, id);
+    const dataBuffer1 = classToByte(json1);
 
-    broadcast(sendData1, socket);
+    broadcast(dataBuffer1, socket);
 
     // second 전송 - loadgamescene
 
     // const sendData2 = Buffer.alloc(byteSize + (intSize*2) + (intSize)*userCount);
-    const loadData = Buffer.alloc(intSize);
-    const bw = new ByteWriter(loadData);
+    // const loadData = Buffer.alloc(intSize);
+    // const bw = new ByteWriter(loadData);
     //bw.writeByte(Protocol.LoadGameScene);
     //bw.writeInt(id);
     //bw.writeInt(userCount);
+    
     const userList = NetworkObjectManager.getObjects();
     const userCount = userList.length;
 
@@ -54,14 +51,10 @@ function FirstConn(socket, id){
         idList.push(element.clientID);
     });
 
-    const loadGameScene = new LoadGameScenePacket(id, userCount, idList);
-    const loadGameSceneJson = JSON.stringify(loadGameScene);
-    const loadGameSceneByte = Buffer.from(loadGameSceneJson);
-    const loadGameSceneSize = loadGameSceneByte.length;
-    bw.writeInt(loadGameSceneSize);
-    const sendData2 = Buffer.concat([loadData, loadGameSceneByte]);
+    const json2 = new LoadGameScenePacket(id, userCount, idList);
+    const dataBuffer2 = classToByte(json2);
 
-    socket.write(sendData2);
+    socket.write(dataBuffer2);
 
     const userInstance = new UnityInstance(id, new Vector3(0,0,0), new Vector3(0,0,0));
     NetworkObjectManager.addObject(userInstance);
@@ -70,22 +63,17 @@ function FirstConn(socket, id){
 function UpdatePlayerPos(socket, id, pos, rot)
 {
     // const sendData = Buffer.alloc(byteSize + intSize + vector3Size * 2);
-    const buffer = Buffer.alloc(byteSize);
-    const bw = new ByteWriter(buffer);
+    // const buffer = Buffer.alloc(byteSize);
+    // const bw = new ByteWriter(buffer);
     
     //bw.writeByte(Protocol.SyncPosition);
     //bw.writeInt(id);
     //bw.writeVector3(pos);
     //bw.writeVector3(rot);
 
-    const syncPosition = new SyncPositionPacket(id, pos, rot);
-    const syncPositionJson = JSON.stringify(syncPosition);
-    const syncPositionByte = Buffer.from(syncPositionJson);
-    const syncPositionSize = syncPositionByte.length;
-    bw.writeInt(syncPositionSize);
-    const sendData = Buffer.concat([buffer, syncPositionByte]);
-
-    broadcast(sendData, socket);
+    const json = new SyncPositionPacket(id, pos, rot);
+    const dataBuffer = classToByte(json);
+    broadcast(dataBuffer, socket);
     const userList = NetworkObjectManager.getObjects();
     userList.forEach((element)=>{
         if(element.clientID == id)
@@ -99,13 +87,7 @@ function UpdatePlayerPos(socket, id, pos, rot)
 function UpdatePlayerDirection(socket, id, direction)
 {
     const json = new PlayerMovePacket(direction , id);
-    const jsonString = JSON.stringify(json);
-    const jsonLength = Buffer.byteLength(jsonString,'utf8');
-    const lengthBuffer = Buffer.alloc(intSize);
-    lengthBuffer.writeUint32BE(jsonLength);
-
-    const jsonBuffer = Buffer.from(jsonString,'utf8');
-    const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
+    const dataBuffer = classToByte(json);
     broadcast(dataBuffer,socket);
 
     // const sendData = Buffer.alloc(byteSize + intSize + vector3Size);
@@ -119,14 +101,7 @@ function UpdatePlayerDirection(socket, id, direction)
 function PlayerDisconnect(socket, id){
 
     const json = new Packet(Protocol.PlayerDisconnect,id);
-    const jsonString = JSON.stringify(json);
-    const jsonLength = Buffer.byteLength(jsonString,'utf8');
-    const lengthBuffer = Buffer.alloc(intSize);
-    lengthBuffer.writeUint32BE(jsonLength);
-
-    const jsonBuffer = Buffer.from(jsonString,'utf8');
-    const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
-
+    const dataBuffer = classToByte(json);
     broadcast(dataBuffer,socket);
 
     // const buffer = Buffer.allocUnsafe(byteSize + intSize);
@@ -141,13 +116,7 @@ function CountDown(protocol) {
     let count;
     
     const json = new Packet(protocol);
-    const jsonString = JSON.stringify(json);
-    const jsonLength = Buffer.byteLength(jsonString,'utf8');
-    const lengthBuffer = Buffer.alloc(intSize);
-    lengthBuffer.writeUint32BE(jsonLength);
-
-    const jsonBuffer = Buffer.from(jsonString,'utf8');
-    const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
+    const dataBuffer = classToByte(json);
 
     // const buffer = Buffer.allocUnsafe(byteSize);
     // const bw = new ByteWriter(buffer);
@@ -186,13 +155,7 @@ function GameStartCountDown(protocol){
     if(Start === false)
     {
         const json = new Packet(protocol);
-        const jsonString = JSON.stringify(json);
-        const jsonLength = Buffer.byteLength(jsonString,'utf8');
-        const lengthBuffer = Buffer.alloc(intSize);
-        lengthBuffer.writeUint32BE(jsonLength);
-        
-        const jsonBuffer = Buffer.from(jsonString,'utf8');
-        const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
+        const dataBuffer = classToByte(json);
         broadcastAll(dataBuffer);
         // const buffer = Buffer.allocUnsafe(byteSize);
         // const bw = new ByteWriter(buffer);
@@ -207,13 +170,7 @@ function PlayerGoal(id){
     if(Goal === false)
     {
         const json = new Packet(Protocol.GameEnd,id);
-        const jsonString = JSON.stringify(json);
-        const jsonLength = Buffer.byteLength(jsonString,'utf8');
-        const lengthBuffer = Buffer.alloc(intSize);
-        lengthBuffer.writeUint32BE(jsonLength);
-
-        const jsonBuffer = Buffer.from(jsonString,'utf8');
-        const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
+        const dataBuffer = classToByte(json);
         broadcastAll(dataBuffer);
 
         // const buffer = Buffer.allocUnsafe(byteSize+intSize);
@@ -250,6 +207,16 @@ function broadcastAll(message) {
     });
 }
 
+function classToByte(json){
+        const jsonString = JSON.stringify(json);
+        const jsonLength = Buffer.byteLength(jsonString,'utf8');
+        const lengthBuffer = Buffer.alloc(intSize);
+        lengthBuffer.writeUint32BE(jsonLength);
+
+        const jsonBuffer = Buffer.from(jsonString,'utf8');
+        const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
+        return dataBuffer;
+}
 
 module.exports = {
     FirstConn,
