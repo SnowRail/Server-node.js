@@ -70,6 +70,23 @@ function PlayerDisconnect(socket, id){
     NetworkObjectManager.removeObjectByID(id);
 }
 
+function CountDown() {
+    let count = 1; // 테스트를 위해 빠르게 끝냄
+
+    const countDown = setInterval(() => {
+        console.log(count);
+
+        if (count === 0) {
+            clearInterval(countDown);
+            console.log("카운트다운 종료~");
+            // broadcast(GameEnd);
+        }
+        else{
+            count--;
+        }
+    }, 1000);
+}
+
 function PlayerGoal(socket, id){
     const buffer = Buffer.allocUnsafe(byteSize+intSize);
     const bw = new ByteWriter(buffer);
@@ -99,4 +116,5 @@ module.exports = {
     UpdatePlayerPos,
     UpdatePlayerDirection,
     PlayerDisconnect,
+    CountDown,
 };
