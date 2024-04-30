@@ -21,14 +21,14 @@ function FirstConn(socket,id){
     bwmy.writeInt(id);
     broadcast(myData,socket);
 
-    const sendData = Buffer.alloc(byteSize + (intSize*2) + (intSize+vector3Size)*userCount);
+    const sendData = Buffer.alloc(byteSize + (intSize*2) + (intSize)*userCount);
     const bw = new ByteWriter(sendData);
     bw.writeByte(Protocol.LoadGameScene);
     bw.writeInt(id);
     bw.writeInt(userCount);
     userList.forEach((element)=>{
         bw.writeInt(element.clientID);
-        bw.writeVector3(element.position);
+        //bw.writeVector3(element.position);
     });
     socket.write(sendData);
 
