@@ -1,3 +1,5 @@
+const Protocol = require('./Protocol');
+
 class Packet {
     constructor(protocol, id = -1) {
         this.protocol = protocol;
