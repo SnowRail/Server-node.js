@@ -51,7 +51,11 @@ function FirstConn(socket, id){
         idList.push(element.clientID);
     });
 
-    const json2 = new LoadGameScenePacket(id, userCount, idList);
+    let ishost = false;
+    if (userCount === 0) 
+        ishost = true;
+
+    const json2 = new LoadGameScenePacket(id, userCount, idList, ishost);
     const dataBuffer2 = classToByte(json2);
 
     socket.write(dataBuffer2);

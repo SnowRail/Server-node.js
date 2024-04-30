@@ -6,10 +6,11 @@ class Packet {
 }
 
 class LoadGameScenePacket extends Packet {
-    constructor(id, userCount, userList) {
+    constructor(id, userCount, userList, ishost) {
         super(Protocol.LoadGameScene, id);
         this.count = userCount;
         this.list = userList;
+        this.ishost = ishost;
     }
 }
 
