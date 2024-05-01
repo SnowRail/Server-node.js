@@ -34,12 +34,12 @@ const server = net.createServer((socket) =>
     console.log('새로운 클라이언트 접속 : ', socket.name);
     console.log('클라이언트 ID : ' + socket.clientID);
 
-    FirstConn(socket,num);
-    
+    FirstConn(socket, num);
+    console.log('conn 통과');
     socket.on('data',(data)=> 
     {
         const offset = 4;
-        const jsonstring = data.substring(offset);
+        const jsonstring = Buffer.from(dataBuffer1).subarray(4);
         const jsonData = JSON.parse(jsonstring.toString());
         const protocol = jsonData.protocol;
         
