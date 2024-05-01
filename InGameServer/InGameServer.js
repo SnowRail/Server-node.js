@@ -44,7 +44,7 @@ const server = net.createServer((socket) =>
         const jsonData = JSON.parse(data.toString());
         const protocol = jsonData.type;
         //console.log('recv json : ', jsonData);
-        //console.log('recv protocol : ', protocol);
+        console.log('recv protocol : ', protocol);
 
         switch(protocol){
             case Protocol.PlayerMove:
