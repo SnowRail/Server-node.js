@@ -63,6 +63,13 @@ function UpdatePlayerPos(socket, id, pos, rot)
     });
 }
 
+function PlayerBreak(socket,id)
+{
+    const json = new Packet(Protocol.PlayerBreak,id);
+    const dataBuffer = classToByte(json);
+    broadcast(dataBuffer,socket);
+}
+
 function UpdatePlayerDirection(socket, id, pos, direction)
 {
     const json = new PlayerMovePacket(pos, direction , id);
@@ -182,6 +189,7 @@ function classToByte(json){
 module.exports = {
     FirstConn,
     UpdatePlayerPos,
+    PlayerBreak,
     UpdatePlayerDirection,
     PlayerDisconnect,
     PlayerGoal,
