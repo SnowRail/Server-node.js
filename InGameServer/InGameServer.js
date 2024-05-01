@@ -82,8 +82,9 @@ const server = net.createServer((socket) =>
                     SendKeyValue(keyId, key, keyPos);
                     break;
             }
+            recvData = '';
         }
-        recvData = '';
+        
     });
 
     socket.on('end',() =>
