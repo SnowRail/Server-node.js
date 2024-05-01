@@ -218,7 +218,7 @@ function classToByte(json){
     const jsonBuffer = Buffer.from(jsonString,'utf8');
     const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
 
-    console.log("bytedata : ", dataBuffer);
+    //console.log("bytedata : ", dataBuffer);
     return dataBuffer;
 }
 
