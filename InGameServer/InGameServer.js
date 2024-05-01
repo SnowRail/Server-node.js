@@ -40,9 +40,9 @@ const server = net.createServer((socket) =>
     {
         const offset = 4;
         const jsonstring = Buffer.from(data).subarray(offset);
-        //console.log('recv protocol : ', jsonstring);
+        console.log('recv data : ', jsonstring);
         const jsonData = JSON.parse(jsonstring.toString());
-        const protocol = jsonData.protocol;
+        const protocol = jsonData.type;
         
         //console.log('recv protocol : ', protocol);
 
