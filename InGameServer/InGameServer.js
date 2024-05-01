@@ -84,7 +84,6 @@ const server = net.createServer((socket) =>
             }
             recvData = '';
         }
-        
     });
 
     socket.on('end',() =>
