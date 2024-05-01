@@ -14,6 +14,7 @@ const {
     PlayerGoal,
     GameStartCountDown,
     ResetServer,
+    SendKeyValue,
 } = require('./ProtocolHandler');
 
 const idList = [];
@@ -69,6 +70,12 @@ const server = net.createServer((socket) =>
                 break;
             case Protocol.ResetServer:
                 ResetServer()
+                break;
+            case Protocol.Key:
+                const keyId = jsonData.id;
+                const key = jsonData.keyData;
+                const keyPos = jsonData.position;
+                SendKeyValue(keyId, key, keyPos);
                 break;
         }
 

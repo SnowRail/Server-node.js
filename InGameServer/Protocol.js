@@ -1,4 +1,5 @@
 const Protocol = {
+    Key : 1,
     PlayerMove : 30, // direction update
     PlayerReconnect : 31,
     PlayerDisconnect : 32,
