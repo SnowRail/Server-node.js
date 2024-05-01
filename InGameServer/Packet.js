@@ -26,7 +26,7 @@ class KeyPacket extends Packet {
 
 class SyncPositionPacket extends Packet {
     constructor(id, playerPos, playerRot) {
-        super(Protocol.SyncPosition, id);
+        super(Protocol.GameSync, id);
         this.position = playerPos;
         this.rotate = playerRot;
     }
