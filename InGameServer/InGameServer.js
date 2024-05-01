@@ -45,7 +45,7 @@ const server = net.createServer((socket) =>
         if(recvData.includes('\n')){
             const msg = recvData.split('\n');
             const lastMsg = msg[msg.length - 1];
-            const jsonData = JSON.parse(lastMsg);
+            const jsonData = JSON.parse(data);
             const protocol = jsonData.type;
 
             console.log('recv protocol : ', jsonData);
@@ -84,7 +84,6 @@ const server = net.createServer((socket) =>
             }
             recvData = '';
         }
-        
     });
 
     socket.on('end',() =>
