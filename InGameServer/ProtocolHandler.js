@@ -63,9 +63,9 @@ function UpdatePlayerPos(socket, id, pos, rot)
     });
 }
 
-function UpdatePlayerDirection(socket, id, direction)
+function UpdatePlayerDirection(socket, id, pos, direction)
 {
-    const json = new PlayerMovePacket(direction , id);
+    const json = new PlayerMovePacket(pos, direction , id);
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer,socket);
 }
