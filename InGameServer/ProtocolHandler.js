@@ -6,6 +6,7 @@ const SocketManager = require('./SoketManager');
 const Protocol = require('./Protocol');
 const { 
     Packet, 
+    KeyPacket,
     SyncPositionPacket, 
     PlayerMovePacket, 
     CountDownPacket, 
@@ -18,34 +19,19 @@ let Start = false;
 
 function FirstConn(socket, id){ 
     // first 전송 - 아이디, otherplayerconnect
-
-    // const myData = Buffer.alloc(intSize + byteSize);
-    // const myData = Buffer.alloc(intSize);
-    // const bwmy = new ByteWriter(myData);
-    //bwmy.writeByte(Protocol.OtherPlayerConnect);
-    //bwmy.writeInt(id);
-
     const json1 = new Packet(Protocol.OtherPlayerConnect, id);
     const dataBuffer1 = classToByte(json1);
 
     broadcast(dataBuffer1, socket);
     
-    // second 전송 - loadgamescene
 
-    // const sendData2 = Buffer.alloc(byteSize + (intSize*2) + (intSize)*userCount);
-    // const loadData = Buffer.alloc(intSize);
-    // const bw = new ByteWriter(loadData);
-    //bw.writeByte(Protocol.LoadGameScene);
-    //bw.writeInt(id);
-    //bw.writeInt(userCount);
-    
+    // second 전송 - loadgamescene
     const userList = NetworkObjectManager.getObjects();
     const userCount = userList.length;
 
     let idList = [];
 
     userList.forEach((element)=>{
-        //bw.writeInt(element.clientID);
         idList.push(element.clientID);
     });
 
@@ -64,15 +50,6 @@ function FirstConn(socket, id){
 
 function UpdatePlayerPos(socket, id, pos, rot)
 {
-    // const sendData = Buffer.alloc(byteSize + intSize + vector3Size * 2);
-    // const buffer = Buffer.alloc(byteSize);
-    // const bw = new ByteWriter(buffer);
-    
-    //bw.writeByte(Protocol.SyncPosition);
-    //bw.writeInt(id);
-    //bw.writeVector3(pos);
-    //bw.writeVector3(rot);
-
     const json = new SyncPositionPacket(id, pos, rot);
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer, socket);
@@ -91,13 +68,6 @@ function UpdatePlayerDirection(socket, id, direction)
     const json = new PlayerMovePacket(direction , id);
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer,socket);
-
-    // const sendData = Buffer.alloc(byteSize + intSize + vector3Size);
-    // const bw = new ByteWriter(sendData);
-    // bw.writeByte(Protocol.PlayerMove);
-    // bw.writeInt(id);
-    // bw.writeVector3(direction);
-    // broadcast(sendData, socket);
 }
 
 function PlayerDisconnect(socket, id){
@@ -106,11 +76,6 @@ function PlayerDisconnect(socket, id){
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer,socket);
 
-    // const buffer = Buffer.allocUnsafe(byteSize + intSize);
-    // const bw = new ByteWriter(buffer);
-    // bw.writeByte(Protocol.PlayerDisconnect);
-    // bw.writeInt(id); 
-    // broadcast(buffer,socket);
     NetworkObjectManager.removeObjectByID(id);
 }
 
@@ -120,8 +85,6 @@ function CountDown(protocol) {
     const json = new Packet(protocol);
     const dataBuffer = classToByte(json);
 
-    // const buffer = Buffer.allocUnsafe(byteSize);
-    // const bw = new ByteWriter(buffer);
     if(protocol === Protocol.GameStart)
     {
         count = 3; // 테스트를 위해 빠르게 끝냄
@@ -139,8 +102,6 @@ function CountDown(protocol) {
             if(protocol === Protocol.GameStart)
             {
                 broadcastAll(dataBuffer);
-                // bw.writeByte(Protocol.GameStart);
-                // broadcastAll(buffer);
             }
             else if(protocol === Protocol.GameEnd)
             {
@@ -159,10 +120,6 @@ function GameStartCountDown(protocol){
         const json = new Packet(protocol);
         const dataBuffer = classToByte(json);
         broadcastAll(dataBuffer);
-        // const buffer = Buffer.allocUnsafe(byteSize);
-        // const bw = new ByteWriter(buffer);
-        // bw.writeByte(Protocol.GameStartCountDown);
-        // broadcastAll(buffer);
         Start = true;
         CountDown(protocol);
     }
@@ -174,14 +131,14 @@ function PlayerGoal(id){
         const json = new Packet(Protocol.GameEnd,id);
         const dataBuffer = classToByte(json);
         broadcastAll(dataBuffer);
-
-        // const buffer = Buffer.allocUnsafe(byteSize+intSize);
-        // const bw = new ByteWriter(buffer);
-        // bw.writeByte(Protocol.GameEnd);
-        // bw.writeInt(id);
-        // broadcastAll(dataBuffer);
         Goal = true;
     }
+}
+
+function SendKeyValue(id, key, pos){
+    const json = new KeyPacket(id, key, pos);
+    const dataBuffer = classToByte(json);
+    broadcastAll(dataBuffer);
 }
 
 
@@ -230,4 +187,5 @@ module.exports = {
     PlayerGoal,
     GameStartCountDown,
     ResetServer,
+    SendKeyValue,
 };
