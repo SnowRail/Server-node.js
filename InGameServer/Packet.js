@@ -2,7 +2,7 @@ const Protocol = require('./Protocol');
 
 class Packet {
     constructor(protocol, id = -1) {
-        this.protocol = protocol;
+        this.type = protocol;
         this.id = id;
     }
 }
