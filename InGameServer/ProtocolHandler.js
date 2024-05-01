@@ -30,6 +30,11 @@ function FirstConn(socket, id){
 
     broadcast(dataBuffer1, socket);
 
+    const jsonstring = Buffer.from(dataBuffer1).subarray(4); 
+    //const jsonstring = dataBuffer1.substring(4);
+    const jsonData = JSON.parse(jsonstring.toString());
+    console.log(jsonData);
+    
     // second 전송 - loadgamescene
 
     // const sendData2 = Buffer.alloc(byteSize + (intSize*2) + (intSize)*userCount);
@@ -210,14 +215,14 @@ function broadcastAll(message) {
 }
 
 function classToByte(json){
-        const jsonString = JSON.stringify(json);
-        const jsonLength = Buffer.byteLength(jsonString,'utf8');
-        const lengthBuffer = Buffer.alloc(intSize);
-        lengthBuffer.writeUint32BE(jsonLength);
+    const jsonString = JSON.stringify(json);
+    const jsonLength = Buffer.byteLength(jsonString,'utf8');
+    const lengthBuffer = Buffer.alloc(intSize);
+    lengthBuffer.writeUInt32BE(jsonLength);
 
-        const jsonBuffer = Buffer.from(jsonString,'utf8');
-        const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
-        return dataBuffer;
+    const jsonBuffer = Buffer.from(jsonString,'utf8');
+    const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
+    return dataBuffer;
 }
 
 module.exports = {
