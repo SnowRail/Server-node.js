@@ -14,6 +14,7 @@ const {
     PlayerGoal,
     GameStartCountDown,
     ResetServer,
+    SendKeyValue,
 } = require('./ProtocolHandler');
 
 const idList = [];
@@ -38,13 +39,13 @@ const server = net.createServer((socket) =>
 
     socket.on('data',(data)=> 
     {
-        const offset = 4;
-        const jsonstring = Buffer.from(data).subarray(offset);
-        console.log('recv data : ', jsonstring);
-        const jsonData = JSON.parse(jsonstring.toString());
+        //const offset = 4;
+        //const jsonstring = Buffer.from(data).subarray(offset);
+        //console.log('recv data : ', data);
+        const jsonData = JSON.parse(data.toString());
         const protocol = jsonData.type;
-        
-        //console.log('recv protocol : ', protocol);
+        //console.log('recv json : ', jsonData);
+        console.log('recv protocol : ', protocol);
 
         switch(protocol){
             case Protocol.PlayerMove:
@@ -69,6 +70,12 @@ const server = net.createServer((socket) =>
                 break;
             case Protocol.ResetServer:
                 ResetServer()
+                break;
+            case Protocol.Key:
+                const keyId = jsonData.id;
+                const key = jsonData.keyData;
+                const keyPos = jsonData.position;
+                SendKeyValue(keyId, key, keyPos);
                 break;
         }
 

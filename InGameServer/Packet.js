@@ -16,6 +16,14 @@ class LoadGameScenePacket extends Packet {
     }
 }
 
+class KeyPacket extends Packet {
+    constructor(id, key, pos) {
+        super(Protocol.Key, id);
+        this.keyData = key;
+        this.position = pos;
+    }
+}
+
 class SyncPositionPacket extends Packet {
     constructor(id, playerPos, playerRot) {
         super(Protocol.SyncPosition, id);
@@ -25,8 +33,9 @@ class SyncPositionPacket extends Packet {
 }
 
 class PlayerMovePacket extends Packet {
-    constructor(playerDirection, id) {
+    constructor(playerPos, playerDirection, id) {
         super(Protocol.PlayerMove, id);
+        this.position = playerPos;
         this.direction = playerDirection;
     }
 }
@@ -41,6 +50,7 @@ class CountDownPacket extends Packet {
 module.exports = {
     Packet,
     LoadGameScenePacket,
+    KeyPacket,
     SyncPositionPacket,
     PlayerMovePacket,
     CountDownPacket
