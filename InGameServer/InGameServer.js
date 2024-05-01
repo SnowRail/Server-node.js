@@ -42,10 +42,10 @@ const server = net.createServer((socket) =>
     {
         recvData += data.toString();
 
-        if(recvData.includes('\n')){
-            const msg = recvData.split('\n');
-            const lastMsg = msg[msg.length - 1];
-            const jsonData = JSON.parse(lastMsg);
+        // if(recvData.includes('\n')){
+        //     const msg = recvData.split('\n');
+        //     const lastMsg = msg[msg.length - 1];
+            const jsonData = JSON.parse(data);
             const protocol = jsonData.type;
 
             console.log('recv protocol : ', jsonData);
@@ -82,8 +82,8 @@ const server = net.createServer((socket) =>
                     SendKeyValue(keyId, key, keyPos);
                     break;
             }
-        }
-        recvData = '';
+        // }
+        // recvData = '';
     });
 
     socket.on('end',() =>
