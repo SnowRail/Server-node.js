@@ -37,77 +37,53 @@ const server = net.createServer((socket) =>
 
     FirstConn(socket, num);
 
+    let recvData = '';
     socket.on('data',(data)=> 
     {
-        //const offset = 4;
-        //const jsonstring = Buffer.from(data).subarray(offset);
-        //console.log('recv data : ', data);
-        const jsonData = JSON.parse(data.toString());
-        const protocol = jsonData.type;
-        //console.log('recv json : ', jsonData);
-        console.log('recv protocol : ', protocol);
+        recvData += data.toString();
 
-        switch(protocol){
-            case Protocol.PlayerMove:
-                const moveId = jsonData.id;
-                const playerPosition = jsonData.position;
-                const playerDirection = jsonData.direction;
-                UpdatePlayerDirection(socket, moveId, playerPosition, playerDirection);
-                break;
-            case Protocol.GameSync:
-                const syncId = jsonData.id;
-                const playerPos = jsonData.position;
-                const playerRot = jsonData.rotation;
-                UpdatePlayerPos(socket, syncId, playerPos, playerRot);
-                break;
-            case Protocol.GameStart:
-                GameStartCountDown(protocol);
-                break;
-            case Protocol.PlayerGoal:
-                const goalId = jsonData.id;
-                PlayerGoal(goalId);
-                break;
-            case Protocol.GameEndCountDown:
-                break;
-            case Protocol.ResetServer:
-                ResetServer()
-                break;
-            case Protocol.Key:
-                const keyId = jsonData.id;
-                const key = jsonData.keyData;
-                const keyPos = jsonData.position;
-                SendKeyValue(keyId, key, keyPos);
-                break;
+        if(recvData.includes('\n')){
+            const msg = recvData.split('\n');
+            const lastMsg = msg[msg.length - 1];
+            const jsonData = JSON.parse(lastMsg);
+            const protocol = jsonData.type;
+
+            console.log('recv protocol : ', jsonData);
+
+            switch(protocol){
+                case Protocol.PlayerMove:
+                    const moveId = jsonData.id;
+                    const playerPosition = jsonData.position;
+                    const playerDirection = jsonData.direction;
+                    UpdatePlayerDirection(socket, moveId, playerPosition, playerDirection);
+                    break;
+                case Protocol.GameSync:
+                    const syncId = jsonData.id;
+                    const playerPos = jsonData.position;
+                    const playerRot = jsonData.rotation;
+                    UpdatePlayerPos(socket, syncId, playerPos, playerRot);
+                    break;
+                case Protocol.GameStart:
+                    GameStartCountDown(protocol);
+                    break;
+                case Protocol.PlayerGoal:
+                    const goalId = jsonData.id;
+                    PlayerGoal(goalId);
+                    break;
+                case Protocol.GameEndCountDown:
+                    break;
+                case Protocol.ResetServer:
+                    ResetServer()
+                    break;
+                case Protocol.Key:
+                    const keyId = jsonData.id;
+                    const key = jsonData.keyData;
+                    const keyPos = jsonData.position;
+                    SendKeyValue(keyId, key, keyPos);
+                    break;
+            }
         }
-
-        // const byteReader = new ByteReader(data);
-        // const protocol = byteReader.readByte();
-        
-        // switch(protocol){
-        //     case Protocol.PlayerMove:
-        //         const moveId = byteReader.readInt();
-        //         const playerDirection = byteReader.readVector3();
-        //         UpdatePlayerDirection(socket, moveId, playerDirection);
-        //         break;
-        //     case Protocol.SyncPosition:
-        //         const syncId = byteReader.readInt();
-        //         const playerPos = byteReader.readVector3();
-        //         const playerRot = byteReader.readVector3();
-        //         UpdatePlayerPos(socket, syncId, playerPos, playerRot);
-        //         break;
-        //     case Protocol.GameStart:
-        //         GameStartCountDown(protocol);
-        //         break;
-        //     case Protocol.PlayerGoal:
-        //         const goalId = byteReader.readInt();   
-        //         PlayerGoal(socket, goalId);
-        //         break;
-        //     case Protocol.GameEndCountDown:
-        //         break;
-        //     case Protocol.ResetServer:
-        //         ResetServer()
-        //         break;
-        // }
+        recvData = '';
     });
 
     socket.on('end',() =>
