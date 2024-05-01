@@ -50,8 +50,9 @@ const server = net.createServer((socket) =>
         switch(protocol){
             case Protocol.PlayerMove:
                 const moveId = jsonData.id;
+                const playerPosition = jsonData.position;
                 const playerDirection = jsonData.direction;
-                UpdatePlayerDirection(socket, moveId, playerDirection);
+                UpdatePlayerDirection(socket, moveId, playerPosition, playerDirection);
                 break;
             case Protocol.GameSync:
                 const syncId = jsonData.id;
