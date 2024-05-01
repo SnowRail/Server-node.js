@@ -53,7 +53,7 @@ const server = net.createServer((socket) =>
                 const playerDirection = jsonData.direction;
                 UpdatePlayerDirection(socket, moveId, playerDirection);
                 break;
-            case Protocol.SyncPosition:
+            case Protocol.GameSync:
                 const syncId = jsonData.id;
                 const playerPos = jsonData.position;
                 const playerRot = jsonData.rotation;
