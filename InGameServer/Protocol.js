@@ -5,7 +5,7 @@ const Protocol = {
     PlayerDisconnect : 32,
     OtherPlayerConnect : 33, // 타 플레이어 입장
     OtherPlayerReconnect : 34,
-    SyncPosition : 35, // position update
+    GameSync : 35, // position update
 
 
     LoadGameScene : 50, // 게임 씬으로 전환  - 멍청 레이싱에서는 playerconnect로 사용
