@@ -63,6 +63,11 @@ function FirstConn(socket, id){
 
     socket.write(dataBuffer2);
 
+    const jsonstring2 = Buffer.from(dataBuffer2).subarray(4); 
+    //const jsonstring = dataBuffer1.substring(4);
+    const jsonData2 = JSON.parse(jsonstring2.toString());
+    console.log(jsonData2);
+
     const userInstance = new UnityInstance(id, new Vector3(0,0,0), new Vector3(0,0,0));
     NetworkObjectManager.addObject(userInstance);
 }
@@ -216,12 +221,14 @@ function broadcastAll(message) {
 
 function classToByte(json){
     const jsonString = JSON.stringify(json);
-    const jsonLength = Buffer.byteLength(jsonString,'utf8');
+    const jsonLength = Buffer.byteLength(jsonString, 'utf8');
     const lengthBuffer = Buffer.alloc(intSize);
-    lengthBuffer.writeUInt32BE(jsonLength);
+    lengthBuffer.writeUInt32LE(jsonLength, 0);
 
     const jsonBuffer = Buffer.from(jsonString,'utf8');
     const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
+
+    console.log("bytedata : ", dataBuffer);
     return dataBuffer;
 }
 

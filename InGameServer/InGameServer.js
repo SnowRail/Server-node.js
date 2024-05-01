@@ -35,15 +35,16 @@ const server = net.createServer((socket) =>
     console.log('클라이언트 ID : ' + socket.clientID);
 
     FirstConn(socket, num);
-    console.log('conn 통과');
+
     socket.on('data',(data)=> 
     {
         const offset = 4;
-        const jsonstring = Buffer.from(dataBuffer1).subarray(4);
+        const jsonstring = Buffer.from(data).subarray(offset);
+        //console.log('recv protocol : ', jsonstring);
         const jsonData = JSON.parse(jsonstring.toString());
         const protocol = jsonData.protocol;
         
-        console.log('protocol : ', protocol);
+        //console.log('recv protocol : ', protocol);
 
         switch(protocol){
             case Protocol.PlayerMove:
