@@ -44,7 +44,7 @@ const server = net.createServer((socket) =>
 
         if(recvData.includes('\n')){
             const msg = recvData.split('\n');
-            const lastMsg = msg[msg.length - 1];
+            const lastMsg = msg[msg.length - 2];
             const jsonData = JSON.parse(lastMsg);
             const protocol = jsonData.type;
 
