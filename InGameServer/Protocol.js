@@ -1,12 +1,13 @@
 const Protocol = {
     Key : 1,
     PlayerMove : 30, // direction update
-    PlayerReconnect : 31,
-    PlayerDisconnect : 32,
-    OtherPlayerConnect : 33, // 타 플레이어 입장
-    OtherPlayerReconnect : 34,
-    GameSync : 35, // position update
-
+    PlayerBreak : 31,
+    PlayerReconnect : 32,
+    PlayerDisconnect : 33,
+    OtherPlayerConnect : 34, // 타 플레이어 입장
+    OtherPlayerReconnect : 35,
+    GameSync : 36, // position update
+    
 
     LoadGameScene : 50, // 게임 씬으로 전환  - 멍청 레이싱에서는 playerconnect로 사용
     // 로딩 완료 관련된 프로토콜이 추가되면 좋을 것 같음

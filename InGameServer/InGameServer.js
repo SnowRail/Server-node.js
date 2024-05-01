@@ -9,6 +9,7 @@ const SocketManager = require('./SoketManager');
 const {
     FirstConn,
     UpdatePlayerPos,
+    PlayerBreak,
     UpdatePlayerDirection,
     PlayerDisconnect,
     PlayerGoal,
@@ -56,6 +57,10 @@ const server = net.createServer((socket) =>
                     const playerPosition = jsonData.position;
                     const playerDirection = jsonData.direction;
                     UpdatePlayerDirection(socket, moveId, playerPosition, playerDirection);
+                    break;
+                case Protocol.PlayerBreak:
+                    const breakId = jsonData.id;
+                    PlayerBreak(socket, breakId);
                     break;
                 case Protocol.GameSync:
                     const syncId = jsonData.id;
