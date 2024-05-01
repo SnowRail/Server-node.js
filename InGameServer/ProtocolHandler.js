@@ -29,11 +29,6 @@ function FirstConn(socket, id){
     const dataBuffer1 = classToByte(json1);
 
     broadcast(dataBuffer1, socket);
-
-    const jsonstring = Buffer.from(dataBuffer1).subarray(4); 
-    //const jsonstring = dataBuffer1.substring(4);
-    const jsonData = JSON.parse(jsonstring.toString());
-    console.log(jsonData);
     
     // second 전송 - loadgamescene
 
@@ -62,11 +57,6 @@ function FirstConn(socket, id){
     const dataBuffer2 = classToByte(json2);
 
     socket.write(dataBuffer2);
-
-    const jsonstring2 = Buffer.from(dataBuffer2).subarray(4); 
-    //const jsonstring = dataBuffer1.substring(4);
-    const jsonData2 = JSON.parse(jsonstring2.toString());
-    console.log(jsonData2);
 
     const userInstance = new UnityInstance(id, new Vector3(0,0,0), new Vector3(0,0,0));
     NetworkObjectManager.addObject(userInstance);
