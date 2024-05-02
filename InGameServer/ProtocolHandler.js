@@ -139,10 +139,10 @@ function PlayerGoal(jsonData){
     }
 }
 
-function SendKeyValue(jsonData){
+function SendKeyValue(socket, jsonData){
     const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration);
     const dataBuffer = classToByte(json);
-    broadcast(dataBuffer);
+    broadcast(dataBuffer, socket);
 }
 
 function ResetServer(){
