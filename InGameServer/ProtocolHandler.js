@@ -16,7 +16,6 @@ const { Vector3 } = require('./UnityClass');
 let Goal = false;
 let Start = false;
 
-
 function FirstConn(socket, id){ 
     // first 전송 - 아이디, otherplayerconnect
     const json1 = new Packet(Protocol.OtherPlayerConnect, id);
@@ -35,11 +34,7 @@ function FirstConn(socket, id){
         idList.push(element.clientID);
     });
 
-    let ishost = false;
-    if (userCount === 0) 
-        ishost = true;
-
-    const json2 = new LoadGameScenePacket(id, userCount, idList, ishost);
+    const json2 = new LoadGameScenePacket(id, userCount, idList);
     const dataBuffer2 = classToByte(json2);
 
     socket.write(dataBuffer2);
@@ -48,33 +43,34 @@ function FirstConn(socket, id){
     NetworkObjectManager.addObject(userInstance);
 }
 
-function UpdatePlayerPos(socket, id, pos, rot)
+function UpdatePlayerPos(socket, jsonData)
 {
-    const json = new SyncPositionPacket(id, pos, rot);
+    const json = new SyncPositionPacket(jsonData.from, jsonData.position, jsonData.direction);
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer, socket);
+
     const userList = NetworkObjectManager.getObjects();
     userList.forEach((element)=>{
         if(element.clientID == id)
         {
-            element.position = pos;  // break 사용할 수 있도록 변경하면 좋을듯
-            element.rotation = rot;
+            element.position = jsonData.position;  // break 사용할 수 있도록 변경하면 좋을듯
+            element.rotation = jsonData.direction;
         }
     });
 }
 
-function PlayerBreak(socket,id)
+function PlayerBreak(socket, jsonData)
 {
-    const json = new Packet(Protocol.PlayerBreak,id);
+    const json = new Packet(Protocol.PlayerBreak, jsonData.from);
     const dataBuffer = classToByte(json);
-    broadcast(dataBuffer,socket);
+    broadcast(dataBuffer, socket);
 }
 
 function UpdatePlayerDirection(socket, id, pos, direction)
 {
     const json = new PlayerMovePacket(pos, direction , id);
     const dataBuffer = classToByte(json);
-    broadcast(dataBuffer,socket);
+    broadcast(dataBuffer, socket);
 }
 
 function PlayerDisconnect(socket, id){
@@ -102,7 +98,8 @@ function CountDown(protocol) {
     }
     const countDown = setInterval(() => {
         console.log(count);
-
+        const buffer = classToByte(new CountDownPacket(Protocol.SendCountDown, count));
+        broadcastAll(buffer);
         if (count === 0) {
             clearInterval(countDown);
             console.log("카운트다운 종료~");
@@ -132,22 +129,21 @@ function GameStartCountDown(protocol){
     }
 }
 
-function PlayerGoal(id){
+function PlayerGoal(jsonData){
     if(Goal === false)
     {
-        const json = new Packet(Protocol.GameEnd,id);
+        const json = new Packet(Protocol.GameEnd, jsonData.from);
         const dataBuffer = classToByte(json);
         broadcastAll(dataBuffer);
         Goal = true;
     }
 }
 
-function SendKeyValue(id, key, pos){
-    const json = new KeyPacket(id, key, pos);
+function SendKeyValue(jsonData){
+    const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration);
     const dataBuffer = classToByte(json);
-    broadcastAll(dataBuffer);
+    broadcast(dataBuffer);
 }
-
 
 function ResetServer(){
     Goal = false;
@@ -193,6 +189,7 @@ module.exports = {
     UpdatePlayerDirection,
     PlayerDisconnect,
     PlayerGoal,
+    CountDown,
     GameStartCountDown,
     ResetServer,
     SendKeyValue,

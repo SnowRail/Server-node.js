@@ -10,10 +10,9 @@ const {
     FirstConn,
     UpdatePlayerPos,
     PlayerBreak,
-    UpdatePlayerDirection,
     PlayerDisconnect,
     PlayerGoal,
-    GameStartCountDown,
+    CountDown,
     ResetServer,
     SendKeyValue,
 } = require('./ProtocolHandler');
@@ -53,54 +52,60 @@ const server = net.createServer((socket) =>
             //console.log('recv protocol : ', protocol);
 
             switch(protocol){
-                case Protocol.PlayerMove:
-                    const moveId = jsonData.id;
-                    const playerPosition = jsonData.position;
-                    const playerDirection = jsonData.direction;
-                    UpdatePlayerDirection(socket, moveId, playerPosition, playerDirection);
+                case Protocol.Login:
+                    // todo login
                     break;
-                case Protocol.PlayerBreak:
-                    const breakId = jsonData.id;
-                    PlayerBreak(socket, breakId);
+                case Protocol.Logout:
+                    // todo logout
                     break;
-                case Protocol.GameSync:
-                    const syncId = jsonData.id;
-                    const playerPos = jsonData.position;
-                    const playerRot = jsonData.rotation;
-                    UpdatePlayerPos(socket, syncId, playerPos, playerRot);
+                case Protocol.Signin:
+                    // todo SignIn
+                    break;
+                case Protocol.StartMatchMaking:
+                    // TODO StartMatchMaking
                     break;
                 case Protocol.GameStart:
-                    GameStartCountDown(protocol);
+                    //GameStartCountDown(protocol);
+                    CountDown(protocol);
+                    break;
+
+                case Protocol.PlayerReady:
+                    // TODO PlayerReady
+                    break;
+                
+                case Protocol.Key:
+                    SendKeyValue(jsonData);
                     break;
                 case Protocol.PlayerGoal:
-                    const goalId = jsonData.id;
-                    PlayerGoal(goalId);
+                    PlayerGoal(jsonData);
                     break;
-                case Protocol.GameEndCountDown:
+                case Protocol.GameSync:
+                    UpdatePlayerPos(socket, jsonData);
                     break;
+                case Protocol.GameStart:
+                    //GameStartCountDown(protocol);
+                    CountDown(protocol);
+                    break;
+                case Protocol.PlayerBreak:
+                    PlayerBreak(socket, jsonData);
+                    break;
+
                 case Protocol.ResetServer:
                     ResetServer()
                     break;
-                case Protocol.Key:
-                    const keyId = jsonData.id;
-                    const key = jsonData.keyData;
-                    const keyPos = jsonData.position;
-                    SendKeyValue(keyId, key, keyPos);
-                    break;
+
             }
             recvData = '';
             dataCount++;
-            console.log('dataCount : ', dataCount);
         }
     });
 
     socket.on('end',() =>
     {
         console.log('클라이언트 접속 종료 : ', socket.remoteAddress,socket.remotePort);
-        PlayerDisconnect(socket,socket.clientID);
         SocketManager.removeSocket(socket);
+        PlayerDisconnect(socket,socket.clientID);
     });
-
 
     socket.on('error',(err)=>
     {

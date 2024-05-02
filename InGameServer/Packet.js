@@ -3,24 +3,25 @@ const Protocol = require('./Protocol');
 class Packet {
     constructor(protocol, id = -1) {
         this.type = protocol;
-        this.id = id;
+        this.from = id;
     }
 }
 
 class LoadGameScenePacket extends Packet {
-    constructor(id, userCount, userList, ishost) {
+    constructor(id, userCount, userList,) {
         super(Protocol.LoadGameScene, id);
         this.count = userCount;
         this.list = userList;
-        this.ishost = ishost;
     }
 }
 
 class KeyPacket extends Packet {
-    constructor(id, key, pos) {
+    constructor(id, pos, vel, acc) {
         super(Protocol.Key, id);
-        this.keyData = key;
+        this.from = id;
         this.position = pos;
+        this.velocity = vel;
+        this.acceleration = acc;
     }
 }
 
@@ -41,9 +42,9 @@ class PlayerMovePacket extends Packet {
 }
 
 class CountDownPacket extends Packet {
-    constructor(protocol) {
+    constructor(protocol, count) {
         super(protocol);
-        this.count = 3;
+        this.count = count;
     }
 }   
 
