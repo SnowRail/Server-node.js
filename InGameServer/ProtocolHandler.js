@@ -140,7 +140,7 @@ function PlayerGoal(jsonData){
 }
 
 function SendKeyValue(jsonData){
-    const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration);
+    const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration,Date.now());
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer);
 }

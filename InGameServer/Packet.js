@@ -16,12 +16,13 @@ class LoadGameScenePacket extends Packet {
 }
 
 class KeyPacket extends Packet {
-    constructor(id, pos, vel, acc) {
+    constructor(id, pos, vel, acc, timestamp) {
         super(Protocol.Key, id);
         this.from = id;
         this.position = pos;
         this.velocity = vel;
         this.acceleration = acc;
+        this.timestamp = timestamp
     }
 }
 
