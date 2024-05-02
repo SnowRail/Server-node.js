@@ -18,7 +18,7 @@ let Start = false;
 
 function FirstConn(socket, id){ 
     // first 전송 - 아이디, otherplayerconnect
-    const json1 = new Packet(Protocol.OtherPlayerConnect, id);
+    const json1 = new Packet(Protocol.PlayerReconnect, id);
     const dataBuffer1 = classToByte(json1);
 
     broadcast(dataBuffer1, socket);
@@ -139,10 +139,10 @@ function PlayerGoal(jsonData){
     }
 }
 
-function SendKeyValue(jsonData){
+function SendKeyValue(socket, jsonData){
     const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration,Date.now());
     const dataBuffer = classToByte(json);
-    broadcast(dataBuffer);
+    broadcast(dataBuffer, socket);
 }
 
 function ResetServer(){
