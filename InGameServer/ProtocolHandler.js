@@ -43,24 +43,25 @@ function FirstConn(socket, id){
     NetworkObjectManager.addObject(userInstance);
 }
 
-function UpdatePlayerPos(socket, id, pos, rot)
+function UpdatePlayerPos(socket, jsonData)
 {
-    const json = new SyncPositionPacket(id, pos, rot);
+    const json = new SyncPositionPacket(jsonData.from, jsonData.position, jsonData.direction);
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer, socket);
+
     const userList = NetworkObjectManager.getObjects();
     userList.forEach((element)=>{
         if(element.clientID == id)
         {
-            element.position = pos;  // break 사용할 수 있도록 변경하면 좋을듯
-            element.rotation = rot;
+            element.position = jsonData.position;  // break 사용할 수 있도록 변경하면 좋을듯
+            element.rotation = jsonData.direction;
         }
     });
 }
 
-function PlayerBreak(socket, id)
+function PlayerBreak(socket, jsonData)
 {
-    const json = new Packet(Protocol.PlayerBreak, id);
+    const json = new Packet(Protocol.PlayerBreak, jsonData.from);
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer, socket);
 }
@@ -128,10 +129,10 @@ function GameStartCountDown(protocol){
     }
 }
 
-function PlayerGoal(id){
+function PlayerGoal(jsonData){
     if(Goal === false)
     {
-        const json = new Packet(Protocol.GameEnd,id);
+        const json = new Packet(Protocol.GameEnd, jsonData.from);
         const dataBuffer = classToByte(json);
         broadcastAll(dataBuffer);
         Goal = true;
