@@ -53,25 +53,28 @@ const server = net.createServer((socket) =>
             //console.log('recv protocol : ', protocol);
 
             switch(protocol){
-                case Protocol.PlayerMove:
-                    const moveId = jsonData.id;
+                case Protocol.Key:
+                    const moveId = jsonData.from;
                     const playerPosition = jsonData.position;
-                    const playerDirection = jsonData.direction;
-                    UpdatePlayerDirection(socket, moveId, playerPosition, playerDirection);
+                    const playerVelocity = jsonData.velocity;
+                    const playerAccel = jsonData.acceleration;
+                    UpdatePlayerDirection(socket, moveId, playerPosition, playerVelocity,playerAccel);
                     break;
-                case Protocol.PlayerBreak:
-                    const breakId = jsonData.id;
-                    PlayerBreak(socket, breakId);
+                case Protocol.GameStart:
+                    GameStartCountDown(protocol);
                     break;
+
                 case Protocol.GameSync:
                     const syncId = jsonData.id;
                     const playerPos = jsonData.position;
                     const playerRot = jsonData.rotation;
                     UpdatePlayerPos(socket, syncId, playerPos, playerRot);
                     break;
-                case Protocol.GameStart:
-                    GameStartCountDown(protocol);
+                case Protocol.PlayerBreak:
+                    const breakId = jsonData.id;
+                    PlayerBreak(socket, breakId);
                     break;
+                
                 case Protocol.PlayerGoal:
                     const goalId = jsonData.id;
                     PlayerGoal(goalId);
@@ -90,7 +93,6 @@ const server = net.createServer((socket) =>
             }
             recvData = '';
             dataCount++;
-            //console.log('dataCount : ', dataCount);
         }
     });
 
