@@ -19,6 +19,7 @@ const {
 } = require('./ProtocolHandler');
 
 const idList = [];
+let dataCount = 0;
 
 const server = net.createServer((socket) =>
 {
@@ -49,7 +50,7 @@ const server = net.createServer((socket) =>
             const jsonData = JSON.parse(lastMsg);
             const protocol = jsonData.type;
 
-            console.log('recv protocol : ', jsonData);
+            //console.log('recv protocol : ', protocol);
 
             switch(protocol){
                 case Protocol.PlayerMove:
@@ -88,6 +89,8 @@ const server = net.createServer((socket) =>
                     break;
             }
             recvData = '';
+            dataCount++;
+            console.log('dataCount : ', dataCount);
         }
     });
 
