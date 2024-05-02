@@ -85,7 +85,7 @@ const server = net.createServer((socket) =>
             }
             recvData = '';
             dataCount++;
-            console.log('dataCount : ', dataCount);
+            //console.log('dataCount : ', dataCount);
         }
     });
 
