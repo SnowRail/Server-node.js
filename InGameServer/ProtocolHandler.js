@@ -16,7 +16,6 @@ const { Vector3 } = require('./UnityClass');
 let Goal = false;
 let Start = false;
 
-
 function FirstConn(socket, id){ 
     // first 전송 - 아이디, otherplayerconnect
     const json1 = new Packet(Protocol.OtherPlayerConnect, id);
@@ -35,11 +34,7 @@ function FirstConn(socket, id){
         idList.push(element.clientID);
     });
 
-    let ishost = false;
-    if (userCount === 0) 
-        ishost = true;
-
-    const json2 = new LoadGameScenePacket(id, userCount, idList, ishost);
+    const json2 = new LoadGameScenePacket(id, userCount, idList);
     const dataBuffer2 = classToByte(json2);
 
     socket.write(dataBuffer2);
@@ -63,18 +58,18 @@ function UpdatePlayerPos(socket, id, pos, rot)
     });
 }
 
-function PlayerBreak(socket,id)
+function PlayerBreak(socket, id)
 {
-    const json = new Packet(Protocol.PlayerBreak,id);
+    const json = new Packet(Protocol.PlayerBreak, id);
     const dataBuffer = classToByte(json);
-    broadcast(dataBuffer,socket);
+    broadcast(dataBuffer, socket);
 }
 
 function UpdatePlayerDirection(socket, id, pos, direction)
 {
     const json = new PlayerMovePacket(pos, direction , id);
     const dataBuffer = classToByte(json);
-    broadcast(dataBuffer,socket);
+    broadcast(dataBuffer, socket);
 }
 
 function PlayerDisconnect(socket, id){
@@ -102,7 +97,8 @@ function CountDown(protocol) {
     }
     const countDown = setInterval(() => {
         console.log(count);
-
+        const buffer = classToByte(new CountDownPacket(Protocol.SendCountDown, count));
+        broadcastAll(buffer);
         if (count === 0) {
             clearInterval(countDown);
             console.log("카운트다운 종료~");
@@ -142,12 +138,11 @@ function PlayerGoal(id){
     }
 }
 
-function SendKeyValue(id, key, pos){
-    const json = new KeyPacket(id, key, pos);
+function SendKeyValue(jsonData){
+    const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration);
     const dataBuffer = classToByte(json);
-    broadcastAll(dataBuffer);
+    broadcast(dataBuffer);
 }
-
 
 function ResetServer(){
     Goal = false;
@@ -193,6 +188,7 @@ module.exports = {
     UpdatePlayerDirection,
     PlayerDisconnect,
     PlayerGoal,
+    CountDown,
     GameStartCountDown,
     ResetServer,
     SendKeyValue,

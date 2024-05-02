@@ -13,7 +13,7 @@ const {
     UpdatePlayerDirection,
     PlayerDisconnect,
     PlayerGoal,
-    GameStartCountDown,
+    CountDown,
     ResetServer,
     SendKeyValue,
 } = require('./ProtocolHandler');
@@ -70,7 +70,8 @@ const server = net.createServer((socket) =>
                     UpdatePlayerPos(socket, syncId, playerPos, playerRot);
                     break;
                 case Protocol.GameStart:
-                    GameStartCountDown(protocol);
+                    //GameStartCountDown(protocol);
+                    CountDown(protocol);
                     break;
                 case Protocol.PlayerGoal:
                     const goalId = jsonData.id;
@@ -82,10 +83,7 @@ const server = net.createServer((socket) =>
                     ResetServer()
                     break;
                 case Protocol.Key:
-                    const keyId = jsonData.id;
-                    const key = jsonData.keyData;
-                    const keyPos = jsonData.position;
-                    SendKeyValue(keyId, key, keyPos);
+                    SendKeyValue(jsonData);
                     break;
             }
             recvData = '';
@@ -97,10 +95,9 @@ const server = net.createServer((socket) =>
     socket.on('end',() =>
     {
         console.log('클라이언트 접속 종료 : ', socket.remoteAddress,socket.remotePort);
-        PlayerDisconnect(socket,socket.clientID);
         SocketManager.removeSocket(socket);
+        PlayerDisconnect(socket,socket.clientID);
     });
-
 
     socket.on('error',(err)=>
     {
