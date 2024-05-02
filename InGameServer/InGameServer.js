@@ -10,13 +10,13 @@ const {
     FirstConn,
     UpdatePlayerPos,
     PlayerBreak,
-    UpdatePlayerDirection,
     PlayerDisconnect,
     PlayerGoal,
     CountDown,
     ResetServer,
     SendKeyValue,
 } = require('./ProtocolHandler');
+const { send } = require('process');
 
 const idList = [];
 let dataCount = 0;
@@ -75,11 +75,7 @@ const server = net.createServer((socket) =>
                     break;
                 
                 case Protocol.Key:
-                    const moveId = jsonData.from;
-                    const playerPosition = jsonData.position;
-                    const playerVelocity = jsonData.velocity;
-                    const playerAccel = jsonData.acceleration;
-                    UpdatePlayerDirection(socket, moveId, playerPosition, playerVelocity,playerAccel);
+                    sendKeyValue(jsonData);
                     break;
                 case Protocol.PlayerGoal:
                     const goalId = jsonData.id;
@@ -91,7 +87,11 @@ const server = net.createServer((socket) =>
                     const playerRot = jsonData.rotation;
                     UpdatePlayerPos(socket, syncId, playerPos, playerRot);
                     break;
-                case Protocol.Break:
+                case Protocol.GameStart:
+                    //GameStartCountDown(protocol);
+                    CountDown(protocol);
+                    break;
+                case Protocol.PlayerBreak:
                     const breakId = jsonData.id;
                     PlayerBreak(socket, breakId);
                     break;
@@ -99,6 +99,7 @@ const server = net.createServer((socket) =>
                 case Protocol.ResetServer:
                     ResetServer()
                     break;
+
             }
             recvData = '';
             dataCount++;
