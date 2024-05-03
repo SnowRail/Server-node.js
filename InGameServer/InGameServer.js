@@ -95,6 +95,7 @@ const server = net.createServer((socket) =>
                     break;
 
             }
+            //console.log("data size : ", jsonData.length);
             recvData = '';
             dataCount++;
         }
