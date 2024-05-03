@@ -82,10 +82,6 @@ const server = net.createServer((socket) =>
                 case Protocol.GameSync:
                     UpdatePlayerPos(socket, jsonData);
                     break;
-                case Protocol.GameStart:
-                    //GameStartCountDown(protocol);
-                    CountDown(protocol);
-                    break;
                 case Protocol.PlayerBreak:
                     PlayerBreak(socket, jsonData);
                     break;
