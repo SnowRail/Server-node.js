@@ -49,7 +49,7 @@ const server = net.createServer((socket) =>
             {
                 const jsonData = JSON.parse(msg[i]);
                 const protocol = jsonData.type;
-                console.log("프로토콜 : " , protocol);
+                
                 switch(protocol){
                     case Protocol.Login:
                         // todo login
