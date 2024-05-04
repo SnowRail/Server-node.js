@@ -47,7 +47,14 @@ class CountDownPacket extends Packet {
         super(protocol);
         this.count = count;
     }
-}   
+}
+
+class DelayPacket extends Packet {
+    constructor(delay) {
+        super(Protocol.Delay);
+        this.delay = delay;
+    }
+}
 
 module.exports = {
     Packet,

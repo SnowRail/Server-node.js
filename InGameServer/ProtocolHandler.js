@@ -82,24 +82,35 @@ function PlayerDisconnect(socket, id){
     NetworkObjectManager.removeObjectByID(id);
 }
 
-function CountDown(protocol) {
+function CountDown(protocol, id) {
     let count;
+    let json;
     
-    const json = new Packet(protocol);
-    const dataBuffer = classToByte(json);
-
     if(protocol === Protocol.GameStart)
     {
         count = 3; // 테스트를 위해 빠르게 끝냄
+        json = new Packet(protocol);
     }
     else if(protocol === Protocol.GameEnd)
     {
         count = 5;
+        json = new Packet(protocol, id);
     }
+    const dataBuffer = classToByte(json);
+
     const countDown = setInterval(() => {
         console.log(count);
-        const buffer = classToByte(new CountDownPacket(Protocol.SendCountDown, count));
+        let buffer;
+        if(protocol === Protocol.GameStart)
+        {
+            buffer = classToByte(new CountDownPacket(Protocol.SendCountDown, count));
+        }
+        else if(protocol === Protocol.GameEnd)
+        {
+            buffer = classToByte(new CountDownPacket(Protocol.GameEndCountDown, count));
+        }
         broadcastAll(buffer);
+        
         if (count === 0) {
             clearInterval(countDown);
             console.log("카운트다운 종료~");
@@ -107,9 +118,9 @@ function CountDown(protocol) {
             {
                 broadcastAll(dataBuffer);
             }
-            else if(protocol === Protocol.GameEnd)
+            else if(protocol === Protocol.PlayerGoal)
             {
-                // todo
+                broadcastAll(dataBuffer);
             }
         }
         else{
@@ -129,13 +140,11 @@ function GameStartCountDown(protocol){
     }
 }
 
-function PlayerGoal(jsonData){
+function PlayerGoal(id){
     if(Goal === false)
     {
-        const json = new Packet(Protocol.GameEnd, jsonData.from);
-        const dataBuffer = classToByte(json);
-        broadcastAll(dataBuffer);
         Goal = true;
+        CountDown(Protocol.GameEnd, id);
     }
 }
 
@@ -151,6 +160,12 @@ function ResetServer(){
     Goal = false;
     Start = false;
     console.log("ResetServer");
+}
+
+function SendDelay(socket){
+    const json = new DelayPacket(Date.now());
+    const dataBuffer = classToByte(json);
+    socket.write(dataBuffer);
 }
 
 function broadcast(message, sender) {
@@ -195,4 +210,5 @@ module.exports = {
     GameStartCountDown,
     ResetServer,
     SendKeyValue,
+    SendDelay,
 };
