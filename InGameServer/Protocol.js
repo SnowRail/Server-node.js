@@ -7,7 +7,7 @@ const Protocol = {
     EnterWaitingRoom : 11,      // 대기실 입장
     LoadGameScene : 12,         // 인게임 씬으로 전환  - 멍청 레이싱에서는 playerconnect로 사용
     PlayerReady : 13,           // 로딩 완료
-    SendCountDown : 14,         // 게임 시작 / 끝 카운트 다운
+    GameStartCountDown : 14,         // 게임 시작 / 끝 카운트 다운
     GameStart : 15,             // 게임 시작
 
     Key : 20,                   // 키 입력
@@ -15,10 +15,10 @@ const Protocol = {
     PlayerReconnect : 22,       // 플레이어 재접속
     PlayerDisconnect : 23,      // 플레이어 접속 끊김
     PlayerGoal : 24,            // 플레이어 골인
-    GameEnd : 25,               // 게임 종료
-    GameEndCountDown : 26,      // 게임 종료 카운트 다운
-    GameSync : 26,              // position update
-    Break : 27,                 // 브레이크 입력 
+    GameEndCountDown : 25,      // 게임 종료 카운트 다운
+    GameEnd : 26,               // 게임 종료
+    GameSync : 27,              // position update
+    Break : 28,                 // 브레이크 입력 
 
     ResetServer : 100,          // 서버 리셋
 
