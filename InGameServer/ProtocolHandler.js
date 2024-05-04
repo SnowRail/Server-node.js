@@ -103,7 +103,7 @@ function CountDown(protocol, id) {
         let buffer;
         if(protocol === Protocol.GameStart)
         {
-            buffer = classToByte(new CountDownPacket(Protocol.SendCountDown, count));
+            buffer = classToByte(new CountDownPacket(Protocol.GameStartCountDown, count));
         }
         else if(protocol === Protocol.GameEnd)
         {
