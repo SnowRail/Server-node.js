@@ -140,7 +140,7 @@ function PlayerGoal(jsonData){
 }
 
 function SendKeyValue(socket, jsonData){
-    let timestamp = Date.now();
+    const timeStamp = Date.now();
     const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration,timestamp);
     const dataBuffer = classToByte(json);
     // broadcastAll(dataBuffer);
