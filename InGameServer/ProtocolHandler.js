@@ -110,7 +110,7 @@ function CountDown(protocol, id) {
             buffer = classToByte(new CountDownPacket(Protocol.GameEndCountDown, count));
         }
         broadcastAll(buffer);
-        
+
         if (count === 0) {
             clearInterval(countDown);
             console.log("카운트다운 종료~");
@@ -118,7 +118,7 @@ function CountDown(protocol, id) {
             {
                 broadcastAll(dataBuffer);
             }
-            else if(protocol === Protocol.PlayerGoal)
+            else if(protocol === Protocol.GameEnd)
             {
                 broadcastAll(dataBuffer);
             }
