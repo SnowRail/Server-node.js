@@ -18,7 +18,6 @@ const {
 } = require('./ProtocolHandler');
 
 const idList = [];
-let dataCount = 0;
 
 const server = net.createServer((socket) =>
 {
@@ -30,7 +29,6 @@ const server = net.createServer((socket) =>
     idList.push(num);
     socket.clientID = num;
     socket.syncCount = 0;
-    
     SocketManager.addSocket(socket);
     
     console.log('새로운 클라이언트 접속 : ', socket.name);
@@ -43,69 +41,57 @@ const server = net.createServer((socket) =>
     {
         recvData += data.toString();
 
-        if(recvData.includes('\n')){
+        if(recvData.includes('\n'))
+        {
+
             const msg = recvData.split('\n');
-            console.log('recvData : ', msg);
-            const lastMsg = msg[msg.length - 2];
-            const jsonData = JSON.parse(lastMsg);
-            const protocol = jsonData.type;
-
-            //console.log('recv protocol : ', protocol);
-
-            switch(protocol){
-                case Protocol.Login:
-                    // todo login
-                    break;
-
-                case Protocol.Logout:
-                    // todo logout
-                    break;
-
-                case Protocol.Signin:
-                    // todo SignIn
-                    break;
-
-                case Protocol.StartMatchMaking:
-                    // TODO StartMatchMaking
-                    break;
-
-                case Protocol.GameStart:
-                    //GameStartCountDown(protocol);
-                    CountDown(protocol, -1);
-                    break;
-
-                case Protocol.PlayerReady:
-                    // TODO PlayerReady
-                    break;
+            for(let i = 0; i < msg.length-1; ++i)
+            {
+                const jsonData = JSON.parse(msg[i]);
+                const protocol = jsonData.type;
                 
-                case Protocol.Key:
-                    SendKeyValue(socket, jsonData);
-                    break;
-
-                case Protocol.PlayerGoal:
-                    PlayerGoal(jsonData.from);
-                    break;
-
-                case Protocol.GameSync:
-                    UpdatePlayerPos(socket, jsonData);
-                    break;
-
-                case Protocol.PlayerBreak:
-                    PlayerBreak(socket, jsonData);
-                    break;
-
-                case Protocol.ResetServer:
-                    ResetServer()
-                    break;
-
-                case Protocol.Delay:
-                    SendDelay(socket);
-                    break;
-
+                switch(protocol){
+                    case Protocol.Login:
+                        // todo login
+                        break;
+                    case Protocol.Logout:
+                        // todo logout
+                        break;
+                    case Protocol.Signin:
+                        // todo SignIn
+                        break;
+                    case Protocol.StartMatchMaking:
+                        // TODO StartMatchMaking
+                        break;
+                    case Protocol.GameStart:
+                        //GameStartCountDown(protocol);t
+                        CountDown(protocol);
+                        break;
+                    case Protocol.PlayerReady:
+                        // TODO PlayerReady
+                        break;
+                    
+                    case Protocol.Key:
+                        SendKeyValue(socket, jsonData);
+                        break;
+                    case Protocol.PlayerGoal:
+                        PlayerGoal(jsonData);
+                        break;
+                    case Protocol.GameSync:
+                        UpdatePlayerPos(socket, jsonData);
+                        break;
+                    case Protocol.PlayerBreak:
+                        PlayerBreak(socket, jsonData);
+                        break;
+    
+                    case Protocol.ResetServer:
+                        ResetServer()
+                        break;
+    
+                }
             }
-            //console.log("data size : ", jsonData.length);
             recvData = '';
-            dataCount++;
+            recvData += msg[msg.length-1];
         }
     });
 
