@@ -55,18 +55,22 @@ const server = net.createServer((socket) =>
                 case Protocol.Login:
                     // todo login
                     break;
+
                 case Protocol.Logout:
                     // todo logout
                     break;
+
                 case Protocol.Signin:
                     // todo SignIn
                     break;
+
                 case Protocol.StartMatchMaking:
                     // TODO StartMatchMaking
                     break;
+
                 case Protocol.GameStart:
                     //GameStartCountDown(protocol);
-                    CountDown(protocol);
+                    CountDown(protocol, -1);
                     break;
 
                 case Protocol.PlayerReady:
@@ -76,18 +80,25 @@ const server = net.createServer((socket) =>
                 case Protocol.Key:
                     SendKeyValue(socket, jsonData);
                     break;
+
                 case Protocol.PlayerGoal:
-                    PlayerGoal(jsonData);
+                    PlayerGoal(jsonData.from);
                     break;
+
                 case Protocol.GameSync:
                     UpdatePlayerPos(socket, jsonData);
                     break;
+
                 case Protocol.PlayerBreak:
                     PlayerBreak(socket, jsonData);
                     break;
 
                 case Protocol.ResetServer:
                     ResetServer()
+                    break;
+
+                case Protocol.Delay:
+                    SendDelay(socket);
                     break;
 
             }
