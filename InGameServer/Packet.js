@@ -22,7 +22,7 @@ class KeyPacket extends Packet {
         this.position = pos;
         this.velocity = vel;
         this.acceleration = acc;
-        this.timestamp = timestamp
+        this.timeStamp = timestamp
     }
 }
 
