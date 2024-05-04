@@ -93,7 +93,7 @@ function CountDown(protocol, id) {
     }
     else if(protocol === Protocol.GameEnd)
     {
-        count = 5;
+        count = 10;
         json = new Packet(protocol, id);
     }
     const dataBuffer = classToByte(json);
