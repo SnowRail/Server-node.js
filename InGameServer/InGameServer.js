@@ -45,6 +45,7 @@ const server = net.createServer((socket) =>
         {
 
             const msg = recvData.split('\n');
+            console.log('msg :  ', msg);
             for(let i = 0; i < msg.length-1; ++i)
             {
                 const jsonData = JSON.parse(msg[i]);
