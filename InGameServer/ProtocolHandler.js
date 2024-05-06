@@ -1,5 +1,4 @@
 const NetworkObjectManager = require('./NetworkObjectManager');
-const { ByteReader, ByteWriter } = require('../Network');
 const { intSize, floatSize, vector3Size, byteSize } = require('./typeSize');
 const UnityInstance = require('./UnityClass/UnityInstance');
 const SocketManager = require('./SoketManager');

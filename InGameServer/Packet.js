@@ -18,7 +18,6 @@ class LoadGameScenePacket extends Packet {
 class KeyPacket extends Packet {
     constructor(id, pos, vel, acc, timestamp) {
         super(Protocol.Key, id);
-        this.from = id;
         this.position = pos;
         this.velocity = vel;
         this.acceleration = acc;
@@ -49,12 +48,6 @@ class CountDownPacket extends Packet {
     }
 }
 
-class DelayPacket extends Packet {
-    constructor(delay) {
-        super(Protocol.Delay);
-        this.delay = delay;
-    }
-}
 
 module.exports = {
     Packet,
