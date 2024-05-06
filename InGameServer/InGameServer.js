@@ -45,7 +45,7 @@ const server = net.createServer((socket) =>
         {
 
             const msg = recvData.split('\n');
-            console.log('msg :  ', msg);
+            //console.log('msg :  ', msg);
             for(let i = 0; i < msg.length-1; ++i)
             {
                 const jsonData = JSON.parse(msg[i]);
@@ -73,7 +73,7 @@ const server = net.createServer((socket) =>
                         break;
                     
                     case Protocol.Key:
-                        SendKeyValue(socket, jsonData);
+                        SendKeyValue(socket, msg[i]);
                         break;
                     case Protocol.PlayerGoal:
                         PlayerGoal(jsonData);
