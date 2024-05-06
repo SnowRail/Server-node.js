@@ -205,5 +205,4 @@ module.exports = {
     GameStartCountDown,
     ResetServer,
     SendKeyValue,
-    SendDelay,
 };
