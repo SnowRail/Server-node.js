@@ -150,9 +150,10 @@ function PlayerGoal(id){
 
 function SendKeyValue(socket, jsonData){
     const timeStamp = Date.now();
-    const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration,timeStamp);
+    const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration, timeStamp);
     const dataBuffer = classToByte(json);
-    // broadcastAll(dataBuffer);
+    //broadcastAll(dataBuffer);
+    // TODO : 다시 parsing하지 말고 바로 전송하기
     broadcast(dataBuffer, socket);
 }
 
@@ -160,12 +161,6 @@ function ResetServer(){
     Goal = false;
     Start = false;
     console.log("ResetServer");
-}
-
-function SendDelay(socket){
-    const json = new DelayPacket(Date.now());
-    const dataBuffer = classToByte(json);
-    socket.write(dataBuffer);
 }
 
 function broadcast(message, sender) {
