@@ -72,7 +72,7 @@ const server = net.createServer((socket) =>
                         SendKeyValue(socket, jsonData);
                         break;
                     case Protocol.PlayerGoal:
-                        PlayerGoal(jsonData);
+                        PlayerGoal(jsonData.from);
                         break;
                     case Protocol.GameSync:
                         UpdatePlayerPos(socket, jsonData);
