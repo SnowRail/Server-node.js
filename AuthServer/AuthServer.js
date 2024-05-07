@@ -24,15 +24,15 @@ io.on('connection', (socket) => {
 
 
     socket.on('disconnect', () => {
-        console.log('user disconnected : ', socket.remoteAddress + ":" + socket.remotePort);
+        console.error('user disconnected : ', socket.remoteAddress + ":" + socket.remotePort);
     });
 });
 
 
 
 
-
-
 app.listen(10101, () => {    
     console.log('Example app listening on port 10101!');
+}).on('error', (err) => {
+    console.error('Server error : ', err);
 });

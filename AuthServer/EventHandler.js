@@ -1,20 +1,24 @@
 const mysql = require('mysql');
+const dotenv = require('dotenv');
+dotenv.config({ path: './.env' });
+
 const connection = mysql.createConnection({
-    host: 'outgame-database.cin32mhxbadg.ap-northeast-2.rds.amazonaws.com',
-    port : 3306,
-    user: 'admin',
-    password: 'vibracoffee',
-    database: 'outgame-database'
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
 connection.connect((err) => {
-    if(err) {
-        console.log('mysql connection error : ', err);
-        return;
+    if (err) {
+        console.error('MySQL connection error:', err);
+        process.exit(1);
     } else {
-        console.log('mysql connection success');
+        console.log('MySQL connection success');
     }
 });
+
 
 function Login(socket, msg) {
     const userData = JSON.parse(msg);
@@ -35,6 +39,7 @@ function Signup(socket, msg) {
     // db에 없는 아이디면
     socket.emit('signupSucc', 'signup success');
 }
+
 
 module.exports = {
     Login,
