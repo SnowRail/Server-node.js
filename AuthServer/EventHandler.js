@@ -4,7 +4,7 @@ const connection = mysql.createConnection({
     port : 3306,
     user: 'admin',
     password: 'vibracoffee',
-    database: 'outgame-database'
+    database: 'OutGameDB'
 });
 
 connection.connect((err) => {
