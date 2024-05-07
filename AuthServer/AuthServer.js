@@ -33,4 +33,6 @@ io.on('connection', (socket) => {
 
 app.listen(10101, () => {    
     console.log('Example app listening on port 10101!');
+}).on('error', (err) => {
+    console.error('Server error : ', err);
 });
