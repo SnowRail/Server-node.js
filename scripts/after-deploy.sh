@@ -5,5 +5,6 @@ cd $REPOSITORY
 
 sudo npm
 fuser -k 30303/tcp
-node InGameServer/InGameServer.js > InGameServer.log 2>&1 &
+pm2 start build/InGameServer/InGameServer.js --name InGameServer
+pm2 logs InGameServer
 # sudo pm2 start dist
