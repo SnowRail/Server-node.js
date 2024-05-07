@@ -43,7 +43,7 @@ jobs:
               #   npm run start  
 
             - name: zip file
-              run: zip -r nodejs-server.zip ./scripts ./appspec.yml ./.env ./package.json ./InGameServer ./AuthServer ./Network
+              run: zip -r nodejs-server.zip ./scripts ./appspec.yml ./.env ./package.json ./InGameServer ./Network
             #   run: zip -r nodejs-server.zip ./dist ./scripts ./appspec.yml ./.env ./package.json
 
             - name: AWS configure credentials
