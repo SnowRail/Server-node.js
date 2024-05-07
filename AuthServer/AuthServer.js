@@ -24,11 +24,9 @@ io.on('connection', (socket) => {
 
 
     socket.on('disconnect', () => {
-        console.log('user disconnected : ', socket.remoteAddress + ":" + socket.remotePort);
+        console.error('user disconnected : ', socket.remoteAddress + ":" + socket.remotePort);
     });
 });
-
-
 
 
 

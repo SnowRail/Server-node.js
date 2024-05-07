@@ -9,7 +9,7 @@ const connection = mysql.createConnection({
 
 connection.connect((err) => {
     if(err) {
-        console.log('mysql connection error : ', err);
+        console.error('mysql connection error : ', err);
         return;
     } else {
         console.log('mysql connection success');
@@ -35,6 +35,14 @@ function Signup(socket, msg) {
     // db에 없는 아이디면
     socket.emit('signupSucc', 'signup success');
 }
+
+connection.end((err) => {
+    if (err) {
+      console.error('Error closing database connection:', err);
+      process.exit(1); // 에러 발생 시 프로세스 종료
+    }
+    console.log('Database connection closed');
+  });
 
 module.exports = {
     Login,
