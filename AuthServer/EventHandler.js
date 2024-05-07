@@ -4,20 +4,21 @@ dotenv.config({ path: './.env' });
 
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
-    port : process.env.DB_PORT,
+    port: process.env.DB_PORT,
     user: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
 });
 
 connection.connect((err) => {
-    if(err) {
-        console.error('mysql connection error : ', err);
-        return;
+    if (err) {
+        console.error('MySQL connection error:', err);
+        process.exit(1);
     } else {
-        console.log('mysql connection success');
+        console.log('MySQL connection success');
     }
 });
+
 
 function Login(socket, msg) {
     const userData = JSON.parse(msg);
@@ -39,13 +40,7 @@ function Signup(socket, msg) {
     socket.emit('signupSucc', 'signup success');
 }
 
-connection.end((err) => {
-    if (err) {
-      console.error('Error closing database connection:', err);
-      process.exit(1); // 에러 발생 시 프로세스 종료
-    }
-    console.log('Database connection closed');
-  });
+
 
 module.exports = {
     Login,
