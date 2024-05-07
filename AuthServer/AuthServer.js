@@ -18,7 +18,7 @@ io.on('connection', (socket) => {
 
     socket.on('signup', (msg) => {
         console.log('signup : ', msg);
-        socket.emit('signup', 'signup success');
+        Signup(socket, msg);
     });
 
 
