@@ -1,9 +1,9 @@
 const mysql = require('mysql');
 const connection = mysql.createConnection({
-    host: 'outgame-database.cin32mhxbadg.ap-northeast-2.rds.amazonaws.com',
+    host: process.env.SSH_HOST, //'outgame-database.cin32mhxbadg.ap-northeast-2.rds.amazonaws.com',
     port : 3306,
     user: 'admin',
-    password: 'vibracoffee',
+    password: process.env.SSH_PASSWORD, //'vibracoffee',
     database: 'OutGameDB'
 });
 
