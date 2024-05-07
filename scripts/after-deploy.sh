@@ -6,5 +6,4 @@ cd $REPOSITORY
 sudo npm
 pm2 stop InGameServer
 pm2 start InGameServer
-pm2 logs InGameServer
 # sudo pm2 start dist
