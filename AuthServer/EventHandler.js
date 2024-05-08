@@ -94,14 +94,14 @@ function MatchMaking(msg)
 
     player.socket.emit('enterRoomSucc', 'Enter Room Succ!!');
     console.log('Enter Room Succ!!');
-
+    
     if(userList.length === 2)
     {
         gameRoomList.set(firstRoomID,userList);
         readyRoomList.delete(firstRoomID);
         userList.forEach(element => {
-            const player = getPlayer(element);
-            player.socket.emit('MoveInGameScene',"매칭완료 게임하러 가는 중! 칙칙폭폭!!");
+            const user = getPlayer(element);
+            user.socket.emit('moveInGameScene',"매칭완료 게임하러 가는 중! 칙칙폭폭!!");
         });
     }
 }
