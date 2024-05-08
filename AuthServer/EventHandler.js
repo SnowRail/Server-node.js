@@ -82,9 +82,9 @@ function MatchMaking(msg)
     console.log("firstRoomID : ",firstRoomID);
     const userList = readyRoomList.get(firstRoomID);
     console.log("userList : ",userList);
-
     userList.push(userData.id);
     console.log("userList : ",userList);
+
     const player = getPlayer(userData.id);
     player.socket.join(firstRoomID,(err)=>{
         if(err){
@@ -119,6 +119,9 @@ function getRandomPlayers(players,count)
 }
 
 function getPlayer(id){
+    connectedPlayers.forEach((el)=>{
+        console.log("elllllll : ",  el);
+    })
     return connectedPlayers.get(id);
 }
 
