@@ -1,6 +1,8 @@
+require("socket.io");
 const mysql = require('mysql');
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
+
 
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
