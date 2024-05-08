@@ -3,7 +3,6 @@ const mysql = require('mysql');
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
 
-
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -13,7 +12,6 @@ const connection = mysql.createConnection({
 });
 
 const connectedPlayers = new Map();
-const matchingQueue = [];
 const readyRoomList = new Map();
 const gameRoomList = new Map();
 
