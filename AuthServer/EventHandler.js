@@ -85,15 +85,14 @@ function MatchMaking(msg)
     userList.push(userData.id);
 
     const player = getPlayer(userData.id);
-    player.socket.join(firstRoomID,(err)=>{
-        if(err){
-            player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
-            console.error('Enter Room Fail!! : ',err);
-        }
-        else{
-            player.socket.emit('enterRoomSucc', 'Enter Room Succ!!');
-            console.log('Enter Room Succ!! : ',err);
-        }
+    player.socket.join(firstRoomID)
+    .then(() => {
+        player.socket.emit('enterRoomSucc', 'Enter Room Succ!!');
+        console.log('Enter Room Succ!!');
+    })
+    .catch((err) => {
+        player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
+        console.error('Enter Room Fail!! : ', err);
     });
     if(userList.length === 2)
     {
