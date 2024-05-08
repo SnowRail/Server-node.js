@@ -99,6 +99,10 @@ function MatchMaking(msg)
     {
         gameRoomList.set(firstRoomID,userList);
         readyRoomList.delete(firstRoomID);
+        userList.forEach(element => {
+            const player = getPlayer(element);
+            player.socket.emit('MoveInGameScene',"매칭완료 게임하러 가는 중! 칙칙폭폭!!");
+        });
     }
 }
 
