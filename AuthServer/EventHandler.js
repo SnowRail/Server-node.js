@@ -1,6 +1,8 @@
+require("socket.io");
 const mysql = require('mysql');
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
+
 
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -9,6 +11,11 @@ const connection = mysql.createConnection({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
 });
+
+const connectedPlayers = new Map();
+const matchingQueue = [];
+const readyRoomList = new Map();
+const gameRoomList = new Map();
 
 connection.connect((err) => {
     if (err) {
@@ -34,6 +41,7 @@ function Login(socket, msg) {
             socket.emit('loginFail', '존재하지 않는 ID거나 비밀번호가 틀렸습니다');
         } else {
             socket.emit('loginSucc', `${rows[0].name}님 로그인에 성공했습니다.`);
+            connectedPlayers.set(userData.id,{socket : socket, room : null});
         }
     });
 }
@@ -64,8 +72,72 @@ function Signup(socket, msg) {
     });
 }
 
+function MatchMaking(msg)
+{
+    const userData = JSON.parse(msg);
+    if(readyRoomList.size === 0)
+    {
+        const roomID = makeRoomID();
+        readyRoomList.set(roomID,[]);
+    }
+    const firstRoomID = readyRoomList.keys().next().value;
+    const userList = readyRoomList.get(firstRoomID);
+    userList.push(userData.id);
+
+    const player = getPlayer(userData.id);
+    player.socket.join(firstRoomID);
+
+    player.socket.on('error', (err) => {
+        player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
+        console.error('Enter Room Fail!! : ', err);
+    });
+
+    player.socket.emit('enterRoomSucc', 'Enter Room Succ!!');
+    console.log('Enter Room Succ!!');
+    
+    if(userList.length === 2)
+    {
+        gameRoomList.set(firstRoomID,userList);
+        readyRoomList.delete(firstRoomID);
+        userList.forEach(element => {
+            const user = getPlayer(element);
+            user.socket.emit('moveInGameScene',"매칭완료 게임하러 가는 중! 칙칙폭폭!!");
+        });
+    }
+}
+
+function getRandomPlayers(players,count)
+{
+    const shuffled = players.slice();
+    let i = players.length;
+    let temp, rand;
+    while (i !== 0){
+        rand = Math.floor(Math.random() * i);
+        i -= 1;
+        temp = shuffled[i];
+        shuffled[i] = shuffled[rand];
+        shuffled[rand] = temp;
+    }
+    return shuffled.slice(0,count);
+}
+
+function getPlayer(id){
+    return connectedPlayers.get(id);
+}
+
+
+function makeRoomID(){
+    let num = 0;
+    do {
+        num = Math.floor(Math.random() * (1000 - 0 + 1)) + 0;
+    } while(gameRoomList.has(num)||readyRoomList.has(num));
+    return num;
+}
+
+
 
 module.exports = {
     Login,
-    Signup
+    Signup,
+    MatchMaking
 }
