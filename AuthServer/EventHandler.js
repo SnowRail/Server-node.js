@@ -79,9 +79,12 @@ function MatchMaking(msg)
         readyRoomList.set(roomID,[]);
     }
     const firstRoomID = readyRoomList.keys().next().value;
+    console.log("firstRoomID : ",firstRoomID);
     const userList = readyRoomList.get(firstRoomID);
-    
+    console.log("userList : ",userList);
+
     userList.push(userData.id);
+    console.log("userList : ",userList);
     const player = getPlayer(userData.id);
     player.socket.join(firstRoomID,(err)=>{
         if(err){
