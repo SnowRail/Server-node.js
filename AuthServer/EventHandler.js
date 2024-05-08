@@ -10,6 +10,9 @@ const connection = mysql.createConnection({
     database: process.env.DB_NAME
 });
 
+const connectedPlayers = new Map();
+const matchingQueue = [];
+
 connection.connect((err) => {
     if (err) {
         console.error('MySQL connection error:', err);
@@ -34,6 +37,7 @@ function Login(socket, msg) {
             socket.emit('loginFail', '존재하지 않는 ID거나 비밀번호가 틀렸습니다');
         } else {
             socket.emit('loginSucc', `${rows[0].name}님 로그인에 성공했습니다.`);
+            connectedPlayers.set(userData.id,socket);
         }
     });
 }
@@ -64,8 +68,48 @@ function Signup(socket, msg) {
     });
 }
 
+function MatchMaking(Socket,msg)
+{
+    const userData = JSON.parse(msg);
+
+    matchingQueue.push(msg.id);
+    if(matchingQueue.length ===5){
+        const matchedPlayers = getRandomPlayers(matchingQueue,5);
+
+        matchedPlayers.forEach(id => {
+            const index = matchingQueue.indexOf(id);
+            matchingQueue.splice(index,1);
+        });
+        
+        matchedPlayers.forEach((id)=>{
+            const playerSocket = getPlayerSocket(id);
+            playerSocket.emit('matchFound',{players : matchedPlayers});
+        });
+    }
+}
+
+function getRandomPlayers(players,count)
+{
+    const shuffled = players.slice();
+    let i = players.length;
+    let temp, rand;
+    while (i !== 0){
+        rand = Math.floor(Math.random() * i);
+        i -= 1;
+        temp = shuffled[i];
+        shuffled[i] = shuffled[rand];
+        shuffled[rand] = temp;
+    }
+    return shuffled.slice(0,count);
+}
+
+function getPlayerSocket(id){
+    return connectedPlayers.get(id);
+}
+
 
 module.exports = {
     Login,
-    Signup
+    Signup,
+    MatchMaking
 }

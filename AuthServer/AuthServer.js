@@ -5,7 +5,11 @@ const server = http.createServer(app);
 const {Server} = require("socket.io");
 const io = new Server(server);
 
-const { Login, Signup } = require('./EventHandler');
+const {   
+    Login, 
+    Signup,
+    MatchMaking 
+} = require('./EventHandler');
 
 io.on('connection', (socket) => {
     //console.log('a user connected : ', socket.remoteAddress + ":" + socket.remotePort);
@@ -23,10 +27,12 @@ io.on('connection', (socket) => {
     
     socket.on('matching', (msg) => {
         console.log('matching : ', msg);
+        MatchMaking(socket,msg);
     });
 
     socket.on('disconnect', () => {
         console.error('user disconnected : ', socket.remoteAddress + ":" + socket.remotePort);
+        // TODO 접속한 플레이어 리스트에서 삭제하기
     });
 });
 
