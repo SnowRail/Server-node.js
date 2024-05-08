@@ -21,9 +21,9 @@ connection.connect((err) => {
 
 
 function Login(socket, msg) {
-    //const userData = JSON.parse(msg);
+    const userData = JSON.parse(msg);
 
-    connection.query('SELECT * FROM User WHERE id = ? AND password = ?', [msg.id, msg.password], (err, rows) => {
+    connection.query('SELECT * FROM User WHERE id = ? AND password = ?', [userData.id, userData.password], (err, rows) => {
         if (err) {
             console.error('Login query error:', err);
             socket.emit('loginFail', 'login fail');
@@ -39,9 +39,9 @@ function Login(socket, msg) {
 }
 
 function Signup(socket, msg) {
-    //const userData = JSON.parse(msg);
-
-    connection.query('SELECT * FROM User WHERE id = ?', [msg.id], (err, rows) => {
+    const userData = JSON.parse(msg);
+    
+    connection.query('SELECT * FROM User WHERE id = ?', [userData.id], (err, rows) => {
         if (err) {
             console.error('Signup query error:', err);
             socket.emit('signupFail', 'signup fail');
@@ -49,7 +49,7 @@ function Signup(socket, msg) {
         }
 
         if (rows.length === 0) {
-            connection.query('INSERT INTO User (id, password, name) VALUES (?, ?, ?)', [msg.id, msg.password, msg.name], (err) => {
+            connection.query("INSERT INTO User (id, password, name) VALUES (?, ?, ?)", [userData.id, userData.password, userData.name], (err) => {
                 if (err) {
                     console.error('Signup query error:', err);
                     socket.emit('signupFail', '회원가입에 실패했습니다');

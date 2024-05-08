@@ -13,7 +13,6 @@ io.on('connection', (socket) => {
     socket.on('login', (msg) => {
         console.log('login : ', msg);
         Login(socket, msg);
-        
     });
 
     socket.on('signup', (msg) => {
