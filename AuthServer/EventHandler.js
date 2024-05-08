@@ -85,11 +85,11 @@ function MatchMaking(msg)
     const player = getPlayer(userData.id);
     player.socket.join(firstRoomID,(err)=>{
         if(err){
-            socket.emit('enterRoomFail', 'Enter Room Fail!!');
+            player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
             console.error('Enter Room Fail!! : ',err);
         }
         else{
-            socket.emit('enterRoomSucc', 'Enter Room Succ!!');
+            player.socket.emit('enterRoomSucc', 'Enter Room Succ!!');
             console.log('Enter Room Succ!! : ',err);
         }
     });
