@@ -9,6 +9,7 @@ const { Login, Signup } = require('./EventHandler');
 
 io.on('connection', (socket) => {
     //console.log('a user connected : ', socket.remoteAddress + ":" + socket.remotePort);
+    console.log("연결됨 : " + socket.id);
 
     socket.on('login', (msg) => {
         console.log('login : ', msg);
@@ -19,7 +20,10 @@ io.on('connection', (socket) => {
         console.log('signup : ', msg);
         Signup(socket, msg);
     });
-    console.log("연결됨 : " + socket.id);
+    
+    socket.on('matching', (msg) => {
+        console.log('matching : ', msg);
+    });
 
     socket.on('disconnect', () => {
         console.error('user disconnected : ', socket.remoteAddress + ":" + socket.remotePort);

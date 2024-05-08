@@ -149,7 +149,7 @@ function PlayerGoal(id){
 
 function SendKeyValue(socket, jsonData){
     const timeStamp = Date.now();
-    const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration, timeStamp);
+    const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration, jsonData.rotation, timeStamp);
     const dataBuffer = classToByte(json);
     //broadcastAll(dataBuffer);
     // TODO : 다시 parsing하지 말고 바로 전송하기
