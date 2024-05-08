@@ -12,6 +12,8 @@ const connection = mysql.createConnection({
 
 const connectedPlayers = new Map();
 const matchingQueue = [];
+const readyRoomList = new Map();
+const gameRoomList = new Map();
 
 connection.connect((err) => {
     if (err) {
@@ -37,7 +39,7 @@ function Login(socket, msg) {
             socket.emit('loginFail', '존재하지 않는 ID거나 비밀번호가 틀렸습니다');
         } else {
             socket.emit('loginSucc', `${rows[0].name}님 로그인에 성공했습니다.`);
-            connectedPlayers.set(userData.id,socket);
+            connectedPlayers.set(userData.id,{socket : socket, room : null});
         }
     });
 }
@@ -68,23 +70,33 @@ function Signup(socket, msg) {
     });
 }
 
-function MatchMaking(Socket,msg)
+function MatchMaking(msg)
 {
     const userData = JSON.parse(msg);
-
-    matchingQueue.push(msg.id);
-    if(matchingQueue.length ===5){
-        const matchedPlayers = getRandomPlayers(matchingQueue,5);
-
-        matchedPlayers.forEach(id => {
-            const index = matchingQueue.indexOf(id);
-            matchingQueue.splice(index,1);
-        });
-        
-        matchedPlayers.forEach((id)=>{
-            const playerSocket = getPlayerSocket(id);
-            playerSocket.emit('matchFound',{players : matchedPlayers});
-        });
+    if(readyRoomList.size === 0)
+    {
+        const roomID = makeRoomID();
+        readyRoomList.set(roomID,[]);
+    }
+    const firstRoomID = readyRoomList.keys().next().value;
+    const userList = readyRoomList.get(firstRoomID);
+    
+    userList.push(userData.id);
+    const player = getPlayer(userData.id);
+    player.socket.join(firstRoomID,(err)=>{
+        if(err){
+            socket.emit('enterRoomFail', 'Enter Room Fail!!');
+            console.error('Enter Room Fail!! : ',err);
+        }
+        else{
+            socket.emit('enterRoomSucc', 'Enter Room Succ!!');
+            console.log('Enter Room Succ!! : ',err);
+        }
+    });
+    if(userList.length === 2)
+    {
+        gameRoomList.set(firstRoomID,userList);
+        readyRoomList.delete(firstRoomID);
     }
 }
 
@@ -103,9 +115,19 @@ function getRandomPlayers(players,count)
     return shuffled.slice(0,count);
 }
 
-function getPlayerSocket(id){
+function getPlayer(id){
     return connectedPlayers.get(id);
 }
+
+
+function makeRoomID(){
+    let num = 0;
+    do {
+        num = Math.floor(Math.random() * (1000 - 0 + 1)) + 0;
+    } while(gameRoomList.has(num)||readyRoomList.has(num));
+    return num;
+}
+
 
 
 module.exports = {
