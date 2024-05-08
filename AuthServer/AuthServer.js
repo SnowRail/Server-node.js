@@ -27,7 +27,7 @@ io.on('connection', (socket) => {
     
     socket.on('matching', (msg) => {
         console.log('matching : ', msg);
-        MatchMaking(socket,msg);
+        MatchMaking(msg);
     });
 
     socket.on('disconnect', () => {
