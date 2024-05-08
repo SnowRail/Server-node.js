@@ -22,22 +22,46 @@ connection.connect((err) => {
 
 function Login(socket, msg) {
     const userData = JSON.parse(msg);
-    msg.id;
-    msg.pw;
 
-    // db에 없으면 
-    // socket.emit('loginFail', 'login fail');  
+    connection.query('SELECT * FROM User WHERE id = ? AND password = ?', [userData.id, userData.password], (err, rows) => {
+        if (err) {
+            console.error('Login query error:', err);
+            socket.emit('loginFail', 'login fail');
+            return;
+        }
 
-    // db에 있으면
-    socket.emit('loginSucc', 'login success');
+        if (rows.length === 0) {
+            socket.emit('loginFail', '존재하지 않는 ID거나 비밀번호가 틀렸습니다');
+        } else {
+            socket.emit('loginSucc', `${rows[0].name}님 로그인에 성공했습니다.`);
+        }
+    });
 }
 
 function Signup(socket, msg) {
-    // db에 이미 있는 아이디면 
-    // socket.emit('signupFail', 'signup fail');
+    const userData = JSON.parse(msg);
+    
+    connection.query('SELECT * FROM User WHERE id = ?', [userData.id], (err, rows) => {
+        if (err) {
+            console.error('Signup query error:', err);
+            socket.emit('signupFail', 'signup fail');
+            return;
+        }
 
-    // db에 없는 아이디면
-    socket.emit('signupSucc', 'signup success');
+        if (rows.length === 0) {
+            connection.query("INSERT INTO User (id, password, name) VALUES (?, ?, ?)", [userData.id, userData.password, userData.name], (err) => {
+                if (err) {
+                    console.error('Signup query error:', err);
+                    socket.emit('signupFail', '회원가입에 실패했습니다');
+                    return;
+                }
+
+                socket.emit('signupSucc', '회원가입에 성공했습니다');
+            });
+        } else {
+            socket.emit('signupFail', '이미 존재하는 ID입니다');
+        }
+    });
 }
 
 
