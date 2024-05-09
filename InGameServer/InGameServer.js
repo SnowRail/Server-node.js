@@ -33,9 +33,6 @@ const server = net.createServer((socket) =>
     logger.info('새로운 클라이언트 접속 : ', socket.name);
     logger.info('클라이언트 ID : ' + socket.clientID);
 
-    console.log('새로운 클라이언트 접속 : ', socket.name);
-    console.log('클라이언트 ID : ' + socket.clientID);
-
     FirstConn(socket, num);
 
     let recvData = '';
@@ -53,7 +50,6 @@ const server = net.createServer((socket) =>
                     jsonData = JSON.parse(msg[i]);
                 }
                 catch(e){
-                    console.error('Json 파싱 에러 :',e);
                     logger.error('Json 파싱 에러 :', e);
                     return;
                 }
@@ -98,7 +94,6 @@ const server = net.createServer((socket) =>
                         ResetServer()
                         break;
                     default:
-                        console.warn('알 수 없는 프로토콜 :', protocol);
                         logger.warn('알 수 없는 프로토콜 :', protocol);
                         break;
                 }
@@ -110,7 +105,6 @@ const server = net.createServer((socket) =>
 
     socket.on('end',() =>
     {
-        // console.log('클라이언트 접속 종료 : ', socket.remoteAddress,socket.remotePort);
         logger.info('클라이언트 접속 종료 : ' + socket.remoteAddress + ':' + socket.remotePort);
         SocketManager.removeSocket(socket);
         PlayerDisconnect(socket,socket.clientID);
@@ -118,7 +112,6 @@ const server = net.createServer((socket) =>
 
     socket.on('error',(err)=>
     {
-        console.error('소켓 에러 : ', err);
         logger.error('소켓 에러 : ', err);
         PlayerDisconnect(socket,socket.clientID);
         SocketManager.removeSocket(socket);
@@ -129,10 +122,8 @@ const server = net.createServer((socket) =>
 
 server.listen(30303,() => 
 {
-    console.log('TCP 서버가 30303번 포트에서 실행 중입니다.')
     logger.info('TCP 서버가 30303번 포트에서 실행 중입니다.');
 }).on('error',(err)=>{
-    console.error('서버 에러 : ',err);
     logger.error('서버 에러 : ', err);
     process.exit(1);
 });
