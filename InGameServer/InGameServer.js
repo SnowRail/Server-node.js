@@ -2,6 +2,7 @@ const net = require('net');
 const Protocol = require('./Protocol');
 const SocketManager = require('./SoketManager');
 const process = require('process');
+const logger = require('./logger');
 
 const {
     FirstConn,
@@ -13,6 +14,7 @@ const {
     ResetServer,
     SendKeyValue,
 } = require('./ProtocolHandler');
+const { log } = require('console');
 
 const idList = [];
 
@@ -27,7 +29,10 @@ const server = net.createServer((socket) =>
     socket.clientID = num;
     socket.syncCount = 0;
     SocketManager.addSocket(socket);
-    
+
+    logger.info('새로운 클라이언트 접속 : ', socket.name);
+    logger.info('클라이언트 ID : ' + socket.clientID);
+
     console.log('새로운 클라이언트 접속 : ', socket.name);
     console.log('클라이언트 ID : ' + socket.clientID);
 
@@ -36,16 +41,23 @@ const server = net.createServer((socket) =>
     let recvData = '';
     socket.on('data',(data)=> 
     {
-        const startTime = process.hrtime();
         recvData += data.toString();
 
         if(recvData.includes('\n'))
         {
             const msg = recvData.split('\n');
-            console.log('msg :  ', msg);
             for(let i = 0; i < msg.length-1; ++i)
             {
-                const jsonData = JSON.parse(msg[i]);
+                let jsonData;
+                try{
+                    jsonData = JSON.parse(msg[i]);
+                }
+                catch(e){
+                    console.error('Json 파싱 에러 :',e);
+                    logger.error('Json 파싱 에러 :', e);
+                    return;
+                }
+
                 const protocol = jsonData.type;
                 
                 switch(protocol){
@@ -85,12 +97,12 @@ const server = net.createServer((socket) =>
                     case Protocol.ResetServer:
                         ResetServer()
                         break;
-    
+                    default:
+                        console.warn('알 수 없는 프로토콜 :', protocol);
+                        logger.warn('알 수 없는 프로토콜 :', protocol);
+                        break;
                 }
             }
-            const endTime = process.hrtime(startTime);
-            const executionTime = endTime[0] * 1e9 + endTime[1];
-            console.log('처리시간 : ', executionTime);
             recvData = '';
             recvData += msg[msg.length-1];
         }
@@ -98,7 +110,8 @@ const server = net.createServer((socket) =>
 
     socket.on('end',() =>
     {
-        console.log('클라이언트 접속 종료 : ', socket.remoteAddress,socket.remotePort);
+        // console.log('클라이언트 접속 종료 : ', socket.remoteAddress,socket.remotePort);
+        logger.info('클라이언트 접속 종료 : ' + socket.remoteAddress + ':' + socket.remotePort);
         SocketManager.removeSocket(socket);
         PlayerDisconnect(socket,socket.clientID);
     });
@@ -106,6 +119,7 @@ const server = net.createServer((socket) =>
     socket.on('error',(err)=>
     {
         console.error('소켓 에러 : ', err);
+        logger.error('소켓 에러 : ', err);
         PlayerDisconnect(socket,socket.clientID);
         SocketManager.removeSocket(socket);
     });
@@ -116,4 +130,9 @@ const server = net.createServer((socket) =>
 server.listen(30303,() => 
 {
     console.log('TCP 서버가 30303번 포트에서 실행 중입니다.')
+    logger.info('TCP 서버가 30303번 포트에서 실행 중입니다.');
+}).on('error',(err)=>{
+    console.error('서버 에러 : ',err);
+    logger.error('서버 에러 : ', err);
+    process.exit(1);
 });
