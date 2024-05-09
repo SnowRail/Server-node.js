@@ -11,28 +11,26 @@ const {
     Signup,
     MatchMaking 
 } = require('./EventHandler');
-const { log } = require('console');
 
 io.on('connection', (socket) => {
-    //console.log('a user connected : ', socket.remoteAddress + ":" + socket.remotePort);
-    logger.info("연결됨 : " + socket.id);
+    logger.info(`새로운 클라이언트 접속 : ${socket.handshake.address}`);
     socket.on('login', (msg) => {
-        logger.info('login : ', msg);
+        logger.info('login : ' + JSON.stringify(msg));
         Login(socket, msg);
     });
 
     socket.on('signup', (msg) => {
-        logger.info('signup : ', msg);
+        logger.info('signup : ', + JSON.stringify(msg));
         Signup(socket, msg);
     });
     
     socket.on('matching', (msg) => {
-        logger.info('matching : ', msg);
+        logger.info('matching : ', + JSON.stringify(msg));
         MatchMaking(msg);
     });
 
     socket.on('disconnect', () => {
-        logger.error('user disconnected : ', socket.remoteAddress + ":" + socket.remotePor);
+        logger.info(`클라이언트 접속 종료 : ${socket.handshake.address}`);
         // TODO 접속한 플레이어 리스트에서 삭제하기
     });
 });
