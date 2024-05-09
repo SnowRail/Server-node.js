@@ -1,6 +1,7 @@
 const net = require('net');
 const Protocol = require('./Protocol');
 const SocketManager = require('./SoketManager');
+const process = require('process');
 
 const {
     FirstConn,
@@ -35,7 +36,7 @@ const server = net.createServer((socket) =>
     let recvData = '';
     socket.on('data',(data)=> 
     {
-        const startTime = Date.now();
+        const startTime = process.hrtime();
         recvData += data.toString();
 
         if(recvData.includes('\n'))
@@ -87,8 +88,9 @@ const server = net.createServer((socket) =>
     
                 }
             }
-            const endTime = Date.now();
-            console.log('처리시간 : ', endTime - startTime);
+            const endTime = process.hrtime(startTime);
+            const executionTime = endTime[0] * 1e9 + endTime[1];
+            console.log('처리시간 : ', executionTime);
             recvData = '';
             recvData += msg[msg.length-1];
         }
