@@ -152,14 +152,7 @@ function SendKeyValue(socket, jsonData){
     const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration, jsonData.rotation, timeStamp);
     const dataBuffer = classToByte(json);
     //broadcastAll(dataBuffer);
-    // TODO : 다시 parsing하지 말고 바로 전송하기
-    const test1 = dataBuffer.subarray(0, intSize);
-    console.log("test1 : ", Buffer.from(test1).readUInt32LE(0));
-    const test2 = dataBuffer.subarray(intSize, dataBuffer.length-1);
-    broadcast(test1, socket);
-    broadcast(test2, socket);
-    
-    //broadcast(dataBuffer, socket);
+    broadcast(dataBuffer, socket);
 }
 
 function ResetServer(){
