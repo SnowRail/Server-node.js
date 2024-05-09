@@ -43,22 +43,60 @@ jobs:
               #   npm run start  
 
             - name: zip file
+              if: github.ref == 'refs/heads/main'
               run: zip -r nodejs-server.zip ./scripts ./appspec.yml ./.env ./package.json ./InGameServer ./Network
             #   run: zip -r nodejs-server.zip ./dist ./scripts ./appspec.yml ./.env ./package.json
 
+            -name: zip file
+              if: github.ref == 'refs/heads/outgame_main'
+              run: zip -r auth-server.zip ./scripts ./appspec-auth.yml ./.env ./package.json ./AuthServer
+
             - name: AWS configure credentials
+              if: github.ref == 'refs/heads/main'
               uses: aws-actions/configure-aws-credentials@v1
               with:
                 aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
                 aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
                 aws-region: ap-northeast-2
 
+            - name: AWS configure credentials
+              if: github.ref == 'refs/heads/outgame_main'
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                aws-access-key-id: ${{ secrets.OUTGAME_AWS_ACCESS_KEY }}
+                aws-secret-access-key: ${{ secrets.OUTGAME_AWS_SECRET_KEY }}
+                aws-region: ap-northeast-2
+
+
             - name: upload to S3
+              if: github.ref == 'refs/heads/main'
               run: aws s3 cp --region ap-northeast-2 ./nodejs-server.zip s3://nodejs-server-build/deploy/
 
+            - name: upload to S3
+              if: github.ref == 'refs/heads/outgame_main'
+              run: aws s3 cp --region ap-northeast-2 ./auth-server.zip s3://nodejs-server-build/outgame/
+
+
             - name: deploy with AWS codeDeploy
+              if: github.ref == 'refs/heads/main'
               run: aws deploy create-deployment
                 --application-name nodejs-server-codedeploy
                 --deployment-config-name CodeDeployDefault.OneAtATime
                 --deployment-group-name nodejs-server-group
                 --s3-location bucket=nodejs-server-build,bundleType=zip,key=deploy/nodejs-server.zip
+
+            - name: deploy with AWS codeDeploy
+              if: github.ref == 'refs/heads/outgame_main'
+              run: aws deploy create-deployment
+                --application-name nodejs-server-codedeploy
+                --deployment-config-name CodeDeployDefault.OneAtATime
+                --deployment-group-name outgame-server-deploy
+                --s3-location bucket=nodejs-server-build,bundleType=zip,key=outgame/auth-server.zip
+
+            - name: Start Server with pm2
+              if: github.ref == 'refs/heads/main'
+              run: pm2 start InGameServer
+
+            - name: Start Server with pm2
+              if: github.ref == 'refs/heads/outgame_main'
+              run: pm2 start AuthServer
