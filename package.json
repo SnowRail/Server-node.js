@@ -16,6 +16,8 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.9.7",
     "socket.io": "^4.7.5",
-    "tunnel-ssh": "^5.1.2"
+    "tunnel-ssh": "^5.1.2",
+    "winston": "^3.13.0",
+    "winston-daily-rotate-file": "^5.0.0"
   }
 }
