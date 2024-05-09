@@ -39,9 +39,8 @@ const server = net.createServer((socket) =>
 
         if(recvData.includes('\n'))
         {
-
             const msg = recvData.split('\n');
-            //console.log('msg :  ', msg);
+            console.log('msg :  ', msg);
             for(let i = 0; i < msg.length-1; ++i)
             {
                 const jsonData = JSON.parse(msg[i]);
