@@ -104,7 +104,7 @@ const server = net.createServer((socket) =>
 
     socket.on('end',() =>
     {
-        logger.info(`클라이언트 접속 종료 : ${socket.handshake.address}`);
+        logger.info(`클라이언트 접속 종료`);
         SocketManager.removeSocket(socket);
         PlayerDisconnect(socket,socket.clientID);
     });
