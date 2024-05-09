@@ -100,6 +100,7 @@ function MatchMaking(msg)
         userList.forEach(element => {
             const user = getPlayer(element);
             user.socket.emit('LoadGameScene', "매칭완료 게임하러 가는 중! 칙칙폭폭!!");
+            // TODO : 대기실 구성을 위한 유저 리스트 정보 전달하기
         });
     }
 }
