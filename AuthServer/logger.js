@@ -9,9 +9,12 @@ const logDir = `${process.cwd()}/logs`;
 
 
 const logFormat = printf(({ level, message, label, timestamp }) => {
-   return `${timestamp} [${label}] ${level}: ${message}`; 
+   return `${timestamp} [${label}] ${level} : ${message}`; 
 });
 
+const logFormatSimple = printf(({level,message})=>{
+    return `${level} : ${message}`;
+})
 
 const logger = winston.createLogger({
    format: combine(
@@ -56,7 +59,7 @@ if (process.env.NODE_ENV !== 'production') {
         new winston.transports.Console({
             format: winston.format.combine(
                 winston.format.colorize(), // 색깔 넣어서 출력
-                winston.format.simple(),
+                logFormatSimple,
             ),
         })
     );
