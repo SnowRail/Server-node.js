@@ -11,7 +11,6 @@ const {
     Signup,
     MatchMaking 
 } = require('./EventHandler');
-const { log } = require('console');
 
 io.on('connection', (socket) => {
     //console.log('a user connected : ', socket.remoteAddress + ":" + socket.remotePort);
@@ -22,12 +21,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on('signup', (msg) => {
-        logger.info('signup : ', msg);
+        logger.info('signup : ', + JSON.stringify(msg));
         Signup(socket, msg);
     });
     
     socket.on('matching', (msg) => {
-        logger.info('matching : ', msg);
+        logger.info('matching : ', + JSON.stringify(msg));
         MatchMaking(msg);
     });
 
