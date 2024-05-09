@@ -65,4 +65,4 @@ jobs:
 
             # pm2를 직접 실행합니다.
             - name: Start Server with pm2
-              run: pm2 start AuthServer
+              run: node AuthServer.js
