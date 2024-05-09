@@ -58,7 +58,7 @@ jobs:
 
             - name: deploy with AWS codeDeploy
               run: aws deploy create-deployment
-                --application-name auth-server-codedeploy
+                --application-name nodejs-server-codedeploy
                 --deployment-config-name CodeDeployDefault.OneAtATime
-                --deployment-group-name auth-server-group
-                --s3-location bucket=auth-server-build,bundleType=zip,key=deploy/auth-server.zip
+                --deployment-group-name outgame-server-deploy
+                --s3-location bucket=nodejs-server-build,bundleType=zip,key=outgame/auth-server.zip
