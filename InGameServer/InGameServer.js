@@ -29,7 +29,7 @@ const server = net.createServer((socket) =>
     socket.syncCount = 0;
     SocketManager.addSocket(socket);
 
-    logger.info(`새로운 클라이언트 접속 : ${socket.handshake.address}`);
+    logger.info(`새로운 클라이언트 접속`);
     logger.info('클라이언트 ID : ' + socket.clientID);
 
     FirstConn(socket, num);
@@ -104,7 +104,7 @@ const server = net.createServer((socket) =>
 
     socket.on('end',() =>
     {
-        logger.info(`클라이언트 접속 종료 : ${socket.handshake.address}`);
+        logger.info(`클라이언트 접속 종료`);
         SocketManager.removeSocket(socket);
         PlayerDisconnect(socket,socket.clientID);
     });
