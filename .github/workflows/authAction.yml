@@ -63,5 +63,6 @@ jobs:
                 --deployment-group-name outgame-server-deploy
                 --s3-location bucket=nodejs-server-build,bundleType=zip,key=outgame/auth-server.zip
 
+            # pm2를 직접 실행합니다.
             - name: Start Server with pm2
               run: pm2 start AuthServer
