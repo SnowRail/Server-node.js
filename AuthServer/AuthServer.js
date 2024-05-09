@@ -17,7 +17,7 @@ io.on('connection', (socket) => {
     //console.log('a user connected : ', socket.remoteAddress + ":" + socket.remotePort);
     logger.info("연결됨 : " + socket.id);
     socket.on('login', (msg) => {
-        logger.info('login : ', msg);
+        logger.info('login : ' + JSON.stringify(msg));
         Login(socket, msg);
     });
 

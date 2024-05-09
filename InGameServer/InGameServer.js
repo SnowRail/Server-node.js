@@ -20,7 +20,6 @@ const idList = [];
 
 const server = net.createServer((socket) =>
 {
-    socket.name = socket.remoteAddress + ":" + socket.remotePort;
     let num = 0;
     do {
         num = Math.floor(Math.random() * (100 - 0 + 1)) + 0;
@@ -30,7 +29,7 @@ const server = net.createServer((socket) =>
     socket.syncCount = 0;
     SocketManager.addSocket(socket);
 
-    logger.info('새로운 클라이언트 접속 : ', socket.name);
+    logger.info('새로운 클라이언트 접속');
     logger.info('클라이언트 ID : ' + socket.clientID);
 
     FirstConn(socket, num);
