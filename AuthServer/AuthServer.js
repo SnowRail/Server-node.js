@@ -13,8 +13,7 @@ const {
 } = require('./EventHandler');
 
 io.on('connection', (socket) => {
-    //console.log('a user connected : ', socket.remoteAddress + ":" + socket.remotePort);
-    logger.info("연결됨 : " + socket.id);
+    logger.info(`연결됨 : ${socket.handshake.address}`);
     socket.on('login', (msg) => {
         logger.info('login : ' + JSON.stringify(msg));
         Login(socket, msg);
