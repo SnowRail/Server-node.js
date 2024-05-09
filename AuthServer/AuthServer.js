@@ -13,7 +13,7 @@ const {
 } = require('./EventHandler');
 
 io.on('connection', (socket) => {
-    logger.info(`연결됨 : ${socket.handshake.address}`);
+    logger.info(`새로운 클라이언트 접속 : ${socket.handshake.address}`);
     socket.on('login', (msg) => {
         logger.info('login : ' + JSON.stringify(msg));
         Login(socket, msg);
@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        logger.error('user disconnected : ', socket.remoteAddress + ":" + socket.remotePor);
+        logger.info(`클라이언트 접속 종료 : ${socket.handshake.address}`);
         // TODO 접속한 플레이어 리스트에서 삭제하기
     });
 });
