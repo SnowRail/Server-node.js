@@ -36,13 +36,11 @@ const server = net.createServer((socket) =>
     let recvData = '';
     socket.on('data',(data)=> 
     {
-        const startTime = process.hrtime();
         recvData += data.toString();
 
         if(recvData.includes('\n'))
         {
             const msg = recvData.split('\n');
-            console.log('msg :  ', msg);
             for(let i = 0; i < msg.length-1; ++i)
             {
                 const jsonData = JSON.parse(msg[i]);
@@ -88,9 +86,6 @@ const server = net.createServer((socket) =>
     
                 }
             }
-            const endTime = process.hrtime(startTime);
-            const executionTime = endTime[0] * 1e9 + endTime[1];
-            console.log('처리시간 : ', executionTime);
             recvData = '';
             recvData += msg[msg.length-1];
         }
