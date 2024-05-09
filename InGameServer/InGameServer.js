@@ -35,7 +35,7 @@ const server = net.createServer((socket) =>
     let recvData = '';
     socket.on('data',(data)=> 
     {
-        const timeStamp = Date.now();
+        const startTime = Date.now();
         recvData += data.toString();
 
         if(recvData.includes('\n'))
@@ -87,7 +87,8 @@ const server = net.createServer((socket) =>
     
                 }
             }
-            console.log('처리시간 : ',timeStamp-Date.now);
+            const endTime = Date.now();
+            console.log('처리시간 : ', endTime - startTime);
             recvData = '';
             recvData += msg[msg.length-1];
         }
