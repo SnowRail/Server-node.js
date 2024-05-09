@@ -56,7 +56,7 @@ if (process.env.NODE_ENV !== 'production') {
         new winston.transports.Console({
             format: winston.format.combine(
                 winston.format.colorize(), // 색깔 넣어서 출력
-                logFormat
+                winston.format.simple(),
             ),
         })
     );
