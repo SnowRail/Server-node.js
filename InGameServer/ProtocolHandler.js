@@ -152,8 +152,8 @@ function SendKeyValue(socket, jsonData){
     const timeStamp = Date.now();
     const json = new KeyPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.acceleration, jsonData.rotation, timeStamp);
     const dataBuffer = classToByte(json);
-    //broadcastAll(dataBuffer);
-    broadcast(dataBuffer, socket);
+    broadcastAll(dataBuffer);
+    //broadcast(dataBuffer, socket);
 }
 
 function ResetServer(){
