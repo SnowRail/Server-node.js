@@ -29,18 +29,25 @@ connection.connect((err) => {
 function Login(socket, msg) {
     const userData = JSON.parse(msg);
 
-    connection.query('SELECT * FROM User WHERE id = ? AND password = ?', [userData.id, userData.password], (err, rows) => {
+    connection.query('SELECT * FROM User WHERE id = ?', [userData.email], (err, rows) => {
         if (err) {
             logger.error('Login query error:', err);
             socket.emit('loginFail', 'login fail');
             return;
         }
 
-        if (rows.length === 0) {
-            socket.emit('loginFail', '존재하지 않는 ID거나 비밀번호가 틀렸습니다');
+        if (rows.length === 0) { // 등록되지 않은 사용자
+            connection.query("INSERT INTO User (id) VALUES (?)", [userData.email], (err) => {
+                if (err) {
+                    logger.error('Signup query error:', err);
+                    socket.emit('signupFail', '회원 등록에 실패했습니다');
+                    return;
+                }
+                socket.emit('loginSucc', `${userData.email}님 로그인에 성공했습니다.`);
+            });
         } else {
             socket.emit('loginSucc', `${rows[0].name}님 로그인에 성공했습니다.`);
-            connectedPlayers.set(userData.id, {socket : socket, room : null});
+            connectedPlayers.set(userData.email, {socket : socket, room : null});
         }
     });
 }
