@@ -39,6 +39,7 @@ io.on('connection', (socket) => {
 
 server.listen(10101, () => {    
     console.log('Example app listening on port 10101!');
+    console.log("배포 테스트 Auth");
 }).on('error', (err) => {
     console.error('Server error : ', err);
 });
