@@ -56,5 +56,4 @@ tcpClient.connect(30304, serverIP, () => {
 
 tcpClient.on('data', (data) => {
     console.log('TCP 서버로부터 온 데이터 : ', data.toString());
-    tcpClient.write('echo : ' + data.toString());
 });
