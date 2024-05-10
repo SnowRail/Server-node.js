@@ -117,13 +117,26 @@ const server = net.createServer((socket) =>
     });
 });
 
-
-
 server.listen(30303,() => 
 {
     console.log('TCP 서버가 30303번 포트에서 실행 중입니다.');
-    console.log('배포 테스트 InGame');
 }).on('error',(err)=>{
     logger.error('서버 에러 : ', err);
+    process.exit(1);
+});
+
+
+
+const outgameServer = net.createServer((socket) => {
+    socket.on('data', (data) => {
+        const msg = data.toString();
+        console.log('outgameServer : ', msg);
+    });
+});
+
+outgameServer.listen(30304, () => {
+    console.log('TCP 서버가 30304번 포트에서 실행 중입니다.');
+}).on('error', (err) => {
+    logger.error('outgameServer 에러 : ', err);
     process.exit(1);
 });
