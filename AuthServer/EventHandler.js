@@ -44,10 +44,10 @@ function setUniqueName(name) {
 function Login(socket, msg) {
     const userData = JSON.parse(msg);
     const loginUser = userData.email;
-    connection.query('SELECT * FROM User WHERE id = ?', [loginUser], (err, rows) => {
+    connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
         if (err) {
             logger.error('Login query error:', err);
-            socket.emit('loginFail', 'login fail');
+            socket.emit('loginFail', 'first login fail');
             return;
         }
         let queryResult;
@@ -57,17 +57,17 @@ function Login(socket, msg) {
                 newName = crypto.randomBytes(8).toString('hex');
             } while (setUniqueName(newName));
 
-            connection.query("INSERT INTO User (id, name) VALUES (?, ?)", [loginUser, newName], (err) => {
+            connection.query("INSERT INTO User (email, name) VALUES (?, ?)", [loginUser, newName], (err) => {
                 if (err) {
                     logger.error('Signup query error:', err);
                     socket.emit('signupFail', '회원 등록에 실패했습니다');
                     return;
                 }
             });
-            connection.query('SELECT * FROM User WHERE id = ?', [loginUser], (err, rows) => {
+            connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
                 if (err) {
                     logger.error('Login query error:', err);
-                    socket.emit('loginFail', 'login fail');
+                    socket.emit('loginFail', 'second login fail');
                     return;
                 }
                 queryResult = rows[0];
@@ -76,7 +76,6 @@ function Login(socket, msg) {
         else {
             queryResult = rows[0];
         }
-        
         socket.emit('inquiryPlayer', JSON.stringify(queryResult));
         connectedPlayers.set(loginUser, {socket : socket, room : null});
     });
@@ -85,7 +84,7 @@ function Login(socket, msg) {
 function Signup(socket, msg) {
     const userData = JSON.parse(msg);
     
-    connection.query('SELECT * FROM User WHERE id = ?', [userData.id], (err, rows) => {
+    connection.query('SELECT * FROM User WHERE email = ?', [userData.email], (err, rows) => {
         if (err) {
             logger.error('Signup query error:', err);
             socket.emit('signupFail', 'signup fail');
@@ -93,7 +92,7 @@ function Signup(socket, msg) {
         }
 
         if (rows.length === 0) {
-            connection.query("INSERT INTO User (id, password, name) VALUES (?, ?, ?)", [userData.id, userData.password, userData.name], (err) => {
+            connection.query("INSERT INTO User (email, password, name) VALUES (?, ?, ?)", [userData.email, userData.password, userData.name], (err) => {
                 if (err) {
                     logger.error('Signup query error:', err);
                     socket.emit('signupFail', '회원가입에 실패했습니다');
