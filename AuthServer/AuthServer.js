@@ -37,7 +37,7 @@ io.on('connection', (socket) => {
 
 
 server.listen(10101, () => {    
-    logger.info('서버가 10101번 포트에서 실행 중입니다.');
+    logger.info('서버가 10101번 포트에서 실행 중입니다. ');
 }).on('error', (err) => {
     logger.error('Server error : ', err);
 });
