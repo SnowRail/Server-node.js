@@ -16,21 +16,19 @@ class LoadGameScenePacket extends Packet {
 }
 
 class KeyPacket extends Packet {
-    constructor(id, pos, vel, acc, rot, timestamp) {
+    constructor(id, acc) {
         super(Protocol.Key, id);
-        this.position = pos;
-        this.velocity = vel;
         this.acceleration = acc;
-        this.rotation = rot;
-        this.timeStamp = timestamp
     }
 }
 
 class SyncPositionPacket extends Packet {
-    constructor(id, playerPos, playerRot) {
-        super(Protocol.GameSync, id);
-        this.position = playerPos;
-        this.rotate = playerRot;
+    constructor(id, pos, vel, rot, timestamp) {
+        super(Protocol.Sync, id);
+        this.position = pos;
+        this.velocity = vel;
+        this.rotation = rot;
+        this.timeStamp = timestamp
     }
 }
 
