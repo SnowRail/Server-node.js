@@ -51,6 +51,7 @@ server.listen(10101, () => {
 
 tcpClient.connect(30304, serverIP, () => {
     console.log('TCP 서버에 연결되었습니다.');
+    tcpClient.write('안녕하세요');
 });
 
 tcpClient.on('data', (data) => {

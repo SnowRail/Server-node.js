@@ -131,6 +131,7 @@ const outgameServer = net.createServer((socket) => {
     socket.on('data', (data) => {
         const msg = data.toString();
         console.log('outgameServer : ', msg);
+        socket.write('반갑습니다');
     });
 });
 
