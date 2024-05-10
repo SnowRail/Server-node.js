@@ -45,7 +45,7 @@ function FirstConn(socket, id){
 
 function UpdatePlayerPos(socket, jsonData)
 {
-    const json = new SyncPositionPacket(jsonData.from, jsonData.position, jsonData.direction);
+    const json = new SyncPositionPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.rotation, jsonData.timeStamp);
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer, socket);
 
@@ -54,7 +54,7 @@ function UpdatePlayerPos(socket, jsonData)
         if(element.clientID == id)
         {
             element.position = jsonData.position;  // break 사용할 수 있도록 변경하면 좋을듯
-            element.rotation = jsonData.direction;
+            element.rotation = jsonData.rotation;
         }
     });
 }

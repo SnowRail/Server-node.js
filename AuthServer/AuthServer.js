@@ -21,7 +21,7 @@ const {
 
 io.on('connection', (socket) => {
     logger.info(`새로운 클라이언트 접속 : ${socket.handshake.address}`);
-    socket.on('login', (msg) => {
+    socket.on('loginSucc', (msg) => { // email 정보
         logger.info('login : ' + JSON.stringify(msg));
         Login(socket, msg);
     });
@@ -31,7 +31,7 @@ io.on('connection', (socket) => {
         Signup(socket, msg);
     });
     
-    socket.on('matching', (msg) => {
+    socket.on('matching', (msg) => { // client의 matching 요청
         logger.info('matching : ', + JSON.stringify(msg));
         MatchMaking(msg);
     });
