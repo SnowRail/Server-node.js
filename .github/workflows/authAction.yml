@@ -1,0 +1,68 @@
+# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+# https://velog.io/@orijoon98/Github-Actions-AWS-CodeDeploy%EB%A5%BC-%ED%99%9C%EC%9A%A9%ED%95%9C-CICD-Node.js1
+name: authAction
+
+on:
+    push:
+        branches: [outgame_main]
+
+jobs:
+    build:
+        runs-on: ubuntu-22.04
+
+        strategy:
+            matrix:
+                node-version: [20.12.2]
+            # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+        steps:
+            - name: Checkout source code.
+              uses: actions/checkout@v2
+
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v2
+              with:
+                node-version: ${{ matrix.node-version }}
+
+            - name: Check Npm -v
+              run: npm -v
+
+            - name: create env file
+              working-directory: ./
+              run: |
+                pwd
+                touch .env
+                echo PORT=${{ secrets.AUTHPORT }} >> .env
+                cat .env
+
+            - name: build server files
+              working-directory: ./
+              run: |
+                npm install -y
+              #   npm run start  
+
+            - name: Rename appspec file
+              run: mv ./appspec-auth.yml ./appspec.yml 
+
+            - name: zip file
+              run: zip -r auth-server.zip ./scripts ./appspec.yml ./.env ./package.json ./AuthServer
+            #   run: zip -r nodejs-server.zip ./dist ./scripts ./appspec.yml ./.env ./package.json
+
+            - name: AWS configure credentials
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                aws-access-key-id: ${{ secrets.OUTGAME_AWS_ACCESS_KEY }}
+                aws-secret-access-key: ${{ secrets.OUTGAME_AWS_SECRET_KEY }}
+                aws-region: ap-northeast-2
+
+            - name: upload to S3
+              run: aws s3 cp --region ap-northeast-2 ./auth-server.zip s3://nodejs-server-build/outgame/
+
+            - name: deploy with AWS codeDeploy
+              run: aws deploy create-deployment
+                --application-name nodejs-server-codedeploy
+                --deployment-config-name CodeDeployDefault.OneAtATime
+                --deployment-group-name outgame-server-deploy
+                --s3-location bucket=nodejs-server-build,bundleType=zip,key=outgame/auth-server.zip
+                #--appspec-file ./appspec-auth.yml

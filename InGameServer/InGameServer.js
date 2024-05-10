@@ -121,7 +121,8 @@ const server = net.createServer((socket) =>
 
 server.listen(30303,() => 
 {
-    logger.info('TCP 서버가 30303번 포트에서 실행 중입니다.');
+    console.log('TCP 서버가 30303번 포트에서 실행 중입니다.');
+    console.log('배포 테스트 InGame');
 }).on('error',(err)=>{
     logger.error('서버 에러 : ', err);
     process.exit(1);
