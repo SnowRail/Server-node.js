@@ -4,6 +4,13 @@ const http = require('http');
 const server = http.createServer(app);
 const {Server} = require("socket.io");
 const io = new Server(server);
+
+const net = require('net');
+const tcpClient = new net.Socket();
+
+const dotenv = require('dotenv');
+dotenv.config({ path: './.env' });
+const serverIP = process.env.SERVER_IP || 'localhost';
 const logger = require('./logger');
 
 const {   
@@ -35,9 +42,18 @@ io.on('connection', (socket) => {
     });
 });
 
-
 server.listen(10101, () => {    
     logger.info('서버가 10101번 포트에서 실행 중입니다. ');
 }).on('error', (err) => {
     logger.error('Server error : ', err);
+});
+
+
+tcpClient.connect(30304, serverIP, () => {
+    console.log('TCP 서버에 연결되었습니다.');
+});
+
+tcpClient.on('data', (data) => {
+    console.log('TCP 서버로부터 온 데이터 : ', data.toString());
+    tcpClient.write('echo : ' + data.toString());
 });
