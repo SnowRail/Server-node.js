@@ -117,28 +117,28 @@ function MatchMaking(msg)
     }
     const firstRoomID = readyRoomList.keys().next().value;
     const userList = readyRoomList.get(firstRoomID);
-    userList.push(userData.id);
+    userList.push(userData.email);
 
-    const player = getPlayer(userData.id);
-    player.socket.join(firstRoomID);
+    const player = getPlayer(userData.email);
+    //player.socket.join(firstRoomID);
 
     player.socket.on('error', (err) => {
         player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
         logger.error('Enter Room Fail!! : ', err);
     });
 
-    player.socket.emit('enterRoomSucc', 'Enter Room Succ!!');
-    logger.info('Enter Room Succ!!');
-    
     if(userList.length === 2)
     {
-        gameRoomList.set(firstRoomID,userList);
+        const sendList = getMatchList(userList);
+        
+        gameRoomList.set(firstRoomID, userList);
         readyRoomList.delete(firstRoomID);
-        userList.forEach(element => {
-            const user = getPlayer(element);
-            user.socket.emit('LoadGameScene', "매칭완료 게임하러 가는 중! 칙칙폭폭!!");
-            // TODO : 대기실 구성을 위한 유저 리스트 정보 전달하기
+
+        userList.forEach(id => {
+            const user = getPlayer(id);
+            user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
         });
+        logger.info('Enter Room Succ!!');
     }
 }
 
@@ -154,6 +154,27 @@ function makeRoomID(){
     return num;
 }
 
+function getMatchList(userList) {
+    userList.forEach(id => {
+        const player = getPlayer(id);
+        connection.query('SELECT * FROM User WHERE email = ?', [id], (err, rows) => {
+            if (err) {
+                logger.error('MatchMaking query error:', err);
+                player.socket.emit('enterRoomFail', 'query error');
+                return;
+            }
+            if (rows.length === 0) {
+                player.socket.emit('enterRoomFail', 'query error');
+                return;
+            }
+            else {
+                const userInfo = new MatchPacket(rows[0].email, rows[0].name, rows[0].curCart);
+                sendList.push(JSON.stringify(userInfo));
+            }
+        });
+    });
+    return sendList;
+}
 
 
 module.exports = {
