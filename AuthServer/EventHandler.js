@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
 const logger = require('./logger');
+const crypto = require('crypto');
 
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -25,30 +26,59 @@ connection.connect((err) => {
     }
 });
 
+function setUniqueName(name) {
+    connection.query('SELECT * FROM User WHERE name = ?', [name], (err, rows) => {
+        if (err) {
+            logger.error('setUniqueName query error:', err);
+            throw err;
+        }
+
+        if (rows.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
+    });
+}
 
 function Login(socket, msg) {
     const userData = JSON.parse(msg);
-
-    connection.query('SELECT * FROM User WHERE id = ?', [userData.email], (err, rows) => {
+    const loginUser = userData.email;
+    connection.query('SELECT * FROM User WHERE id = ?', [loginUser], (err, rows) => {
         if (err) {
             logger.error('Login query error:', err);
             socket.emit('loginFail', 'login fail');
             return;
         }
-
+        let queryResult;
         if (rows.length === 0) { // 등록되지 않은 사용자
-            connection.query("INSERT INTO User (id) VALUES (?)", [userData.email], (err) => {
+            let newName;
+            do {
+                newName = crypto.randomBytes(8).toString('hex');
+            } while (setUniqueName(newName));
+
+            connection.query("INSERT INTO User (id, name) VALUES (?, ?)", [loginUser, newName], (err) => {
                 if (err) {
                     logger.error('Signup query error:', err);
                     socket.emit('signupFail', '회원 등록에 실패했습니다');
                     return;
                 }
-                socket.emit('loginSucc', `${userData.email}님 로그인에 성공했습니다.`);
             });
-        } else {
-            socket.emit('loginSucc', `${rows[0].name}님 로그인에 성공했습니다.`);
-            connectedPlayers.set(userData.email, {socket : socket, room : null});
+            connection.query('SELECT * FROM User WHERE id = ?', [loginUser], (err, rows) => {
+                if (err) {
+                    logger.error('Login query error:', err);
+                    socket.emit('loginFail', 'login fail');
+                    return;
+                }
+                queryResult = rows[0];
+            });
         }
+        else {
+            queryResult = rows[0];
+        }
+        
+        socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+        connectedPlayers.set(loginUser, {socket : socket, room : null});
     });
 }
 
