@@ -11,3 +11,11 @@ class NamePacket extends Packet {
         this.name = name;
     }
 }
+
+class MatchPacket extends Packet {
+    constructor(email, name, curCart) {
+        super(email);
+        this.name = name;
+        this.curCart = curCart;
+    }
+}
