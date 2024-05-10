@@ -128,10 +128,21 @@ server.listen(30303,() =>
 
 
 const outgameServer = net.createServer((socket) => {
+    socket.write('반갑습니다');
+
     socket.on('data', (data) => {
         const msg = data.toString();
         console.log('outgameServer : ', msg);
-        socket.write('반갑습니다');
+    });
+
+    socket.on('end',() =>
+    {
+        logger.info(`outgame 접속 종료`);
+    });
+
+    socket.on('error',(err)=>
+    {
+        logger.error('outgame 에러 : ', err);
     });
 });
 
