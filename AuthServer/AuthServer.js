@@ -4,6 +4,7 @@ const http = require('http');
 const server = http.createServer(app);
 const {Server} = require("socket.io");
 const io = new Server(server);
+const logger = require('./logger');
 
 const {   
     Login, 
@@ -12,34 +13,31 @@ const {
 } = require('./EventHandler');
 
 io.on('connection', (socket) => {
-    //console.log('a user connected : ', socket.remoteAddress + ":" + socket.remotePort);
-    console.log("연결됨 : " + socket.id);
-
+    logger.info(`새로운 클라이언트 접속 : ${socket.handshake.address}`);
     socket.on('login', (msg) => {
-        console.log('login : ', msg);
+        logger.info('login : ' + JSON.stringify(msg));
         Login(socket, msg);
     });
 
     socket.on('signup', (msg) => {
-        console.log('signup : ', msg);
+        logger.info('signup : ', + JSON.stringify(msg));
         Signup(socket, msg);
     });
     
     socket.on('matching', (msg) => {
-        console.log('matching : ', msg);
+        logger.info('matching : ', + JSON.stringify(msg));
         MatchMaking(msg);
     });
 
     socket.on('disconnect', () => {
-        console.error('user disconnected : ', socket.remoteAddress + ":" + socket.remotePort);
+        logger.info(`클라이언트 접속 종료 : ${socket.handshake.address}`);
         // TODO 접속한 플레이어 리스트에서 삭제하기
     });
 });
 
 
 server.listen(10101, () => {    
-    console.log('Example app listening on port 10101!');
-    console.log("배포 테스트 Auth");
+    logger.info('서버가 10101번 포트에서 실행 중입니다.');
 }).on('error', (err) => {
-    console.error('Server error : ', err);
+    logger.error('Server error : ', err);
 });

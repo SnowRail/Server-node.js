@@ -2,6 +2,7 @@ require("socket.io");
 const mysql = require('mysql');
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
+const logger = require('./logger');
 
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -17,10 +18,10 @@ const gameRoomList = new Map();
 
 connection.connect((err) => {
     if (err) {
-        console.error('MySQL connection error:', err);
+        logger.error('MySQL connection error:', err);
         process.exit(1);
     } else {
-        console.log('MySQL connection success');
+        logger.info('MySQL connection success');
     }
 });
 
@@ -30,7 +31,7 @@ function Login(socket, msg) {
 
     connection.query('SELECT * FROM User WHERE id = ? AND password = ?', [userData.id, userData.password], (err, rows) => {
         if (err) {
-            console.error('Login query error:', err);
+            logger.error('Login query error:', err);
             socket.emit('loginFail', 'login fail');
             return;
         }
@@ -49,7 +50,7 @@ function Signup(socket, msg) {
     
     connection.query('SELECT * FROM User WHERE id = ?', [userData.id], (err, rows) => {
         if (err) {
-            console.error('Signup query error:', err);
+            logger.error('Signup query error:', err);
             socket.emit('signupFail', 'signup fail');
             return;
         }
@@ -57,7 +58,7 @@ function Signup(socket, msg) {
         if (rows.length === 0) {
             connection.query("INSERT INTO User (id, password, name) VALUES (?, ?, ?)", [userData.id, userData.password, userData.name], (err) => {
                 if (err) {
-                    console.error('Signup query error:', err);
+                    logger.error('Signup query error:', err);
                     socket.emit('signupFail', '회원가입에 실패했습니다');
                     return;
                 }
@@ -87,11 +88,11 @@ function MatchMaking(msg)
 
     player.socket.on('error', (err) => {
         player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
-        console.error('Enter Room Fail!! : ', err);
+        logger.error('Enter Room Fail!! : ', err);
     });
 
     player.socket.emit('enterRoomSucc', 'Enter Room Succ!!');
-    console.log('Enter Room Succ!!');
+    logger.info('Enter Room Succ!!');
     
     if(userList.length === 2)
     {
