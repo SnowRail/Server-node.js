@@ -46,7 +46,7 @@ jobs:
               run: mv ./appspec-auth.yml ./appspec.yml 
 
             - name: zip file
-              run: zip -r auth-server.zip ./scripts ./appspec-auth.yml ./.env ./package.json ./AuthServer
+              run: zip -r auth-server.zip ./scripts ./appspec.yml ./.env ./package.json ./AuthServer
             #   run: zip -r nodejs-server.zip ./dist ./scripts ./appspec.yml ./.env ./package.json
 
             - name: AWS configure credentials
