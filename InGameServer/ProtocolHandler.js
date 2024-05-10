@@ -11,6 +11,7 @@ const {
     CountDownPacket, 
     LoadGameScenePacket } = require('./Packet');
 const { Vector3 } = require('./UnityClass');
+const logger = require('./logger');
 
 let Goal = false;
 let Start = false;
@@ -98,7 +99,7 @@ function CountDown(protocol, id) {
     const dataBuffer = classToByte(json);
 
     const countDown = setInterval(() => {
-        console.log(count);
+        logger.info(count);
         let buffer;
         if(protocol === Protocol.GameStart)
         {
@@ -112,7 +113,7 @@ function CountDown(protocol, id) {
 
         if (count === 0) {
             clearInterval(countDown);
-            console.log("카운트다운 종료~");
+            logger.info("카운트다운 종료~")
             if(protocol === Protocol.GameStart)
             {
                 broadcastAll(dataBuffer);
@@ -158,7 +159,7 @@ function SendKeyValue(socket, jsonData){
 function ResetServer(){
     Goal = false;
     Start = false;
-    console.log("ResetServer");
+    logger.info("ResetServer");
 }
 
 function broadcast(message, sender) {
@@ -188,7 +189,6 @@ function classToByte(json){
     const jsonBuffer = Buffer.from(jsonString,'utf8');
     const dataBuffer = Buffer.concat([lengthBuffer,jsonBuffer]);
 
-    //console.log("bytedata : ", dataBuffer);
     return dataBuffer;
 }
 
