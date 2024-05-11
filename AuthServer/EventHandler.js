@@ -26,64 +26,49 @@ connection.connect((err) => {
     }
 });
 
-function setUniqueName(name) {
-    connection.query('SELECT * FROM User WHERE name = ?', [name], (err, rows) => {
-        if (err) {
-            logger.error('setUniqueName query error:', err);
-            throw err;
-        }
-
-        if (rows.length === 0) {
-            return false;
-        } else {
-            return true;
-        }
-    });
-}
-
 function Login(socket, msg) {
     const userData = JSON.parse(msg);
     const loginUser = userData.email;
+    const loginID = userData.email.split('@')[0];
+
     connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
         if (err) {
             logger.error('Login query error:', err);
             socket.emit('loginFail', 'first login fail');
             return;
         }
-        else {
-            let queryResult;
-            if (rows.length === 0) { // 등록되지 않은 사용자
-                let newName;
-                do {
-                    newName = crypto.randomBytes(8).toString('hex');
-                } while (setUniqueName(newName));
+        if (rows.length === 0) { // 등록되지 않은 사용자
+            let newName;
+            do {
+                newName = crypto.randomBytes(8).toString('hex');
+            } while (isUniqueName(newName));
 
-                connection.query("INSERT INTO User (email, name) VALUES (?, ?)", [loginUser, newName], (err) => {
+            connection.query("INSERT INTO User (email, id, name) VALUES (?, ?, ?)", [loginUser, loginID, newName], (err) => {
+                if (err) {
+                    logger.error('Signup query error:', err);
+                    socket.emit('signupFail', '회원 등록에 실패했습니다');
+                    return;
+                }
+                connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
                     if (err) {
-                        logger.error('Signup query error:', err);
-                        socket.emit('signupFail', '회원 등록에 실패했습니다');
+                        logger.error('Login query error:', err);
+                        socket.emit('loginFail', 'second login fail');
                         return;
                     }
                     else {
-                        connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, member) => {
-                            if (err) {
-                                logger.error('Login query error:', err);
-                                socket.emit('loginFail', 'second login fail');
-                                return;
-                            }
-                            else {
-                                queryResult = member[0];
-                            }
-                        });
+                        const queryResult = rows[0];
+                        console.log("query : ", queryResult);
+                        socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+                        connectedPlayers.set(loginID, {socket : socket, room : null});
                     }
                 });
-            }
-            else {
-                queryResult = rows[0];
-            }
+            });
+        }
+        else {
+            const queryResult = rows[0];
             console.log("query : ", queryResult);
             socket.emit('inquiryPlayer', JSON.stringify(queryResult));
-            connectedPlayers.set(loginUser, {socket : socket, room : null});
+            connectedPlayers.set(loginID, {socket : socket, room : null});
         }
     });
 }
@@ -114,28 +99,16 @@ function Signup(socket, msg) {
     });
 }
 
-function SetName(socket,msg)
+function SetName(socket, msg) // name change
 {
     const userData = JSON.parse(msg);
-    connection.query('SELECT * FROM User WHERE name = ?', [userData.name], (err, rows) => {
+    connection.query('UPDATE User SET name = ? WHERE id = ?', [userData.name, userData.id], (err) => {
         if (err) {
-            logger.error('setName query error : ', err);
+            logger.error('SetName query error:', err);
             socket.emit('setNameFail', 'setName fail');
             return;
         }
-        if (rows.length === 0) {
-            connection.query("UPDATE User SET name = ? WHERE email = ?", [userData.name, userData.email], (err) => {
-                if (err) {
-                    logger.error('Signup query error:', err);
-                    socket.emit('signupFail', '회원가입에 실패했습니다');
-                    return;
-                }
-
-                socket.emit('signupSucc', '회원가입에 성공했습니다');
-            });
-        } else {
-            socket.emit('signupFail', '이미 존재하는 ID입니다');
-        }
+        socket.emit('setNameSucc', 'setName succ');
     });
 }
 
@@ -149,9 +122,9 @@ function MatchMaking(msg)
     }
     const firstRoomID = readyRoomList.keys().next().value;
     const userList = readyRoomList.get(firstRoomID);
-    userList.push(userData.email);
+    userList.push(userData.id);
 
-    const player = getPlayer(userData.email);
+    const player = getPlayer(userData.id);
     //player.socket.join(firstRoomID);
 
     player.socket.on('error', (err) => {
@@ -178,6 +151,21 @@ function getPlayer(id){
     return connectedPlayers.get(id);
 }
 
+function isUniqueName(name) { // 중복 있으면 true, 없으면 false
+    connection.query('SELECT * FROM User WHERE name = ?', [name], (err, rows) => {
+        if (err) {
+            logger.error('setUniqueName query error:', err);
+            throw err;
+        }
+
+        if (rows.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
+    });
+}
+
 function makeRoomID(){
     let num = 0;
     do {
@@ -189,7 +177,7 @@ function makeRoomID(){
 function getMatchList(userList) {
     userList.forEach(id => {
         const player = getPlayer(id);
-        connection.query('SELECT * FROM User WHERE email = ?', [id], (err, rows) => {
+        connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
             if (err) {
                 logger.error('MatchMaking query error:', err);
                 player.socket.emit('enterRoomFail', 'query error');
@@ -200,7 +188,7 @@ function getMatchList(userList) {
                 return;
             }
             else {
-                const userInfo = new MatchPacket(rows[0].email, rows[0].name, rows[0].curCart);
+                const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
                 sendList.push(JSON.stringify(userInfo));
             }
         });
