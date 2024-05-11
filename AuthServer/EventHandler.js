@@ -63,19 +63,23 @@ function Login(socket, msg) {
                     socket.emit('signupFail', '회원 등록에 실패했습니다');
                     return;
                 }
-            });
-            connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
-                if (err) {
-                    logger.error('Login query error:', err);
-                    socket.emit('loginFail', 'second login fail');
-                    return;
+                else {
+                    connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, member) => {
+                        if (err) {
+                            logger.error('Login query error:', err);
+                            socket.emit('loginFail', 'second login fail');
+                            return;
+                        }
+                        else
+                            queryResult = member[0];
+                    });
                 }
-                queryResult = rows[0];
             });
         }
         else {
             queryResult = rows[0];
         }
+        console.log("query : ", queryResult);
         socket.emit('inquiryPlayer', JSON.stringify(queryResult));
         connectedPlayers.set(loginUser, {socket : socket, room : null});
     });
