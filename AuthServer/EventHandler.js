@@ -198,6 +198,7 @@ function makeRoomID(){
 
 function getMatchList(userList) {
     const keyList = Array.from(userList.keys());
+    const sendList = [];
     keyList.forEach(id => {
         const player = getPlayer(id);
         connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
