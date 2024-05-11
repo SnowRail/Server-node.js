@@ -29,7 +29,9 @@ connection.connect((err) => {
 function Login(socket, msg) {
     const userData = JSON.parse(msg);
     const loginUser = userData.email;
-    const loginID = userData.email.split('@')[0];
+    const emailSplit = userData.email.split('@');
+    const loginID = emailSplit[0];
+    const defaultLogin = emailSplit.length > 1 ? false : true;
 
     connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
         if (err) {
@@ -70,6 +72,9 @@ function Login(socket, msg) {
             console.log("query : ", queryResult);
             socket.emit('inquiryPlayer', JSON.stringify(queryResult));
             connectedPlayers.set(loginID, {socket : socket, room : null});
+        }
+        if (defaultLogin) {
+            socket.emit('loginSucc', 'default login succ');
         }
     });
 }
@@ -119,11 +124,11 @@ function MatchMaking(msg)
     if(readyRoomList.size === 0)
     {
         const roomID = makeRoomID();
-        readyRoomList.set(roomID, {userList : [], readyCount : 0});
+        readyRoomList.set(roomID, {userList : new Map(), readyCount : 0});
     }
     const firstRoomID = readyRoomList.keys().next().value;
     const userList = readyRoomList.get(firstRoomID).userList;
-    userList.push(userData.id);
+    userList.set(userData.id, false);
 
     const player = getPlayer(userData.id);
     //player.socket.join(firstRoomID);
@@ -149,7 +154,6 @@ function ReadyGame(msg) {
     const userData = JSON.parse(msg);
     const roomID = userData.roomID;
     const userList = readyRoomList.get(roomID).userList;
-    
 }
 
 function enterInGame(roomID, userList) {
@@ -189,7 +193,7 @@ function makeRoomID(){
 }
 
 function getMatchList(userList) {
-    userList.forEach(id => {
+    userList.keys().forEach(id => {
         const player = getPlayer(id);
         connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
             if (err) {
