@@ -147,6 +147,17 @@ function MatchMaking(msg)
     }
 }
 
+function ReadyGame(msg) {
+    const userData = JSON.parse(msg);
+    const roomID = userData.roomID;
+    const userList = gameRoomList.get(roomID);
+    userList.forEach(id => {
+        const user = getPlayer(id);
+        user.socket.emit('gameStart', 'Game Start');
+    });
+
+}
+
 function getPlayer(id){
     return connectedPlayers.get(id);
 }
