@@ -146,7 +146,7 @@ function MatchMaking(msg)
     {
         const sendList = getMatchList(userList);
 
-        userList.keys().forEach(id => {
+        sendList.forEach(id => {
             const user = getPlayer(id);
             user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
         });
@@ -197,7 +197,8 @@ function makeRoomID(){
 }
 
 function getMatchList(userList) {
-    userList.keys().forEach(id => {
+    const keyList = Array.from(userList.keys());
+    keyList.forEach(id => {
         const player = getPlayer(id);
         connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
             if (err) {
