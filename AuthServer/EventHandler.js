@@ -146,7 +146,7 @@ function MatchMaking(msg)
     {
         const sendList = getMatchList(userList);
 
-        userList.forEach(id => {
+        userList.keys().forEach(id => {
             const user = getPlayer(id);
             user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
         });
