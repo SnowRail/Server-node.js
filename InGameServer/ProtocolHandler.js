@@ -51,7 +51,7 @@ function UpdatePlayerPos(socket, jsonData)
 
     const userList = NetworkObjectManager.getObjects();
     userList.forEach((element)=>{
-        if(element.clientID == id)
+        if(element.clientID == jsonData.from)
         {
             element.position = jsonData.position;  // break 사용할 수 있도록 변경하면 좋을듯
             element.rotation = jsonData.rotation;
