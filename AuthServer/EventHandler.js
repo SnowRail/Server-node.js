@@ -50,38 +50,36 @@ function Login(socket, msg) {
             socket.emit('loginFail', 'first login fail');
             return;
         }
-        let queryResult;
         if (rows.length === 0) { // 등록되지 않은 사용자
             let newName;
             do {
                 newName = crypto.randomBytes(8).toString('hex');
             } while (setUniqueName(newName));
 
-            connection.query("INSERT INTO User (email, name) VALUES (?, ?)", [loginUser, newName], (err) => {
+            connection.query("INSERT INTO User (email, name) VALUES (?, ?)", [loginUser, newName], (err, result) => {
                 if (err) {
                     logger.error('Signup query error:', err);
                     socket.emit('signupFail', '회원 등록에 실패했습니다');
                     return;
                 }
-                else {
-                    connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, member) => {
-                        if (err) {
-                            logger.error('Login query error:', err);
-                            socket.emit('loginFail', 'second login fail');
-                            return;
-                        }
-                        else
-                            queryResult = member[0];
-                    });
-                }
+                // INSERT 쿼리 실행 후 새로 등록된 사용자의 정보를 가져옵니다.
+                connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
+                    if (err) {
+                        logger.error('Login query error:', err);
+                        socket.emit('loginFail', 'second login fail');
+                        return;
+                    }
+                    const queryResult = rows[0];
+                    socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+                    connectedPlayers.set(loginUser, {socket : socket, room : null});
+                });
             });
         }
         else {
-            queryResult = rows[0];
+            const queryResult = rows[0];
+            socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+            connectedPlayers.set(loginUser, {socket : socket, room : null});
         }
-        console.log("query : ", queryResult);
-        socket.emit('inquiryPlayer', JSON.stringify(queryResult));
-        connectedPlayers.set(loginUser, {socket : socket, room : null});
     });
 }
 
@@ -97,6 +95,31 @@ function Signup(socket, msg) {
 
         if (rows.length === 0) {
             connection.query("INSERT INTO User (email, password, name) VALUES (?, ?, ?)", [userData.email, userData.password, userData.name], (err) => {
+                if (err) {
+                    logger.error('Signup query error:', err);
+                    socket.emit('signupFail', '회원가입에 실패했습니다');
+                    return;
+                }
+
+                socket.emit('signupSucc', '회원가입에 성공했습니다');
+            });
+        } else {
+            socket.emit('signupFail', '이미 존재하는 ID입니다');
+        }
+    });
+}
+
+function SetName(socket,msg)
+{
+    const userData = JSON.parse(msg);
+    connection.query('SELECT * FROM User WHERE name = ?', [userData.name], (err, rows) => {
+        if (err) {
+            logger.error('setName query error : ', err);
+            socket.emit('setNameFail', 'setName fail');
+            return;
+        }
+        if (rows.length === 0) {
+            connection.query("UPDATE User SET name = ? WHERE email = ?", [userData.name, userData.email], (err) => {
                 if (err) {
                     logger.error('Signup query error:', err);
                     socket.emit('signupFail', '회원가입에 실패했습니다');
@@ -184,5 +207,6 @@ function getMatchList(userList) {
 module.exports = {
     Login,
     Signup,
+    SetName,
     MatchMaking
 }

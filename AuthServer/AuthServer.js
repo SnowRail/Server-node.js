@@ -16,6 +16,7 @@ const logger = require('./logger');
 const {   
     Login, 
     Signup,
+    SetName,
     MatchMaking 
 } = require('./EventHandler');
 
@@ -29,6 +30,11 @@ io.on('connection', (socket) => {
     socket.on('signup', (msg) => {
         logger.info('signup : ', + JSON.stringify(msg));
         Signup(socket, msg);
+    });
+
+    socket.on('setName', (msg) => {
+        logger.info('setName : ', + JSON.stringify(msg));
+        SetName(socket, msg);
     });
     
     socket.on('matching', (msg) => { // client의 matching 요청
