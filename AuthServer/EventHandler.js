@@ -50,38 +50,41 @@ function Login(socket, msg) {
             socket.emit('loginFail', 'first login fail');
             return;
         }
-        let queryResult;
-        if (rows.length === 0) { // 등록되지 않은 사용자
-            let newName;
-            do {
-                newName = crypto.randomBytes(8).toString('hex');
-            } while (setUniqueName(newName));
-
-            connection.query("INSERT INTO User (email, name) VALUES (?, ?)", [loginUser, newName], (err) => {
-                if (err) {
-                    logger.error('Signup query error:', err);
-                    socket.emit('signupFail', '회원 등록에 실패했습니다');
-                    return;
-                }
-                else {
-                    connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, member) => {
-                        if (err) {
-                            logger.error('Login query error:', err);
-                            socket.emit('loginFail', 'second login fail');
-                            return;
-                        }
-                        else
-                            queryResult = member[0];
-                    });
-                }
-            });
-        }
         else {
-            queryResult = rows[0];
+            let queryResult;
+            if (rows.length === 0) { // 등록되지 않은 사용자
+                let newName;
+                do {
+                    newName = crypto.randomBytes(8).toString('hex');
+                } while (setUniqueName(newName));
+
+                connection.query("INSERT INTO User (email, name) VALUES (?, ?)", [loginUser, newName], (err) => {
+                    if (err) {
+                        logger.error('Signup query error:', err);
+                        socket.emit('signupFail', '회원 등록에 실패했습니다');
+                        return;
+                    }
+                    else {
+                        connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, member) => {
+                            if (err) {
+                                logger.error('Login query error:', err);
+                                socket.emit('loginFail', 'second login fail');
+                                return;
+                            }
+                            else {
+                                queryResult = member[0];
+                            }
+                        });
+                    }
+                });
+            }
+            else {
+                queryResult = rows[0];
+            }
+            console.log("query : ", queryResult);
+            socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+            connectedPlayers.set(loginUser, {socket : socket, room : null});
         }
-        console.log("query : ", queryResult);
-        socket.emit('inquiryPlayer', JSON.stringify(queryResult));
-        connectedPlayers.set(loginUser, {socket : socket, room : null});
     });
 }
 
