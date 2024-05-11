@@ -22,6 +22,10 @@ const {
 
 io.on('connection', (socket) => {
     logger.info(`새로운 클라이언트 접속 : ${socket.handshake.address}`);
+    socket.on('login', (msg) => { // 일반 login
+        logger.info('login : ' + JSON.stringify(msg));
+        Login(socket, msg);
+    });
     socket.on('loginSucc', (msg) => { // email 정보
         logger.info('login : ' + JSON.stringify(msg));
         Login(socket, msg);
