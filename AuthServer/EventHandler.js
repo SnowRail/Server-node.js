@@ -41,7 +41,7 @@ function Login(socket, msg) {
             let newName;
             do {
                 newName = crypto.randomBytes(8).toString('hex');
-            } while (isUniqueName(newName));
+            } while (!isUniqueName(newName));
 
             connection.query("INSERT INTO User (email, id, name) VALUES (?, ?, ?)", [loginUser, loginID, newName], (err) => {
                 if (err) {
@@ -102,14 +102,21 @@ function Signup(socket, msg) {
 function SetName(socket, msg) // name change
 {
     const userData = JSON.parse(msg);
-    connection.query('UPDATE User SET name = ? WHERE id = ?', [userData.name, userData.id], (err) => {
-        if (err) {
-            logger.error('SetName query error:', err);
-            socket.emit('setNameFail', 'setName fail');
-            return;
-        }
-        socket.emit('setNameSucc', 'setName succ');
-    });
+    if(isUniqueName(msg.id))
+    {
+        connection.query('UPDATE User SET name = ? WHERE id = ?', [userData.name, userData.id], (err) => {
+            if (err) {
+                logger.error('SetName query error:', err);
+                socket.emit('setNameFail', 'setName fail');
+                return;
+            }
+            socket.emit('setNameSucc',"닉네임이 변경되었습니다.");
+        });
+    }
+    else
+    {
+        socket.emit('setNameFail', '중복된 닉네임입니다.')
+    }
 }
 
 function MatchMaking(msg)
@@ -159,9 +166,9 @@ function isUniqueName(name) { // 중복 있으면 true, 없으면 false
         }
 
         if (rows.length === 0) {
-            return false;
-        } else {
             return true;
+        } else {
+            return false;
         }
     });
 }
