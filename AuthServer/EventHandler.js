@@ -114,6 +114,31 @@ function Signup(socket, msg) {
     });
 }
 
+function SetName(socket,msg)
+{
+    const userData = JSON.parse(msg);
+    connection.query('SELECT * FROM User WHERE name = ?', [userData.name], (err, rows) => {
+        if (err) {
+            logger.error('setName query error : ', err);
+            socket.emit('setNameFail', 'setName fail');
+            return;
+        }
+        if (rows.length === 0) {
+            connection.query("UPDATE User SET name = ? WHERE email = ?", [userData.name, userData.email], (err) => {
+                if (err) {
+                    logger.error('Signup query error:', err);
+                    socket.emit('signupFail', '회원가입에 실패했습니다');
+                    return;
+                }
+
+                socket.emit('signupSucc', '회원가입에 성공했습니다');
+            });
+        } else {
+            socket.emit('signupFail', '이미 존재하는 ID입니다');
+        }
+    });
+}
+
 function MatchMaking(msg)
 {
     const userData = JSON.parse(msg);
@@ -187,5 +212,6 @@ function getMatchList(userList) {
 module.exports = {
     Login,
     Signup,
+    SetName,
     MatchMaking
 }
