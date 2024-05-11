@@ -59,6 +59,7 @@ function Login(socket, msg) {
                         const queryResult = rows[0];
                         console.log("query : ", queryResult);
                         socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+                        socket.id = loginID;
                         connectedPlayers.set(loginID, {socket : socket, room : null});
                     }
                 });
@@ -118,10 +119,10 @@ function MatchMaking(msg)
     if(readyRoomList.size === 0)
     {
         const roomID = makeRoomID();
-        readyRoomList.set(roomID, []);
+        readyRoomList.set(roomID, {userList : [], readyCount : 0});
     }
     const firstRoomID = readyRoomList.keys().next().value;
-    const userList = readyRoomList.get(firstRoomID);
+    const userList = readyRoomList.get(firstRoomID).userList;
     userList.push(userData.id);
 
     const player = getPlayer(userData.id);
@@ -135,9 +136,6 @@ function MatchMaking(msg)
     if(userList.length === 2)
     {
         const sendList = getMatchList(userList);
-        
-        gameRoomList.set(firstRoomID, userList);
-        readyRoomList.delete(firstRoomID);
 
         userList.forEach(id => {
             const user = getPlayer(id);
@@ -150,12 +148,17 @@ function MatchMaking(msg)
 function ReadyGame(msg) {
     const userData = JSON.parse(msg);
     const roomID = userData.roomID;
-    const userList = gameRoomList.get(roomID);
+    const userList = readyRoomList.get(roomID).userList;
+    
+}
+
+function enterInGame(roomID, userList) {
+    gameRoomList.set(roomID, userList);
+    readyRoomList.delete(roomID);
     userList.forEach(id => {
         const user = getPlayer(id);
-        user.socket.emit('gameStart', 'Game Start');
+        user.socket.emit('enterInGame', 'Enter InGame');
     });
-
 }
 
 function getPlayer(id){
@@ -207,10 +210,15 @@ function getMatchList(userList) {
     return sendList;
 }
 
+function Disconnect(socket) {
+    connectedPlayers.delete(socket.id);
+}
 
 module.exports = {
     Login,
     Signup,
     SetName,
-    MatchMaking
+    MatchMaking,
+    ReadyGame,
+    Disconnect
 }
