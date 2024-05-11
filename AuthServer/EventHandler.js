@@ -142,7 +142,7 @@ function MatchMaking(msg)
         logger.error('Enter Room Fail!! : ', err);
     });
 
-    if(userList.length === 2)
+    if(userList.size === 2)
     {
         const sendList = getMatchList(userList);
 
