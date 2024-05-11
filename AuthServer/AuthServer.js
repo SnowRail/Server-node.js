@@ -17,7 +17,9 @@ const {
     Login, 
     Signup,
     SetName,
-    MatchMaking 
+    MatchMaking,
+    ReadyGame,
+    Disconnect 
 } = require('./EventHandler');
 
 io.on('connection', (socket) => {
@@ -30,25 +32,31 @@ io.on('connection', (socket) => {
         logger.info('login : ' + JSON.stringify(msg));
         Login(socket, msg);
     });
-
+    
     socket.on('signup', (msg) => {
-        logger.info('signup : ', + JSON.stringify(msg));
+        logger.info('signup : ' + JSON.stringify(msg));
         Signup(socket, msg);
     });
 
     socket.on('setName', (msg) => {
-        logger.info('setName : ', + JSON.stringify(msg));
+        logger.info('setName : ' + JSON.stringify(msg));
         SetName(socket, msg);
     });
     
     socket.on('matching', (msg) => { // client의 matching 요청
-        logger.info('matching : ', + JSON.stringify(msg));
+        logger.info('matching : ' + JSON.stringify(msg));
         MatchMaking(msg);
+    });
+
+    socket.on('readyGame', (msg) => {
+        logger.info('beforeStart : ' + JSON.stringify(msg));
+        ReadyGame(msg);
     });
 
     socket.on('disconnect', () => {
         logger.info(`클라이언트 접속 종료 : ${socket.handshake.address}`);
         // TODO 접속한 플레이어 리스트에서 삭제하기
+        Disconnect(socket);
     });
 });
 

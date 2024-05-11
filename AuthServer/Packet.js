@@ -19,3 +19,9 @@ class MatchPacket extends Packet {
         this.curCart = curCart;
     }
 }
+
+
+module.exports = {
+    NamePacket,
+    MatchPacket
+}
