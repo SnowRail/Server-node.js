@@ -13,6 +13,10 @@ const connection = mysql.createConnection({
     database: process.env.DB_NAME
 });
 
+const {
+    MatchPacket
+} = require('./Packet');
+
 const connectedPlayers = new Map();
 const readyRoomList = new Map();
 const gameRoomList = new Map();
