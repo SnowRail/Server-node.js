@@ -142,9 +142,15 @@ function MatchMaking(msg)
         const roomID = makeRoomID();
         readyRoomList.set(roomID, {userList : new Map(), readyCount : 0});
     }
-    const firstRoomID = readyRoomList.keys().next().value;
-    const userList = readyRoomList.get(firstRoomID).userList;
-    userList.set(userData.id, false);
+    //const firstRoomID = readyRoomList.keys().next().value;
+    let firstRoomID;
+    for (const roomid of readyRoomList.keys()) {
+        firstRoomID = roomid;
+        break;
+    }
+    const matchList = readyRoomList.get(firstRoomID).userList;
+    matchList.set(userData.id, false);
+    console.log('matchList : ', matchList);
     
     const player = getPlayer(userData.id);
     //player.socket.join(firstRoomID);
@@ -154,10 +160,10 @@ function MatchMaking(msg)
         logger.error('Enter Room Fail!! : ', err);
     });
 
-    if(userList.size === 2)
+    if(matchList.size === 2)
     {
-        logger.info('userList : ', userList);
-        const sendList = getMatchList(userList);
+        logger.info('userList : ', matchList);
+        const sendList = getMatchList(matchList);
 
         sendList.forEach(id => {
             const user = getPlayer(id);
@@ -213,7 +219,7 @@ async function getMatchList(userList) {
     const keyList = Array.from(userList.keys());
     const sendList = [];
     logger.info('keyList : ', keyList);
-    await Promist.all(keyList.map(id => {
+    await Promise.all(keyList.map(id => {
         return new Promise((resolve, reject) => {
             const player = getPlayer(id);
             connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
