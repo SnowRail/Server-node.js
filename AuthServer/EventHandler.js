@@ -19,6 +19,7 @@ const {
 const { log } = require("console");
 
 const connectedPlayers = new Map();
+const matchRoomList = new Map();
 const readyRoomList = new Map();
 const gameRoomList = new Map();
 
@@ -134,19 +135,19 @@ function SetName(socket, msg) // name change
 function MatchMaking(msg)
 {
     const userData = JSON.parse(msg);
-    if(readyRoomList.size === 0)
+    if(matchRoomList.size === 0)
     {
         const roomID = makeRoomID();
-        readyRoomList.set(roomID, {userList : new Map(), readyCount : 0});
+        matchRoomList.set(roomID, []);
     }
-    //const firstRoomID = readyRoomList.keys().next().value;
+    //const firstRoomID = matchRoomList.keys().next().value;
     let firstRoomID;
-    for (const roomid of readyRoomList.keys()) {
+    for (const roomid of matchRoomList.keys()) {
         firstRoomID = roomid;
         break;
     }
-    const matchList = readyRoomList.get(firstRoomID).userList;
-    matchList.set(userData.id, false);
+    const matchList = matchRoomList.get(firstRoomID);
+    matchList.push(userData.id);
     
     const player = getPlayer(userData.id);
     //player.socket.join(firstRoomID);
@@ -167,7 +168,11 @@ function MatchMaking(msg)
                 user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
             });
             logger.info('Enter Room Succ!!');
+
+            readyRoomList.set(firstRoomID, {userList : matchList, readyCount : 0});
+            matchRoomList.delete(firstRoomID);
         });
+
     }
 }
 
@@ -213,10 +218,10 @@ function makeRoomID(){
 }
 
 function getMatchList(userList) {
-    const keyList = Array.from(userList.keys());
-    const sendList = []; 
+    //const keyList = Array.from(userList.keys());
+    //const sendList = []; 
 
-    const promises = keyList.map(id => {
+    const promises = userList.map(id => {
         return new Promise((resolve, reject) => {
             const player = getPlayer(id);
             connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
