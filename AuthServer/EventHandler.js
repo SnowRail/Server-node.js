@@ -110,30 +110,37 @@ function Signup(socket, msg) {
     });
 }
 
-function SetName(socket, msg) // name change
+async function SetName(socket, msg) // name change
 {
     const userData = JSON.parse(msg);
-    logger.info(userData.name);
-    if(isUniqueName(userData.name))
+    try
     {
-        connection.query('UPDATE User SET name = ? WHERE id = ?', [userData.name, userData.id], (err) => {
-            if (err) {
-                logger.error('SetName query error:', err);
-                socket.emit('setNameFail', 'setName fail');
-                return;
-            }
-            socket.emit('setNameSucc', {
-                message: "닉네임이 변경되었습니다.",
-                name: userData.name
+        const isUnique = await isUniqueName(userData.name);
+
+        if(isUnique)
+        {
+            connection.query('UPDATE User SET name = ? WHERE id = ?', [userData.name, userData.id], (err) => {
+                if (err) {
+                    logger.error('SetName query error:', err);
+                    socket.emit('setNameFail', 'setName fail');
+                    return;
+                }
+                socket.emit('setNameSucc', {
+                    message: "닉네임이 변경되었습니다.",
+                    name: userData.name
+                });
             });
-        });
+        }
+        else
+        {
+            socket.emit('setNameFail', '중복된 닉네임입니다.')
+        }
     }
-    else
+    catch(err)
     {
-        socket.emit('setNameFail', '중복된 닉네임입니다.')
+        logger.error('Error checking unique name:', err)
     }
 }
-
 function MatchMaking(msg)
 {
     const userData = JSON.parse(msg);
@@ -185,22 +192,19 @@ function getPlayer(id){
     return connectedPlayers.get(id);
 }
 
-function isUniqueName(name) { // 중복 없으면 true, 있으면 false
-    connection.query('SELECT * FROM User WHERE name = ?', [name], (err, rows) => {
-        if (err) {
-            logger.error('setUniqueName query error:', err);
-            
-        }
-        logger.info("rowsssss : ",rows);
-        logger.info("rowsssss len : ",rows.length);
-        if (rows.length === 0) {
-            return true;
-        } else {
-            return false;
-        }
-    });
-}
+async function isUniqueName(name) {
+    try {
+        const [rows] = await connection.promise().query('SELECT * FROM User WHERE name = ?', [name]);
 
+        logger.info("rowsssss : ", rows);
+        logger.info("rowsssss len : ", rows.length);
+
+        return rows.length === 0;
+    } catch (err) {
+        logger.error('setUniqueName query error:', err);
+        throw err;
+    }
+}
 function makeRoomID(){
     let num = 0;
     do {
