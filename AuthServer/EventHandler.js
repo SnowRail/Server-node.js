@@ -162,6 +162,7 @@ function MatchMaking(msg)
         const matchPromise = getMatchList(matchList);
         matchPromise.then(sendList => {
             sendList.forEach(element => {
+                console.log("sendList : ", sendList);
                 console.log('element id: ', element.id);
                 const user = getPlayer(element.id);
                 console.log('user : ', user);
@@ -192,7 +193,6 @@ function enterInGame(roomID, userList) {
 }
 
 function getPlayer(id){
-    console.log("connectedPlayers : ", connectedPlayers.get(id));
     return connectedPlayers.get(id);
 }
 
@@ -237,7 +237,7 @@ function getMatchList(userList) {
                 }
                 else {
                     const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
-                    resolve(JSON.stringify(userInfo));
+                    resolve(userInfo);
                 }
             });
         });
