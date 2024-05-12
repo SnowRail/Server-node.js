@@ -243,9 +243,10 @@ async function getMatchList(userList) {
                 }
             });
         });
-    }));
-    console.log('sendList : ', sendList);
-    return sendList;
+    })).then(() => {
+        console.log('sendList : ', sendList);
+        return sendList;
+    });
 }
 
 function Disconnect(socket) {
