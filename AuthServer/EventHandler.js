@@ -159,12 +159,13 @@ function MatchMaking(msg)
 
     if(matchList.length === 2)
     {
-        console.log('userList : ', matchList);
         const matchPromise = getMatchList(matchList);
         matchPromise.then(sendList => {
             console.log('sendList : ', sendList);
             sendList.forEach(element => {
+                console.log('element : ', element);
                 const user = getPlayer(element.id);
+                console.log('user : ', user);
                 user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
             });
             logger.info('Enter Room Succ!!');
@@ -192,6 +193,7 @@ function enterInGame(roomID, userList) {
 }
 
 function getPlayer(id){
+    console.log("connectedPlayers : ", connectedPlayers);
     return connectedPlayers.get(id);
 }
 
@@ -247,7 +249,6 @@ function getMatchList(userList) {
     });
 
     return Promise.all(promises).then(sendList => {
-        console.log('sendList : ', sendList);
         return sendList;
     });
 }
