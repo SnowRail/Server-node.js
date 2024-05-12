@@ -149,8 +149,8 @@ function MatchMaking(msg)
     const matchList = matchRoomList.get(firstRoomID);
     matchList.push(userData.id);
     
+    console.log("player id : ", userData.id);
     const player = getPlayer(userData.id);
-    //player.socket.join(firstRoomID);
 
     player.socket.on('error', (err) => {
         player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
@@ -161,9 +161,8 @@ function MatchMaking(msg)
     {
         const matchPromise = getMatchList(matchList);
         matchPromise.then(sendList => {
-            console.log('sendList : ', sendList);
             sendList.forEach(element => {
-                console.log('element : ', element);
+                console.log('element id: ', element.id);
                 const user = getPlayer(element.id);
                 console.log('user : ', user);
                 user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
@@ -193,7 +192,7 @@ function enterInGame(roomID, userList) {
 }
 
 function getPlayer(id){
-    console.log("connectedPlayers : ", connectedPlayers);
+    console.log("connectedPlayers : ", connectedPlayers.get(id));
     return connectedPlayers.get(id);
 }
 
@@ -229,19 +228,15 @@ function getMatchList(userList) {
             connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
                 if (err) {
                     logger.error('MatchMaking query error:', err);
-                    console.log('query error');
                     player.socket.emit('enterRoomFail', 'query error');
                     reject(err);
                 }
                 if (rows.length === 0) {
-                    console.log('뭐가 없음');
                     player.socket.emit('enterRoomFail', 'query error');
                     resolve();
                 }
                 else {
                     const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
-                    //sendList.push(JSON.stringify(userInfo));
-                    console.log('push 완료');
                     resolve(JSON.stringify(userInfo));
                 }
             });
