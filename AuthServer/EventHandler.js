@@ -184,17 +184,18 @@ function getPlayer(id){
     return connectedPlayers.get(id);
 }
 
-function isUniqueName(name) { // 중복 있으면 true, 없으면 false
+function isUniqueName(name, callback) {
     connection.query('SELECT * FROM User WHERE name = ?', [name], (err, rows) => {
         if (err) {
             logger.error('setUniqueName query error:', err);
-            throw err;
+            callback(err, null);
+            return;
         }
 
         if (rows.length === 0) {
-            return true;
+            callback(null, true);
         } else {
-            return false;
+            callback(null, false);
         }
     });
 }
