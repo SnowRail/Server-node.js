@@ -139,10 +139,15 @@ function MatchMaking(msg)
         const roomID = makeRoomID();
         readyRoomList.set(roomID, {userList : new Map(), readyCount : 0});
     }
-    const firstRoomID = readyRoomList.keys().next().value;
-    const userList = readyRoomList.get(firstRoomID).userList;
-    userList.set(userData.id, false);
-
+    //const firstRoomID = readyRoomList.keys().next().value;
+    let firstRoomID;
+    for (const roomid of readyRoomList.keys()) {
+        firstRoomID = roomid;
+        break;
+    }
+    const matchList = readyRoomList.get(firstRoomID).userList;
+    matchList.set(userData.id, false);
+    
     const player = getPlayer(userData.id);
     //player.socket.join(firstRoomID);
 
@@ -151,10 +156,11 @@ function MatchMaking(msg)
         logger.error('Enter Room Fail!! : ', err);
     });
 
-    if(userList.size === 2)
+    if(matchList.size === 2)
     {
-        const sendList = getMatchList(userList);
-
+        console.log('userList : ', matchList);
+        const sendList = getMatchList(matchList);
+        console.log('sendList : ', sendList);
         sendList.forEach(id => {
             const user = getPlayer(id);
             user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
@@ -204,28 +210,39 @@ function makeRoomID(){
     return num;
 }
 
-function getMatchList(userList) {
+async function getMatchList(userList) {
     const keyList = Array.from(userList.keys());
     const sendList = [];
-    keyList.forEach(id => {
-        const player = getPlayer(id);
-        connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
-            if (err) {
-                logger.error('MatchMaking query error:', err);
-                player.socket.emit('enterRoomFail', 'query error');
-                return;
-            }
-            if (rows.length === 0) {
-                player.socket.emit('enterRoomFail', 'query error');
-                return;
-            }
-            else {
-                const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
-                sendList.push(JSON.stringify(userInfo));
-            }
+
+    await Promise.all(keyList.map(id => {
+        return new Promise((resolve, reject) => {
+            const player = getPlayer(id);
+            connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
+                if (err) {
+                    logger.error('MatchMaking query error:', err);
+                    console.log('query error');
+                    player.socket.emit('enterRoomFail', 'query error');
+                    reject(err);
+                    return;
+                }
+                if (rows.length === 0) {
+                    console.log('뭐가 없음');
+                    player.socket.emit('enterRoomFail', 'query error');
+                    resolve();
+                    return;
+                }
+                else {
+                    const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
+                    sendList.push(JSON.stringify(userInfo));
+                    console.log('push 완료');
+                    resolve();
+                }
+            });
         });
+    })).then(() => {
+        console.log('sendList : ', sendList);
+        return sendList;
     });
-    return sendList;
 }
 
 function Disconnect(socket) {
