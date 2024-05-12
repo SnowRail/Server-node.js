@@ -122,10 +122,7 @@ function SetName(socket, msg) // name change
                 socket.emit('setNameFail', 'setName fail');
                 return;
             }
-            socket.emit('setNameSucc', {
-                message: "닉네임이 변경되었습니다.",
-                name: userData.name
-            });
+            socket.emit('setNameSucc', "닉네임이 변경되었습니다.");
         });
     }
     else
@@ -191,8 +188,6 @@ async function isUniqueName(name) { // 중복 없으면 true, 있으면 false
             logger.error('setUniqueName query error:', err);
             
         }
-        logger.info("rowsssss : ",rows);
-        logger.info("rowsssss : ",rows);
         if (rows.length === 0) {
             return true;
         } else {
