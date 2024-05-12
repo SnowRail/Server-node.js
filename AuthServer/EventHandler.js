@@ -68,7 +68,7 @@ function Login(socket, msg) {
                         console.log("query : ", queryResult);
                         socket.emit('inquiryPlayer', JSON.stringify(queryResult));
                         socket.id = loginID;
-                        connectedPlayers.set(loginID, {socket : socket, room : null});
+                        connectedPlayers.set(loginID, {socket : socket, room : null, state : 'lobby'});
                     }
                 });
             });
@@ -149,24 +149,22 @@ function MatchMaking(msg)
     const matchList = matchRoomList.get(firstRoomID);
     matchList.push(userData.id);
     
-    console.log("player id : ", userData.id);
     const player = getPlayer(userData.id);
-
     player.socket.on('error', (err) => {
         player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
         logger.error('Enter Room Fail!! : ', err);
     });
+    player.room = firstRoomID;
+    player.state = 'matching';
 
     if(matchList.length === 2)
     {
         const matchPromise = getMatchList(matchList);
         matchPromise.then(sendList => {
             sendList.forEach(element => {
-                console.log("sendList : ", sendList);
-                console.log('element id: ', element.id);
                 const user = getPlayer(element.id);
-                console.log('user : ', user);
-                user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
+                user.socket.emit('enterRoomSucc', JSON.stringify(sendList));  
+                user.state = 'ready';      
             });
             logger.info('Enter Room Succ!!');
 
@@ -189,6 +187,7 @@ function enterInGame(roomID, userList) {
     userList.forEach(id => {
         const user = getPlayer(id);
         user.socket.emit('enterInGame', 'Enter InGame');
+        user.state = 'ingame';
     });
 }
 
@@ -249,6 +248,29 @@ function getMatchList(userList) {
 }
 
 function Disconnect(socket) {
+    const disconnectPlayer = connectedPlayers.get(socket.id);
+    switch(disconnectPlayer.state){
+        case 'lobby':
+            break;
+        case 'matching':
+            const matchList = matchRoomList.get(disconnectPlayer.room);
+            matchList.splice(matchList.indexOf(socket.id), 1);
+            if(matchList.length === 0)
+            {
+                matchRoomList.delete(disconnectPlayer.room);
+            }
+            break;
+        case 'ready':
+            const readyList = readyRoomList.get(disconnectPlayer.room);
+            readyList.userList.splice(readyList.userList.indexOf(socket.id), 1);
+            if(readyList.userList.length === 0)
+            {
+                readyRoomList.delete(disconnectPlayer.room);
+            }
+            break;
+        case 'ingame':
+            break;
+    }
     connectedPlayers.delete(socket.id);
 }
 
