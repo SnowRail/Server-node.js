@@ -12,8 +12,8 @@ const logFormat = printf(({ level, message, label, timestamp }) => {
    return `${timestamp} [${label}] ${level} : ${message}`; 
 });
 
-const logFormatSimple = printf(({level,message})=>{
-    return `${level} : ${message}`;
+const logFormatSimple = printf(({level,message, timestamp})=>{
+    return `${timestamp} [${level}] : ${message}`;
 })
 
 const logger = winston.createLogger({

@@ -16,6 +16,7 @@ const connection = mysql.createConnection({
 const {
     MatchPacket
 } = require('./Packet');
+const { log } = require("console");
 
 const connectedPlayers = new Map();
 const readyRoomList = new Map();
@@ -47,7 +48,7 @@ function Login(socket, msg) {
             let newName;
             do {
                 newName = crypto.randomBytes(8).toString('hex');
-            } while (isUniqueName(newName));
+            } while (!isUniqueName(newName));
 
             connection.query("INSERT INTO User (email, id, name) VALUES (?, ?, ?)", [loginUser, loginID, newName], (err) => {
                 if (err) {
@@ -112,14 +113,25 @@ function Signup(socket, msg) {
 function SetName(socket, msg) // name change
 {
     const userData = JSON.parse(msg);
-    connection.query('UPDATE User SET name = ? WHERE id = ?', [userData.name, userData.id], (err) => {
-        if (err) {
-            logger.error('SetName query error:', err);
-            socket.emit('setNameFail', 'setName fail');
-            return;
-        }
-        socket.emit('setNameSucc', 'setName succ');
-    });
+    logger.info(userData.name);
+    if(isUniqueName(userData.name))
+    {
+        connection.query('UPDATE User SET name = ? WHERE id = ?', [userData.name, userData.id], (err) => {
+            if (err) {
+                logger.error('SetName query error:', err);
+                socket.emit('setNameFail', 'setName fail');
+                return;
+            }
+            socket.emit('setNameSucc', {
+                message: "닉네임이 변경되었습니다.",
+                name: userData.name
+            });
+        });
+    }
+    else
+    {
+        socket.emit('setNameFail', '중복된 닉네임입니다.')
+    }
 }
 
 function MatchMaking(msg)
@@ -174,17 +186,17 @@ function getPlayer(id){
     return connectedPlayers.get(id);
 }
 
-function isUniqueName(name) { // 중복 ?��?���? true, ?��?���? false
-    connection.query('SELECT * FROM User WHERE name = ?', [name], (err, rows) => {
+async function isUniqueName(name) { // 중복 없으면 true, 있으면 false
+    await connection.query('SELECT * FROM User WHERE name = ?', [name], (err, rows) => {
         if (err) {
             logger.error('setUniqueName query error:', err);
-            throw err;
+            
         }
-
+        logger.info("rowsssss : ",rows);
         if (rows.length === 0) {
-            return false;
-        } else {
             return true;
+        } else {
+            return false;
         }
     });
 }
