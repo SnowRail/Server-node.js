@@ -120,7 +120,10 @@ function SetName(socket, msg) // name change
                 socket.emit('setNameFail', 'setName fail');
                 return;
             }
-            socket.emit('setNameSucc',"닉네임이 변경되었습니다.");
+            socket.emit('setNameSucc', {
+                message: "닉네임이 변경되었습니다.",
+                name: userData.name
+            });
         });
     }
     else
