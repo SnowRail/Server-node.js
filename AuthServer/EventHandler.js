@@ -214,11 +214,11 @@ function makeRoomID(){
     return num;
 }
 
-async function getMatchList(userList) {
+function getMatchList(userList) {
     const keyList = Array.from(userList.keys());
-    const sendList = [];
+    const sendList = []; 
 
-    await Promise.all(keyList.map(id => {
+    const promises = keyList.map(id => {
         return new Promise((resolve, reject) => {
             const player = getPlayer(id);
             connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
@@ -243,7 +243,9 @@ async function getMatchList(userList) {
                 }
             });
         });
-    })).then(() => {
+    });
+
+    return Promise.all(promises).then(() => {
         console.log('sendList : ', sendList);
         return sendList;
     });
