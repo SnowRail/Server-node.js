@@ -157,14 +157,14 @@ function MatchMaking(msg)
         logger.error('Enter Room Fail!! : ', err);
     });
 
-    if(matchList.size === 2)
+    if(matchList.length === 2)
     {
         console.log('userList : ', matchList);
         const matchPromise = getMatchList(matchList);
         matchPromise.then(sendList => {
             console.log('sendList : ', sendList);
-            sendList.forEach(id => {
-                const user = getPlayer(id);
+            sendList.forEach(element => {
+                const user = getPlayer(element.id);
                 user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
             });
             logger.info('Enter Room Succ!!');
@@ -192,7 +192,7 @@ function enterInGame(roomID, userList) {
 }
 
 function getPlayer(id){
-    return connectedPlayers.get(id);
+    return connectedPlayers.get(id).socket;
 }
 
 async function isUniqueName(name) { // 중복 없으면 true, 있으면 false
