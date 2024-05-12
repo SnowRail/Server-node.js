@@ -159,13 +159,15 @@ function MatchMaking(msg)
     if(matchList.size === 2)
     {
         console.log('userList : ', matchList);
-        const sendList = getMatchList(matchList);
-        console.log('sendList : ', sendList);
-        sendList.forEach(id => {
-            const user = getPlayer(id);
-            user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
+        const matchPromise = getMatchList(matchList);
+        matchPromise.then(sendList => {
+            console.log('sendList : ', sendList);
+            sendList.forEach(id => {
+                const user = getPlayer(id);
+                user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
+            });
+            logger.info('Enter Room Succ!!');
         });
-        logger.info('Enter Room Succ!!');
     }
 }
 
@@ -223,13 +225,11 @@ function getMatchList(userList) {
                     console.log('query error');
                     player.socket.emit('enterRoomFail', 'query error');
                     reject(err);
-                    return;
                 }
                 if (rows.length === 0) {
                     console.log('뭐가 없음');
                     player.socket.emit('enterRoomFail', 'query error');
                     resolve();
-                    return;
                 }
                 else {
                     const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
