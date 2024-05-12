@@ -16,6 +16,7 @@ const connection = mysql.createConnection({
 const {
     MatchPacket
 } = require('./Packet');
+const { log } = require("console");
 
 const connectedPlayers = new Map();
 const readyRoomList = new Map();
@@ -184,18 +185,18 @@ function getPlayer(id){
     return connectedPlayers.get(id);
 }
 
-function isUniqueName(name, callback) {
+function isUniqueName(name) { // 중복 없으면 true, 있으면 false
     connection.query('SELECT * FROM User WHERE name = ?', [name], (err, rows) => {
         if (err) {
             logger.error('setUniqueName query error:', err);
-            callback(err, null);
-            return;
+            
         }
-
+        logger.info("rowsssss : ",rows);
+        logger.info("rowsssss len : ",rows.length);
         if (rows.length === 0) {
-            callback(null, true);
+            return true;
         } else {
-            callback(null, false);
+            return false;
         }
     });
 }
