@@ -192,7 +192,7 @@ function enterInGame(roomID, userList) {
 }
 
 function getPlayer(id){
-    return connectedPlayers.get(id).socket;
+    return connectedPlayers.get(id);
 }
 
 async function isUniqueName(name) { // 중복 없으면 true, 있으면 false
