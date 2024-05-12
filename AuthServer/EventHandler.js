@@ -150,7 +150,6 @@ function MatchMaking(msg)
     }
     const matchList = readyRoomList.get(firstRoomID).userList;
     matchList.set(userData.id, false);
-    console.log('matchList : ', matchList);
     
     const player = getPlayer(userData.id);
     //player.socket.join(firstRoomID);
@@ -162,9 +161,9 @@ function MatchMaking(msg)
 
     if(matchList.size === 2)
     {
-        logger.info('userList : ', matchList);
+        console.log('userList : ', matchList);
         const sendList = getMatchList(matchList);
-
+        console.log('sendList : ', sendList);
         sendList.forEach(id => {
             const user = getPlayer(id);
             user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
@@ -218,18 +217,20 @@ function makeRoomID(){
 async function getMatchList(userList) {
     const keyList = Array.from(userList.keys());
     const sendList = [];
-    logger.info('keyList : ', keyList);
+
     await Promise.all(keyList.map(id => {
         return new Promise((resolve, reject) => {
             const player = getPlayer(id);
             connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
                 if (err) {
                     logger.error('MatchMaking query error:', err);
+                    console.log('query error');
                     player.socket.emit('enterRoomFail', 'query error');
                     reject(err);
                     return;
                 }
                 if (rows.length === 0) {
+                    console.log('뭐가 없음');
                     player.socket.emit('enterRoomFail', 'query error');
                     resolve();
                     return;
@@ -237,12 +238,13 @@ async function getMatchList(userList) {
                 else {
                     const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
                     sendList.push(JSON.stringify(userInfo));
+                    console.log('push 완료');
                     resolve();
                 }
             });
         });
     }));
-    logger.info('sendList : ', sendList);
+    console.log('sendList : ', sendList);
     return sendList;
 }
 
