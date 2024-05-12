@@ -194,7 +194,7 @@ function getPlayer(id){
 
 async function isUniqueName(name) {
     try {
-        const [rows] = await connection.promise().query('SELECT * FROM User WHERE name = ?', [name]);
+        const [rows] = await connection.query('SELECT * FROM User WHERE name = ?', [name]);
 
         logger.info("rowsssss : ", rows);
         logger.info("rowsssss len : ", rows.length);
