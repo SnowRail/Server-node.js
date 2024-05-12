@@ -77,7 +77,7 @@ function Login(socket, msg) {
             const queryResult = rows[0];
             console.log("query : ", queryResult);
             socket.emit('inquiryPlayer', JSON.stringify(queryResult));
-            connectedPlayers.set(loginID, {socket : socket, room : null});
+            connectedPlayers.set(loginID, {socket : socket, room : null, state : 'lobby'});
         }
         if (defaultLogin) {
             socket.emit('loginSucc', 'default login succ');
@@ -249,6 +249,9 @@ function getMatchList(userList) {
 
 function Disconnect(socket) {
     const disconnectPlayer = connectedPlayers.get(socket.id);
+    if (!disconnectPlayer) {
+        return;
+    }
     switch(disconnectPlayer.state){
         case 'lobby':
             break;
