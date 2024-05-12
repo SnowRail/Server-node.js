@@ -233,15 +233,15 @@ function getMatchList(userList) {
                 }
                 else {
                     const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
-                    sendList.push(JSON.stringify(userInfo));
+                    //sendList.push(JSON.stringify(userInfo));
                     console.log('push 완료');
-                    resolve();
+                    resolve(JSON.stringify(userInfo));
                 }
             });
         });
     });
 
-    return Promise.all(promises).then(() => {
+    return Promise.all(promises).then(sendList => {
         console.log('sendList : ', sendList);
         return sendList;
     });
