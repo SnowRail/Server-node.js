@@ -112,7 +112,8 @@ function Signup(socket, msg) {
 function SetName(socket, msg) // name change
 {
     const userData = JSON.parse(msg);
-    if(isUniqueName(userData.id))
+    logger.info(userData.name);
+    if(isUniqueName(userData.name))
     {
         connection.query('UPDATE User SET name = ? WHERE id = ?', [userData.name, userData.id], (err) => {
             if (err) {
