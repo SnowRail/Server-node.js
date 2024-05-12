@@ -145,7 +145,7 @@ function MatchMaking(msg)
     const firstRoomID = readyRoomList.keys().next().value;
     const userList = readyRoomList.get(firstRoomID).userList;
     userList.set(userData.id, false);
-
+    
     const player = getPlayer(userData.id);
     //player.socket.join(firstRoomID);
 
@@ -156,6 +156,7 @@ function MatchMaking(msg)
 
     if(userList.size === 2)
     {
+        logger.info('userList : ', userList);
         const sendList = getMatchList(userList);
 
         sendList.forEach(id => {
@@ -192,7 +193,6 @@ async function isUniqueName(name) { // 중복 없으면 true, 있으면 false
             
         }
         logger.info("rowsssss : ",rows);
-        logger.info("rowsssss : ",rows);
         if (rows.length === 0) {
             return true;
         } else {
@@ -209,27 +209,34 @@ function makeRoomID(){
     return num;
 }
 
-function getMatchList(userList) {
+async function getMatchList(userList) {
     const keyList = Array.from(userList.keys());
     const sendList = [];
-    keyList.forEach(id => {
-        const player = getPlayer(id);
-        connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
-            if (err) {
-                logger.error('MatchMaking query error:', err);
-                player.socket.emit('enterRoomFail', 'query error');
-                return;
-            }
-            if (rows.length === 0) {
-                player.socket.emit('enterRoomFail', 'query error');
-                return;
-            }
-            else {
-                const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
-                sendList.push(JSON.stringify(userInfo));
-            }
+    logger.info('keyList : ', keyList);
+    await Promist.all(keyList.map(id => {
+        return new Promise((resolve, reject) => {
+            const player = getPlayer(id);
+            connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
+                if (err) {
+                    logger.error('MatchMaking query error:', err);
+                    player.socket.emit('enterRoomFail', 'query error');
+                    reject(err);
+                    return;
+                }
+                if (rows.length === 0) {
+                    player.socket.emit('enterRoomFail', 'query error');
+                    resolve();
+                    return;
+                }
+                else {
+                    const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
+                    sendList.push(JSON.stringify(userInfo));
+                    resolve();
+                }
+            });
         });
-    });
+    }));
+    logger.info('sendList : ', sendList);
     return sendList;
 }
 
