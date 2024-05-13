@@ -147,9 +147,11 @@ function MatchMaking(msg)
         break;
     }
     const matchList = matchRoomList.get(firstRoomID);
+    logger.info("유저 아이디 : ", userData.id);
     matchList.push(userData.id);
     
     const player = getPlayer(userData.id);
+    logger.info("플레이어 :",player);
     player.socket.on('error', (err) => {
         player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
         logger.error('Enter Room Fail!! : ', err);
