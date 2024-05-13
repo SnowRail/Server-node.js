@@ -147,11 +147,9 @@ function MatchMaking(msg)
         break;
     }
     const matchList = matchRoomList.get(firstRoomID);
-    logger.info("유저 아이디 : ", userData.id);
     matchList.push(userData.id);
     
     const player = getPlayer(userData.id);
-    logger.info("플레이어 :",player);
     player.socket.on('error', (err) => {
         player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
         logger.error('Enter Room Fail!! : ', err);
@@ -159,22 +157,36 @@ function MatchMaking(msg)
     player.room = firstRoomID;
     player.state = 'matching';
 
+    const timeoutId = setTimeout(() => {
+        if (matchList.length >= 2) {
+            processMatchList(matchList, firstRoomID);
+        } else {
+            // 매칭이 이루어지지 않은 경우에 대한 처리
+            // 예를 들어, 매칭 실패 메시지를 전송하거나 다른 동작을 수행할 수 있습니다.
+            processMatchList(matchList, firstRoomID);
+        }
+    }, 20000); // 20초 (20000ms) 후에 실행
+
     if(matchList.length === 2)
     {
-        const matchPromise = getMatchList(matchList);
-        matchPromise.then(sendList => {
-            sendList.forEach(element => {
-                const user = getPlayer(element.id);
-                user.socket.emit('enterRoomSucc', JSON.stringify(sendList));  
-                user.state = 'ready';      
-            });
-            logger.info('Enter Room Succ!!');
-
-            readyRoomList.set(firstRoomID, {userList : matchList, readyCount : 0});
-            matchRoomList.delete(firstRoomID);
-        });
-
+        clearTimeout(timeoutId); // 타이머 취소
+        processMatchList(matchList, firstRoomID);
     }
+}
+
+function processMatchList(matchList, roomID) {
+    const matchPromise = getMatchList(matchList);
+    matchPromise.then(sendList => {
+        sendList.forEach(element => {
+            const user = getPlayer(element.id);
+            user.socket.emit('enterRoomSucc', JSON.stringify(sendList));  
+            user.state = 'ready';      
+        });
+        logger.info('Enter Room Succ!!');
+
+        readyRoomList.set(roomID, {userList : matchList, readyCount : 0});
+        matchRoomList.delete(roomID);
+    });
 }
 
 function ReadyGame(msg) {
