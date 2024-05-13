@@ -19,6 +19,7 @@ const {
 const { log } = require("console");
 
 const connectedPlayers = new Map();
+const matchRoomList = new Map();
 const readyRoomList = new Map();
 const gameRoomList = new Map();
 
@@ -67,7 +68,7 @@ function Login(socket, msg) {
                         console.log("query : ", queryResult);
                         socket.emit('inquiryPlayer', JSON.stringify(queryResult));
                         socket.id = loginID;
-                        connectedPlayers.set(loginID, {socket : socket, room : null});
+                        connectedPlayers.set(loginID, {socket : socket, room : null, state : 'lobby'});
                     }
                 });
             });
@@ -76,7 +77,7 @@ function Login(socket, msg) {
             const queryResult = rows[0];
             console.log("query : ", queryResult);
             socket.emit('inquiryPlayer', JSON.stringify(queryResult));
-            connectedPlayers.set(loginID, {socket : socket, room : null});
+            connectedPlayers.set(loginID, {socket : socket, room : null, state : 'lobby'});
         }
         if (defaultLogin) {
             socket.emit('loginSucc', 'default login succ');
@@ -134,38 +135,43 @@ function SetName(socket, msg) // name change
 function MatchMaking(msg)
 {
     const userData = JSON.parse(msg);
-    if(readyRoomList.size === 0)
+    if(matchRoomList.size === 0)
     {
         const roomID = makeRoomID();
-        readyRoomList.set(roomID, {userList : new Map(), readyCount : 0});
+        matchRoomList.set(roomID, []);
     }
-    //const firstRoomID = readyRoomList.keys().next().value;
+    //const firstRoomID = matchRoomList.keys().next().value;
     let firstRoomID;
-    for (const roomid of readyRoomList.keys()) {
+    for (const roomid of matchRoomList.keys()) {
         firstRoomID = roomid;
         break;
     }
-    const matchList = readyRoomList.get(firstRoomID).userList;
-    matchList.set(userData.id, false);
+    const matchList = matchRoomList.get(firstRoomID);
+    matchList.push(userData.id);
     
     const player = getPlayer(userData.id);
-    //player.socket.join(firstRoomID);
-
     player.socket.on('error', (err) => {
         player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
         logger.error('Enter Room Fail!! : ', err);
     });
+    player.room = firstRoomID;
+    player.state = 'matching';
 
-    if(matchList.size === 2)
+    if(matchList.length === 2)
     {
-        console.log('userList : ', matchList);
-        const sendList = getMatchList(matchList);
-        console.log('sendList : ', sendList);
-        sendList.forEach(id => {
-            const user = getPlayer(id);
-            user.socket.emit('enterRoomSucc', JSON.stringify(sendList));        
+        const matchPromise = getMatchList(matchList);
+        matchPromise.then(sendList => {
+            sendList.forEach(element => {
+                const user = getPlayer(element.id);
+                user.socket.emit('enterRoomSucc', JSON.stringify(sendList));  
+                user.state = 'ready';      
+            });
+            logger.info('Enter Room Succ!!');
+
+            readyRoomList.set(firstRoomID, {userList : matchList, readyCount : 0});
+            matchRoomList.delete(firstRoomID);
         });
-        logger.info('Enter Room Succ!!');
+
     }
 }
 
@@ -181,6 +187,7 @@ function enterInGame(roomID, userList) {
     userList.forEach(id => {
         const user = getPlayer(id);
         user.socket.emit('enterInGame', 'Enter InGame');
+        user.state = 'ingame';
     });
 }
 
@@ -210,42 +217,63 @@ function makeRoomID(){
     return num;
 }
 
-async function getMatchList(userList) {
-    const keyList = Array.from(userList.keys());
-    const sendList = [];
+function getMatchList(userList) {
+    //const keyList = Array.from(userList.keys());
+    //const sendList = []; 
 
-    await Promise.all(keyList.map(id => {
+    const promises = userList.map(id => {
         return new Promise((resolve, reject) => {
             const player = getPlayer(id);
             connection.query('SELECT * FROM User WHERE id = ?', [id], (err, rows) => {
                 if (err) {
                     logger.error('MatchMaking query error:', err);
-                    console.log('query error');
                     player.socket.emit('enterRoomFail', 'query error');
                     reject(err);
-                    return;
                 }
                 if (rows.length === 0) {
-                    console.log('뭐가 없음');
                     player.socket.emit('enterRoomFail', 'query error');
                     resolve();
-                    return;
                 }
                 else {
                     const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
-                    sendList.push(JSON.stringify(userInfo));
-                    console.log('push 완료');
-                    resolve();
+                    resolve(userInfo);
                 }
             });
         });
-    })).then(() => {
-        console.log('sendList : ', sendList);
+    });
+
+    return Promise.all(promises).then(sendList => {
         return sendList;
     });
 }
 
 function Disconnect(socket) {
+    const disconnectPlayer = connectedPlayers.get(socket.id);
+    if (!disconnectPlayer) {
+        return;
+    }
+    switch(disconnectPlayer.state){
+        case 'lobby':
+            break;
+        case 'matching':
+            const matchList = matchRoomList.get(disconnectPlayer.room);
+            matchList.splice(matchList.indexOf(socket.id), 1);
+            if(matchList.length === 0)
+            {
+                matchRoomList.delete(disconnectPlayer.room);
+            }
+            break;
+        case 'ready':
+            const readyList = readyRoomList.get(disconnectPlayer.room);
+            readyList.userList.splice(readyList.userList.indexOf(socket.id), 1);
+            if(readyList.userList.length === 0)
+            {
+                readyRoomList.delete(disconnectPlayer.room);
+            }
+            break;
+        case 'ingame':
+            break;
+    }
     connectedPlayers.delete(socket.id);
 }
 
