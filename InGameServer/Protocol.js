@@ -20,6 +20,7 @@ const Protocol = {
     GameSync : 27,              // position update
     Break : 28,                 // 브레이크 입력 
     Sync : 30,                  // 동기화
+    Respawn : 31,
 
     ResetServer : 100,          // 서버 리셋
 
