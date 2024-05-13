@@ -161,6 +161,13 @@ function ResetServer(){
     logger.info("ResetServer");
 }
 
+function Respawn(socket, jsonData){
+    const json = new Packet(jsonData.from);
+    const dataBuffer = classToByte(json);
+    
+    broadcast(dataBuffer, socket);
+}
+
 function broadcast(message, sender) {
     const sockets = SocketManager.getSockets();
 
@@ -202,4 +209,5 @@ module.exports = {
     GameStartCountDown,
     ResetServer,
     SendKeyValue,
+    Respawn,
 };

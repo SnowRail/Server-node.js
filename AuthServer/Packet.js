@@ -1,21 +1,27 @@
 
 class Packet {
-    constructor(email) {
-        this.email = email;
+    constructor(id) {
+        this.id = id;
     }
 }
 
 class NamePacket extends Packet {
-    constructor(email, name) {
-        super(email);
+    constructor(id, name) {
+        super(id);
         this.name = name;
     }
 }
 
 class MatchPacket extends Packet {
-    constructor(email, name, curCart) {
-        super(email);
+    constructor(id, name, curCart) {
+        super(id);
         this.name = name;
         this.curCart = curCart;
     }
+}
+
+
+module.exports = {
+    NamePacket,
+    MatchPacket
 }
