@@ -13,6 +13,7 @@ const {
     CountDown,
     ResetServer,
     SendKeyValue,
+    Respawn,
 } = require('./ProtocolHandler');
 const { log } = require('console');
 
@@ -87,6 +88,9 @@ const server = net.createServer((socket) =>
                         break;
                     case Protocol.Sync:
                         UpdatePlayerPos(socket, jsonData);
+                        break;
+                    case Protocol.Respawn:
+                        Respawn(socket, jsonData);
                         break;
     
                     case Protocol.ResetServer:
