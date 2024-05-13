@@ -38,6 +38,11 @@ io.on('connection', (socket) => {
         Signup(socket, msg);
     });
 
+    socket.on('inquiryFriend', (msg) => {
+        logger.info('setName : ' + JSON.stringify(msg));
+        SetName(socket, msg);
+    });
+
     socket.on('setName', (msg) => {
         logger.info('setName : ' + JSON.stringify(msg));
         SetName(socket, msg);
