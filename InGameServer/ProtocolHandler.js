@@ -162,7 +162,7 @@ function ResetServer(){
 }
 
 function Respawn(socket, jsonData){
-    const json = new Packet(jsonData.from);
+    const json = new Packet(Protocol.Respawn, jsonData.from);
     const dataBuffer = classToByte(json);
     
     broadcast(dataBuffer, socket);
