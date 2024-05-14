@@ -115,7 +115,7 @@ function Signup(socket, msg) {
         }
 
         if (rows.length === 0) {
-            connection.query("INSERT INTO User (email, id, password, name) VALUES (?, ?, ?)", [userData.email, userData.email, userData.password, userData.name], (err) => {
+            connection.query("INSERT INTO User (email, id, password, name) VALUES (?, ?, ?, ?)", [userData.email, userData.email, userData.password, userData.name], (err) => {
                 if (err) {
                     logger.error('Signup query error:', err);
                     socket.emit('signupFail', '회원가입에 실패했습니다');
