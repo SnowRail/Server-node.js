@@ -151,7 +151,7 @@ function SetName(socket, msg) // name change
     }
 }
 
-function MatchMaking(msg,tcpClient)
+function MatchMaking(msg, tcpClient)
 {
     const userData = JSON.parse(msg);
     const player = getPlayer(userData.id);
@@ -174,7 +174,6 @@ function MatchMaking(msg,tcpClient)
     const matchList = matchRoomList.get(firstRoomID);
     matchList.push(userData.id);
     
-    
     player.socket.on('error', (err) => {
         player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
         logger.error('Enter Room Fail!! : ', err);
@@ -185,13 +184,15 @@ function MatchMaking(msg,tcpClient)
     if(matchList.length === 2 && !matchList.processed)
     {
         matchList.processed = true; // 처리 플래그 설정
-        processMatchList(matchList, firstRoomID,tcpClient);
+        processMatchList(matchList, firstRoomID);
+        tcpClient.write('{"roomID":' + firstRoomID + ',"playerList":' + JSON.stringify(matchList) + '}');
     }
     else if(!matchList.timeoutId)
     {
         const timeoutId = setTimeout(() => {
             if (!matchList.processed) {
-                processMatchList(matchList, firstRoomID,tcpClient);
+                processMatchList(matchList, firstRoomID);
+                tcpClient.write('{"roomID":' + firstRoomID + ',"playerList":' + JSON.stringify(matchList) + '}');
             }
         }, 20000); // 20초 (20000ms) 후에 실행
 
@@ -199,12 +200,13 @@ function MatchMaking(msg,tcpClient)
     }
 }
 
-function processMatchList(matchList, roomID,tcpClient) {
+function processMatchList(matchList, roomID) {
     const matchPromise = getMatchList(matchList);
     matchPromise.then(sendList => {
         sendList.forEach(element => {
             const user = getPlayer(element.id);
-            user.socket.emit('enterRoomSucc', JSON.stringify(sendList));  
+            // user.socket.emit('enterRoomSucc', JSON.stringify(sendList)); 
+            user.socket.emit('enterRoomSucc', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(sendList) + '}' ); 
             user.state = 'ready';      
         });
         logger.info('Enter Room Succ!!');
@@ -221,20 +223,20 @@ function processMatchList(matchList, roomID,tcpClient) {
             });
             logger.info('Move to in-game scene');
         }, 5000); // 5초 (5000ms) 후에 실행
-        gameRoomList.set(roomID, {userList : matchList, readyCount : 0});
+        gameRoomList.set(roomID, {userList : matchList});
         readyRoomList.delete(roomID);
-        MoveInGameScene(sendList,roomID,tcpClient)
+        // MoveInGameScene(sendList,roomID,tcpClient)
     });
 }
 
 function MoveInGameScene(sendList,roomID,tcpClient)
 {
-    const data = {
-        roomID : roomID,
-        playerList : sendList
-    };
-    const jsonData = JSON.stringify(data);
-    tcpClient.write(jsonData);
+    // const data = {
+    //     roomID : roomID,
+    //     playerList : sendList
+    // };
+    // const jsonData = JSON.stringify(data);
+    // tcpClient.write(jsonData);
 }
 
 function ReadyGame(msg) {
@@ -243,15 +245,7 @@ function ReadyGame(msg) {
     const userList = readyRoomList.get(roomID).userList;
 }
 
-function enterInGame(roomID, userList) {
-    gameRoomList.set(roomID, userList);
-    readyRoomList.delete(roomID);
-    userList.forEach(id => {
-        const user = getPlayer(id);
-        user.socket.emit('enterInGame', 'Enter InGame');
-        user.state = 'ingame';
-    });
-}
+
 
 function getPlayer(id){
     return connectedPlayers.get(id);
