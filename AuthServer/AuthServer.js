@@ -38,6 +38,11 @@ io.on('connection', (socket) => {
         Signup(socket, msg);
     });
 
+    socket.on('inquiryFriend', (msg) => {
+        logger.info('setName : ' + JSON.stringify(msg));
+        SetName(socket, msg);
+    });
+
     socket.on('setName', (msg) => {
         logger.info('setName : ' + JSON.stringify(msg));
         SetName(socket, msg);
@@ -45,7 +50,7 @@ io.on('connection', (socket) => {
     
     socket.on('matching', (msg) => { // client의 matching 요청
         logger.info('matching : ' + JSON.stringify(msg));
-        MatchMaking(msg);
+        MatchMaking(msg,tcpClient);
     });
 
     socket.on('readyGame', (msg) => {

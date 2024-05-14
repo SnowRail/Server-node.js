@@ -17,6 +17,7 @@ const {
     MatchPacket
 } = require('./Packet');
 const { log } = require("console");
+const { send } = require("process");
 
 const connectedPlayers = new Map();
 const matchRoomList = new Map();
@@ -39,50 +40,69 @@ function Login(socket, msg) {
     const loginID = emailSplit[0];
     const defaultLogin = emailSplit.length > 1 ? false : true;
 
-    connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
-        if (err) {
-            logger.error('Login query error:', err);
-            socket.emit('loginFail', 'first login fail');
-            return;
-        }
-        if (rows.length === 0) { // 등록되지 않은 사용자
-            let newName;
-            do {
-                newName = crypto.randomBytes(8).toString('hex');
-            } while (!isUniqueName(newName));
+    if (defaultLogin) { // 기본 로그인
+        const loginPW = userData.password;
+        connection.query('SELECT * FROM User WHERE email = ? AND password = ?', [loginUser, loginPW], (err, rows) => {
+            if (err) {
+                logger.error('Login query error:', err);
+                socket.emit('loginFail', 'login query fail');
+                return;
+            }
+            if (rows.length === 0) { // 등록되지 않은 사용자
+                socket.emit('loginFail', '존재하지 않는 ID 또는 비밀번호입니다');
+            }
+            else {
+                const queryResult = rows[0];
+                console.log("query : ", queryResult);
+                socket.emit('loginSucc', 'default login succ');
+                socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+                connectedPlayers.set(loginID, {socket : socket, room : null, state : 'lobby'});
+            }
+        });
+    } else // google login
+    {   connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
+            if (err) {
+                logger.error('Login query error:', err);
+                socket.emit('loginFail', 'first login fail');
+                return;
+            }
+            if (rows.length === 0) { // 등록되지 않은 사용자
+                let newName;
+                do {
+                    newName = crypto.randomBytes(8).toString('hex');
+                } while (!isUniqueName(newName));
 
-            connection.query("INSERT INTO User (email, id, name) VALUES (?, ?, ?)", [loginUser, loginID, newName], (err) => {
-                if (err) {
-                    logger.error('Signup query error:', err);
-                    socket.emit('signupFail', '회원 등록에 실패했습니다');
-                    return;
-                }
-                connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
+                connection.query("INSERT INTO User (email, id, name) VALUES (?, ?, ?)", [loginUser, loginID, newName], (err) => {
                     if (err) {
-                        logger.error('Login query error:', err);
-                        socket.emit('loginFail', 'second login fail');
+                        logger.error('Signup query error:', err);
+                        socket.emit('signupFail', '회원 등록에 실패했습니다');
                         return;
                     }
-                    else {
-                        const queryResult = rows[0];
-                        console.log("query : ", queryResult);
-                        socket.emit('inquiryPlayer', JSON.stringify(queryResult));
-                        socket.id = loginID;
-                        connectedPlayers.set(loginID, {socket : socket, room : null, state : 'lobby'});
-                    }
+                    connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
+                        if (err) {
+                            logger.error('Login query error:', err);
+                            socket.emit('loginFail', 'second login fail');
+                            return;
+                        }
+                        else {
+                            const queryResult = rows[0];
+                            console.log("query : ", queryResult);
+                            socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+                            socket.id = loginID;
+                            connectedPlayers.set(loginID, {socket : socket, room : null, state : 'lobby'});
+                        }
+                    });
                 });
-            });
-        }
-        else {
-            const queryResult = rows[0];
-            console.log("query : ", queryResult);
-            socket.emit('inquiryPlayer', JSON.stringify(queryResult));
-            connectedPlayers.set(loginID, {socket : socket, room : null, state : 'lobby'});
-        }
-        if (defaultLogin) {
-            socket.emit('loginSucc', 'default login succ');
-        }
-    });
+            }
+            else {
+                const queryResult = rows[0];
+                console.log("query : ", queryResult);
+                socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+                connectedPlayers.set(loginID, {socket : socket, room : null, state : 'lobby'});
+            }
+            
+        });
+    }
 }
 
 function Signup(socket, msg) {
@@ -96,13 +116,12 @@ function Signup(socket, msg) {
         }
 
         if (rows.length === 0) {
-            connection.query("INSERT INTO User (email, password, name) VALUES (?, ?, ?)", [userData.email, userData.password, userData.name], (err) => {
+            connection.query("INSERT INTO User (email, id, password, name) VALUES (?, ?, ?, ?)", [userData.email, userData.email, userData.password, userData.name], (err) => {
                 if (err) {
                     logger.error('Signup query error:', err);
                     socket.emit('signupFail', '회원가입에 실패했습니다');
                     return;
                 }
-
                 socket.emit('signupSucc', '회원가입에 성공했습니다');
             });
         } else {
@@ -132,9 +151,15 @@ function SetName(socket, msg) // name change
     }
 }
 
-function MatchMaking(msg)
+function MatchMaking(msg,tcpClient)
 {
     const userData = JSON.parse(msg);
+    const player = getPlayer(userData.id);
+    if(player.state === 'matching')
+    {
+        logger.info("여기 들어오면 매칭중이였음");
+        return;
+    }
     if(matchRoomList.size === 0)
     {
         const roomID = makeRoomID();
@@ -149,7 +174,7 @@ function MatchMaking(msg)
     const matchList = matchRoomList.get(firstRoomID);
     matchList.push(userData.id);
     
-    const player = getPlayer(userData.id);
+    
     player.socket.on('error', (err) => {
         player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
         logger.error('Enter Room Fail!! : ', err);
@@ -157,22 +182,59 @@ function MatchMaking(msg)
     player.room = firstRoomID;
     player.state = 'matching';
 
-    if(matchList.length === 2)
+    if(matchList.length === 2 && !matchList.processed)
     {
-        const matchPromise = getMatchList(matchList);
-        matchPromise.then(sendList => {
+        matchList.processed = true; // 처리 플래그 설정
+        processMatchList(matchList, firstRoomID,tcpClient);
+    }
+    else if(!matchList.timeoutId)
+    {
+        const timeoutId = setTimeout(() => {
+            if (!matchList.processed) {
+                processMatchList(matchList, firstRoomID,tcpClient);
+            }
+        }, 20000); // 20초 (20000ms) 후에 실행
+
+        matchList.timeoutId = timeoutId; // 매치리스트에 타임아웃 ID 저장
+    }
+}
+
+function processMatchList(matchList, roomID,tcpClient) {
+    const matchPromise = getMatchList(matchList);
+    matchPromise.then(sendList => {
+        sendList.forEach(element => {
+            const user = getPlayer(element.id);
+            user.socket.emit('enterRoomSucc', JSON.stringify(sendList));  
+            user.state = 'ready';      
+        });
+        logger.info('Enter Room Succ!!');
+
+        readyRoomList.set(roomID, {userList : matchList, readyCount : 0});
+        matchRoomList.delete(roomID);
+
+        // 5초 후에 moveInGameScene 이벤트 emit
+        setTimeout(() => {
             sendList.forEach(element => {
                 const user = getPlayer(element.id);
-                user.socket.emit('enterRoomSucc', JSON.stringify(sendList));  
-                user.state = 'ready';      
+                user.socket.emit('moveInGameScene', 'Move to in-game scene');
+                user.state = 'ingame'
             });
-            logger.info('Enter Room Succ!!');
+            logger.info('Move to in-game scene');
+        }, 5000); // 5초 (5000ms) 후에 실행
+        gameRoomList.set(roomID, {userList : matchList, readyCount : 0});
+        readyRoomList.delete(roomID);
+        MoveInGameScene(sendList,roomID,tcpClient)
+    });
+}
 
-            readyRoomList.set(firstRoomID, {userList : matchList, readyCount : 0});
-            matchRoomList.delete(firstRoomID);
-        });
-
-    }
+function MoveInGameScene(sendList,roomID,tcpClient)
+{
+    const data = {
+        roomID : roomID,
+        playerList : sendList
+    };
+    const jsonData = JSON.stringify(data);
+    tcpClient.write(jsonData);
 }
 
 function ReadyGame(msg) {

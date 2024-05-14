@@ -136,8 +136,19 @@ const outgameServer = net.createServer((socket) => {
 
     socket.on('data', (data) => {
         const msg = data.toString();
+        const receivedData = JSON.parse(msg);
+        const roomID = receivedData.roomID;
+        const playerList = receivedData.playerList;
+        playerList.forEach((player) => {
+            const socket = SocketManager.getSocketById(player.id);
+            if(socket)
+            {
+                // FirstConn(socket.player.id);
+            }
+        });
         console.log('outgameServer : ', msg);
     });
+
 
     socket.on('end',() =>
     {
