@@ -81,14 +81,14 @@ tcpClient.on('data', (data) => {
     console.log('TCP 서버로부터 온 데이터 : ', data.toString());
 });
 
-client.on('close', () => {
+tcpClient.on('close', () => {
     console.log('tcp Connection closed');
 });
 
-client.on('end', () => {
+tcpClient.on('end', () => {
     console.log('Server closed the connection');
 });
 
-client.on('error', (err) => {
+tcpClient.on('error', (err) => {
     console.error('Error occurred:', err.message);
 });
