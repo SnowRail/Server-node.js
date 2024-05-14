@@ -163,14 +163,17 @@ function MatchMaking(msg)
     player.room = firstRoomID;
     player.state = 'matching';
 
-    if(matchList.length === 2)
+    if(matchList.length === 2 && !matchList.processed)
     {
+        matchList.processed = true; // 처리 플래그 설정
         processMatchList(matchList, firstRoomID);
     }
-    else
+    else if(!matchList.timeoutId)
     {
         const timeoutId = setTimeout(() => {
-            processMatchList(matchList, firstRoomID);
+            if (!matchList.processed) {
+                processMatchList(matchList, firstRoomID);
+            }
         }, 20000); // 20초 (20000ms) 후에 실행
 
         matchList.timeoutId = timeoutId; // 매치리스트에 타임아웃 ID 저장
