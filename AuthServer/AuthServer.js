@@ -63,6 +63,12 @@ io.on('connection', (socket) => {
         // TODO 접속한 플레이어 리스트에서 삭제하기
         Disconnect(socket);
     });
+
+    socket.on('close', (reason) => {
+        logger.info(`클라이언트 연결 종료 : ${socket.handshake.address}, 이유 : ${reason}`);
+        Disconnect(socket);
+    });
+
 });
 
 server.listen(10101, () => {    
