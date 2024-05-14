@@ -6,11 +6,11 @@ const {Server} = require("socket.io");
 const io = new Server(server);
 
 const net = require('net');
-const tcpClient = new net.Socket();
+//const tcpClient = new net.Socket();
 
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
-const serverIP = process.env.SERVER_IP || 'localhost';
+const serverIP = process.env.SERVER_IP;
 const logger = require('./logger');
 
 const {   
@@ -72,7 +72,7 @@ server.listen(10101, () => {
 });
 
 
-tcpClient.connect(30304, serverIP, () => {
+const tcpClient = net.connect(30304, serverIP, () => {
     console.log('TCP 서버에 연결되었습니다.');
     tcpClient.write('안녕하세요');
 });
