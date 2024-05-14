@@ -24,6 +24,8 @@ const matchRoomList = new Map();
 const readyRoomList = new Map();
 const gameRoomList = new Map();
 
+let idList = [];
+
 connection.connect((err) => {
     if (err) {
         logger.error('MySQL connection error:', err);
@@ -295,6 +297,7 @@ function getMatchList(userList, roomID) {
                     do {
                         num = Math.floor(Math.random() * (100 - 0 + 1)) + 0;
                     } while(idList.includes(num));
+                    idList.push(num);
                     // const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart, roomID);
                     const userInfo = new MatchPacket(num, rows[0].name, rows[0].curCart, roomID);
                     resolve(userInfo);
