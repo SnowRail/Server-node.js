@@ -135,6 +135,12 @@ function SetName(socket, msg) // name change
 function MatchMaking(msg)
 {
     const userData = JSON.parse(msg);
+    const player = getPlayer(userData.id);
+    if(player.state === 'matching')
+    {
+        logger.info("여기 들어오면 매칭중이였음");
+        return;
+    }
     if(matchRoomList.size === 0)
     {
         const roomID = makeRoomID();
@@ -149,7 +155,7 @@ function MatchMaking(msg)
     const matchList = matchRoomList.get(firstRoomID);
     matchList.push(userData.id);
     
-    const player = getPlayer(userData.id);
+    
     player.socket.on('error', (err) => {
         player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
         logger.error('Enter Room Fail!! : ', err);
@@ -195,6 +201,7 @@ function processMatchList(matchList, roomID) {
                 user.state = 'ingame'
             });
             logger.info('Move to in-game scene');
+            
         }, 5000); // 5초 (5000ms) 후에 실행
     });
 }
