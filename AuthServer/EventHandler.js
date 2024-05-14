@@ -163,19 +163,29 @@ function MatchMaking(msg)
     player.room = firstRoomID;
     player.state = 'matching';
 
-    const timeoutId = setTimeout(() => {
-        if (matchList.length >= 2) {
-            processMatchList(matchList, firstRoomID);
-        } else {
-            // 매칭이 이루어지지 않은 경우에 대한 처리
-            // 예를 들어, 매칭 실패 메시지를 전송하거나 다른 동작을 수행할 수 있습니다.
-            processMatchList(matchList, firstRoomID);
-        }
-    }, 20000); // 20초 (20000ms) 후에 실행
+    let timeoutId = null; // 타임아웃 ID를 저장할 변수
+
+    const startTimeout = () => {
+        timeoutId = setTimeout(() => {
+            if (matchList.length >= 2) {
+                processMatchList(matchList, firstRoomID);
+            } else {
+                // 매칭이 이루어지지 않은 경우에 대한 처리
+                // 예를 들어, 매칭 실패 메시지를 전송하거나 다른 동작을 수행할 수 있습니다.
+                processMatchList(matchList, firstRoomID);
+            }
+        }, 20000); // 20초 (20000ms) 후에 실행
+    };
+
+    if(matchList.length < 2) {
+        startTimeout(); // 매치리스트의 길이가 2보다 작을 때만 타임아웃 시작
+    }
 
     if(matchList.length === 2)
     {
-        clearTimeout(timeoutId); // 타이머 취소
+        if (timeoutId) {
+            clearTimeout(timeoutId); // 타임아웃이 시작되었다면 취소
+        }
         processMatchList(matchList, firstRoomID);
     }
 }
