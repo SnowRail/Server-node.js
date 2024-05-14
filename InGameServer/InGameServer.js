@@ -135,7 +135,8 @@ const outgameServer = net.createServer((socket) => {
     socket.write('반갑습니다');
 
     socket.on('data', (data) => {
-        const msg = data.toString();
+        console.log('outgameServer : ', msg);
+        //const msg = data.toString();
         // const receivedData = JSON.parse(msg);
         // const roomID = receivedData.roomID;
         // const playerList = receivedData.playerList;
@@ -146,7 +147,7 @@ const outgameServer = net.createServer((socket) => {
         //         // FirstConn(socket.player.id);
         //     }
         // });
-        console.log('outgameServer : ', msg);
+        
     });
 
 
