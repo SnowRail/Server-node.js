@@ -201,7 +201,7 @@ function MatchMaking(msg, tcpClient)
 }
 
 function processMatchList(matchList, roomID) {
-    const matchPromise = getMatchList(matchList);
+    const matchPromise = getMatchList(matchList,roomID);
     matchPromise.then(sendList => {
         sendList.forEach(element => {
             const user = getPlayer(element.id);
@@ -218,7 +218,7 @@ function processMatchList(matchList, roomID) {
         setTimeout(() => {
             sendList.forEach(element => {
                 const user = getPlayer(element.id);
-                user.socket.emit('moveInGameScene', 'Move to in-game scene');
+                user.socket.emit('loadGameScene', 'Move to in-game scene');
                 user.state = 'ingame'
             });
             logger.info('Move to in-game scene');
@@ -273,7 +273,7 @@ function makeRoomID(){
     return num;
 }
 
-function getMatchList(userList) {
+function getMatchList(userList, roomID) {
     //const keyList = Array.from(userList.keys());
     //const sendList = []; 
 
@@ -291,7 +291,7 @@ function getMatchList(userList) {
                     resolve();
                 }
                 else {
-                    const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
+                    const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart, roomID);
                     resolve(userInfo);
                 }
             });

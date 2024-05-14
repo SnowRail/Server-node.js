@@ -13,10 +13,11 @@ class NamePacket extends Packet {
 }
 
 class MatchPacket extends Packet {
-    constructor(id, name, curCart) {
+    constructor(id, name, curCart,roomID) {
         super(id);
         this.name = name;
         this.curCart = curCart;
+        this.roomID = roomID;
     }
 }
 
