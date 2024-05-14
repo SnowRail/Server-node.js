@@ -299,7 +299,7 @@ function getMatchList(userList, roomID) {
                     } while(idList.includes(num));
                     idList.push(num);
                     // const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart, roomID);
-                    const userInfo = new MatchPacket(num, rows[0].name, rows[0].curCart, roomID);
+                    const userInfo = new MatchPacket(rows[0].id, num, rows[0].curCart, roomID);
                     resolve(userInfo);
                 }
             });
