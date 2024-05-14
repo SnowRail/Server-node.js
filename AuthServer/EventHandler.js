@@ -151,7 +151,7 @@ function SetName(socket, msg) // name change
     }
 }
 
-function MatchMaking(msg,tcpClient)
+function MatchMaking(msg)
 {
     const userData = JSON.parse(msg);
     const player = getPlayer(userData.id);
@@ -185,13 +185,13 @@ function MatchMaking(msg,tcpClient)
     if(matchList.length === 2 && !matchList.processed)
     {
         matchList.processed = true; // 처리 플래그 설정
-        processMatchList(matchList, firstRoomID,tcpClient);
+        processMatchList(matchList, firstRoomID);
     }
     else if(!matchList.timeoutId)
     {
         const timeoutId = setTimeout(() => {
             if (!matchList.processed) {
-                processMatchList(matchList, firstRoomID,tcpClient);
+                processMatchList(matchList, firstRoomID);
             }
         }, 20000); // 20초 (20000ms) 후에 실행
 
@@ -199,7 +199,7 @@ function MatchMaking(msg,tcpClient)
     }
 }
 
-function processMatchList(matchList, roomID,tcpClient) {
+function processMatchList(matchList, roomID) {
     const matchPromise = getMatchList(matchList);
     matchPromise.then(sendList => {
         sendList.forEach(element => {
@@ -223,18 +223,18 @@ function processMatchList(matchList, roomID,tcpClient) {
         }, 5000); // 5초 (5000ms) 후에 실행
         gameRoomList.set(roomID, {userList : matchList, readyCount : 0});
         readyRoomList.delete(roomID);
-        MoveInGameScene(sendList,roomID,tcpClient)
+        // MoveInGameScene(sendList,roomID,tcpClient)
     });
 }
 
 function MoveInGameScene(sendList,roomID,tcpClient)
 {
-    const data = {
-        roomID : roomID,
-        playerList : sendList
-    };
-    const jsonData = JSON.stringify(data);
-    tcpClient.write(jsonData);
+    // const data = {
+    //     roomID : roomID,
+    //     playerList : sendList
+    // };
+    // const jsonData = JSON.stringify(data);
+    // tcpClient.write(jsonData);
 }
 
 function ReadyGame(msg) {
