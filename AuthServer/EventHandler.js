@@ -207,8 +207,8 @@ function processMatchList(matchList, roomID) {
     matchPromise.then(sendList => {
         sendList.forEach(element => {
             const user = getPlayer(element.id);
-            user.socket.emit('enterRoomSucc', JSON.stringify(sendList)); 
-            // user.socket.emit('enterRoomSucc', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(sendList) + '}' ); 
+            // user.socket.emit('enterRoomSucc', JSON.stringify(sendList)); 
+            user.socket.emit('enterRoomSucc', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(sendList) + '}' ); 
             user.state = 'ready';      
         });
         logger.info('Enter Room Succ!!');
