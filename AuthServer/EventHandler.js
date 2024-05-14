@@ -291,7 +291,12 @@ function getMatchList(userList, roomID) {
                     resolve();
                 }
                 else {
-                    const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart, roomID);
+                    let num = 0;
+                    do {
+                        num = Math.floor(Math.random() * (100 - 0 + 1)) + 0;
+                    } while(idList.includes(num));
+                    // const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart, roomID);
+                    const userInfo = new MatchPacket(num, rows[0].name, rows[0].curCart, roomID);
                     resolve(userInfo);
                 }
             });
