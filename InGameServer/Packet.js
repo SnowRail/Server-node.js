@@ -28,7 +28,7 @@ class SyncPositionPacket extends Packet {
         this.position = pos;
         this.velocity = vel;
         this.rotation = rot;
-        this.timeStamp = timestamp
+        this.timeStamp = timestamp;
     }
 }
 
