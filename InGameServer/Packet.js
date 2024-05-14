@@ -47,6 +47,13 @@ class CountDownPacket extends Packet {
     }
 }
 
+class GameResultPacket extends Packet {
+    constructor(result, endTime) {
+        super(Protocol.GameEnd);
+        this.result = result;
+        this.endTime = endTime;
+    }
+}
 
 module.exports = {
     Packet,
@@ -54,5 +61,6 @@ module.exports = {
     KeyPacket,
     SyncPositionPacket,
     PlayerMovePacket,
-    CountDownPacket
+    CountDownPacket,
+    GameResultPacket
 }
