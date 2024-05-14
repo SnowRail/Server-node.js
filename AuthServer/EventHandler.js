@@ -24,6 +24,8 @@ const matchRoomList = new Map();
 const readyRoomList = new Map();
 const gameRoomList = new Map();
 
+let idList = [];
+
 connection.connect((err) => {
     if (err) {
         logger.error('MySQL connection error:', err);
@@ -201,7 +203,7 @@ function MatchMaking(msg, tcpClient)
 }
 
 function processMatchList(matchList, roomID) {
-    const matchPromise = getMatchList(matchList);
+    const matchPromise = getMatchList(matchList,roomID);
     matchPromise.then(sendList => {
         sendList.forEach(element => {
             const user = getPlayer(element.id);
@@ -218,7 +220,7 @@ function processMatchList(matchList, roomID) {
         setTimeout(() => {
             sendList.forEach(element => {
                 const user = getPlayer(element.id);
-                user.socket.emit('moveInGameScene', 'Move to in-game scene');
+                user.socket.emit('loadGameScene', 'Move to in-game scene');
                 user.state = 'ingame'
             });
             logger.info('Move to in-game scene');
@@ -273,7 +275,7 @@ function makeRoomID(){
     return num;
 }
 
-function getMatchList(userList) {
+function getMatchList(userList, roomID) {
     //const keyList = Array.from(userList.keys());
     //const sendList = []; 
 
@@ -291,7 +293,13 @@ function getMatchList(userList) {
                     resolve();
                 }
                 else {
-                    const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
+                    let num = 0;
+                    do {
+                        num = Math.floor(Math.random() * (100 - 0 + 1)) + 0;
+                    } while(idList.includes(num));
+                    idList.push(num);
+                    // const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart, roomID);
+                    const userInfo = new MatchPacket(rows[0].id, num, rows[0].curCart, roomID);
                     resolve(userInfo);
                 }
             });
