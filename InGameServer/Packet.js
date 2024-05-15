@@ -8,14 +8,6 @@ class Packet {
     }
 }
 
-class LoadGameScenePacket extends Packet {
-    constructor(roomID, id, userCount, userList) {
-        super(Protocol.LoadGameScene, id, roomID);
-        this.count = userCount;
-        this.list = userList;
-    }
-}
-
 class KeyPacket extends Packet {
     constructor(roomID, id, acc) {
         super(Protocol.Key, id, roomID);
@@ -50,7 +42,6 @@ class GameResultPacket extends Packet {
 
 module.exports = {
     Packet,
-    LoadGameScenePacket,
     KeyPacket,
     SyncPositionPacket,
     CountDownPacket,
