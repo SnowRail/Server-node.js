@@ -1,5 +1,5 @@
 const NetworkObjectManager = require('./NetworkObjectManager');
-const { intSize, floatSize, vector3Size, byteSize } = require('./typeSize');
+const { intSize } = require('./typeSize');
 const UnityInstance = require('./UnityClass/UnityInstance');
 const SocketManager = require('./SoketManager');
 const Protocol = require('./Protocol');
@@ -9,12 +9,17 @@ const {
     SyncPositionPacket, 
     PlayerMovePacket, 
     CountDownPacket, 
-    LoadGameScenePacket } = require('./Packet');
+    LoadGameScenePacket,
+    GameResultPacket
+ } = require('./Packet');
 const { Vector3 } = require('./UnityClass');
 const logger = require('./logger');
+const sema = require('semaphore')(1);
 
 let Goal = false;
 let Start = false;
+
+const gameRoomList = new Map(); // {roomID, userList, startTime, goalCount, gameResult}
 
 function FirstConn(socket, id){ 
     // first 전송 - 아이디, otherplayerconnect
@@ -84,19 +89,16 @@ function PlayerDisconnect(socket, id){
 
 function CountDown(protocol, id) {
     let count;
-    let json;
     
     if(protocol === Protocol.GameStart)
     {
         count = 3; // 테스트를 위해 빠르게 끝냄
-        json = new Packet(protocol);
+        
     }
     else if(protocol === Protocol.GameEnd)
     {
         count = 10;
-        json = new Packet(protocol, id);
     }
-    const dataBuffer = classToByte(json);
 
     const countDown = setInterval(() => {
         logger.info(count);
@@ -113,13 +115,23 @@ function CountDown(protocol, id) {
 
         if (count === 0) {
             clearInterval(countDown);
-            logger.info("카운트다운 종료~")
+            logger.info("카운트다운 종료~");
             if(protocol === Protocol.GameStart)
             {
+                const dataBuffer = classToByte(new Packet(protocol));
                 broadcastAll(dataBuffer);
+                const sockets = SocketManager.getSockets();
+                gameRoomList.set(1000, {userList : sockets, startTime : Date.now(), goalCount : 0, gameResult : new Map()});
             }
             else if(protocol === Protocol.GameEnd)
             {
+                const gameRoom = gameRoomList.get(1000);
+                const endTime = Date.now() - gameRoom.startTime;
+                const resultList = [];
+                gameRoom.gameResult.forEach((value, key) => {
+                    resultList.push({nickname : key, rank : value.rank, goalTime : value.goalTime});
+                });
+                const dataBuffer = classToByte(new GameResultPacket(resultList, endTime));
                 broadcastAll(dataBuffer);
             }
         }
@@ -141,10 +153,18 @@ function GameStartCountDown(protocol){
 }
 
 function PlayerGoal(id){
-    if(Goal === false)
+    const gameRoom = gameRoomList.get(1000);
+    if(gameRoom !== undefined)
     {
-        Goal = true;
-        CountDown(Protocol.GameEnd, id);
+        if (gameRoom.goalCount === 0) {
+            CountDown(Protocol.GameEnd, id);
+        }
+        sema.take(function() {
+            gameRoom.goalCount++;
+            gameRoom.gameResult.set(String(id).toString(), {rank : gameRoom.goalCount, goalTime : Date.now() - gameRoom.startTime });
+            console.log("goalID : " + id);
+            sema.leave();
+        }); 
     }
 }
 
