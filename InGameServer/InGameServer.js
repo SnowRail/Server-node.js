@@ -12,6 +12,9 @@ const interServerSocket = io2('http://'+serverIP+':'+serverPORT);
 const logger = require('./logger');
 
 const {
+    //  ----websocket----
+    AddGameRoomList,
+    //  -------tcp--------
     FirstConn,
     UpdatePlayerPos,
     PlayerBreak,
@@ -140,12 +143,17 @@ server.listen(30303,() =>
 
 // outgameserver 연결
 
-interServerSocket.on('connect', (socket) => {
+interServerSocket.on('connect', () => {
     console.log('서버에 접속했습니다.');
-    socket.emit('message', '안녕하세요, 서버!');
+    interServerSocket.emit('message', '안녕하세요, 서버!');
 
     interServerSocket.on('message', (data) => {
         console.log('서버로부터 받은 메시지:', data);
+    });
+
+    interServerSocket.on('enterInGame', (data) => {
+        console.log('enterInGame 받은 메시지:', data);
+        AddGameRoomList(data);
     });
     
     interServerSocket.on('disconnect', () => {
