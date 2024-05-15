@@ -135,7 +135,7 @@ const outgameServer = net.createServer((socket) => {
     socket.write('반갑습니다');
 
     socket.on('data', (data) => {
-        console.log('outgameServer : ', msg);
+        console.log('outgameServer : ', data);
         //const msg = data.toString();
         // const receivedData = JSON.parse(msg);
         // const roomID = receivedData.roomID;
