@@ -5,11 +5,6 @@ const process = require('process');
 const logger = require('./logger');
 
 
-const Index = ({params}) => {
-	console.log("process.env.TEST_URL : " + params.serverIP);
-    console.log("process.env.TEST_URL : " + params.serverPort);
-}
-
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
 const serverIP = process.env.SERVER_IP;
@@ -162,17 +157,3 @@ interServerSocket.on('message', (data) => {
     console.log(`아웃게임 서버로부터 받은 메시지: ${data}`);
 });
 
-
-
-export async function getServerSideProps(ctx) {
-    return {
-        props: {
-            params: {
-                serverIP : process.env.SERVER_IP,
-                serverPort :process.env.SERVER_PORT
-            }
-        }
-    }
-}
-
-export default Index;
