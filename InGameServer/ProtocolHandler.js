@@ -82,7 +82,7 @@ function UpdatePlayerPos(socket, jsonData)
 {
     const json = new SyncPositionPacket(jsonData.roomID, jsonData.from, jsonData.position, jsonData.velocity, jsonData.rotation, jsonData.timeStamp);
     const dataBuffer = classToByte(json);
-    broadcast(dataBuffer, socket,jsonData.roomID);
+    broadcast(dataBuffer, socket, jsonData.roomID);
 
     const userList = NetworkObjectManager.getObjects();
     userList.forEach((element)=>{
@@ -143,8 +143,6 @@ function CountDown(protocol, roomID) {
             {
                 const dataBuffer = classToByte(new Packet(protocol, roomID));
                 broadcastAll(dataBuffer, roomID);
-                const sockets = SocketManager.getSockets();
-                gameRoomList.set(roomID, {userList : sockets, startTime : Date.now(), goalCount : 0, gameResult : new Map()});
             }
             else if(protocol === Protocol.GameEnd)
             {
