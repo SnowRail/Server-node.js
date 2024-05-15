@@ -30,20 +30,8 @@ const idList = [];
 
 const server = net.createServer((socket) =>
 {
-    let num = 0;
-    do {
-        num = Math.floor(Math.random() * (100 - 0 + 1)) + 0;
-    } while(idList.includes(num));
-    idList.push(num);
-    
-    
-    socket.clientID = num;
-    socket.syncCount = 0;
-    SocketManager.addSocket(socket);
 
     logger.info(`새로운 클라이언트 접속`);
-    logger.info('클라이언트 ID : ' + socket.clientID);
-
     // FirstConn(socket, num);
 
     let recvData = '';

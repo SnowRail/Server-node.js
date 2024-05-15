@@ -32,6 +32,7 @@ function SetPlayerInfo(socket, jsonData)
 {
     socket.clientID = jsonData.from;
     socket.roomID = jsonData.roomID;
+    SocketManager.addSocket(socket);
     const room = gameRoomList.get(socket.roomID);
     sema.take(function(){
         room.readycnt++;
