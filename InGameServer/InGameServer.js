@@ -1,3 +1,7 @@
+const express = require('express');
+const http = require('http');
+const {Server} = require("socket.io");
+
 const process = require('process');
 const net = require('net');
 const Protocol = require('./Protocol');
