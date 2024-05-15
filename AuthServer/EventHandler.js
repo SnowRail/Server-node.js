@@ -274,9 +274,6 @@ function makeRoomID(){
 }
 
 function getMatchList(userList) {
-    //const keyList = Array.from(userList.keys());
-    //const sendList = []; 
-
     const promises = userList.map(id => {
         return new Promise((resolve, reject) => {
             const player = getPlayer(id);
