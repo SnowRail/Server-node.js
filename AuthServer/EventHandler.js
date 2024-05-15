@@ -153,7 +153,7 @@ function SetName(socket, msg) // name change
     }
 }
 
-function MatchMaking(msg, tcpClient)
+function MatchMaking(msg)
 {
     const userData = JSON.parse(msg);
     const player = getPlayer(userData.id);
@@ -187,14 +187,12 @@ function MatchMaking(msg, tcpClient)
     {
         matchList.processed = true; // 처리 플래그 설정
         processMatchList(matchList, firstRoomID);
-        //tcpClient.write('{"roomID":' + firstRoomID + ',"playerList":' + JSON.stringify(matchList) + '}');
     }
     else if(!matchList.timeoutId)
     {
         const timeoutId = setTimeout(() => {
             if (!matchList.processed) {
                 processMatchList(matchList, firstRoomID);
-                //tcpClient.write('{"roomID":' + firstRoomID + ',"playerList":' + JSON.stringify(matchList) + '}');
             }
         }, 20000); // 20초 (20000ms) 후에 실행
 
@@ -279,7 +277,7 @@ function getMatchList(userList, roomID) {
                     resolve();
                 }
                 else {
-                    const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart, roomID);
+                    const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
                     resolve(userInfo);
                 }
             });
