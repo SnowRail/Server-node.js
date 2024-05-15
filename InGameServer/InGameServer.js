@@ -1,21 +1,15 @@
+const dotenv = require('dotenv');
+dotenv.config({ path: './.env' });
+const process = require('process');
 const net = require('net');
 const Protocol = require('./Protocol');
 const SocketManager = require('./SoketManager');
-const process = require('process');
 const logger = require('./logger');
 
-
-const dotenv = require('dotenv');
-dotenv.config({ path: './.env' });
 const serverIP = process.env.SERVER_IP;
 const serverPORT = process.env.SERVER_PORT;
 const io = require('socket.io-client');
-const interServerSocket = io('http://'+serverIP+':'+serverPORT, {
-    reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
-    reconnectionAttempts: Infinity
-});
+const interServerSocket = io('http://'+serverIP+':'+serverPORT);
 
 const {
     FirstConn,
