@@ -15,7 +15,6 @@ const {
     SendKeyValue,
     Respawn,
 } = require('./ProtocolHandler');
-const { log } = require('console');
 
 const idList = [];
 
@@ -126,45 +125,5 @@ server.listen(30303,() =>
     console.log('TCP 서버가 30303번 포트에서 실행 중입니다.');
 }).on('error',(err)=>{
     logger.error('서버 에러 : ', err);
-    process.exit(1);
-});
-
-
-
-const outgameServer = net.createServer((socket) => {
-    socket.write('반갑습니다');
-
-    socket.on('data', (data) => {
-        console.log('outgameServer : ', msg);
-        //const msg = data.toString();
-        // const receivedData = JSON.parse(msg);
-        // const roomID = receivedData.roomID;
-        // const playerList = receivedData.playerList;
-        // playerList.forEach((player) => {
-        //     const socket = SocketManager.getSocketById(player.id);
-        //     if(socket)
-        //     {
-        //         // FirstConn(socket.player.id);
-        //     }
-        // });
-        
-    });
-
-
-    socket.on('end',() =>
-    {
-        logger.info(`outgame 접속 종료`);
-    });
-
-    socket.on('error',(err)=>
-    {
-        logger.error('outgame 에러 : ', err);
-    });
-});
-
-outgameServer.listen(30304, () => {
-    console.log('TCP 서버가 30304번 포트에서 실행 중입니다.');
-}).on('error', (err) => {
-    logger.error('outgameServer 에러 : ', err);
     process.exit(1);
 });

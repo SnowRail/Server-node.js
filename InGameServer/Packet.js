@@ -48,9 +48,9 @@ class CountDownPacket extends Packet {
 }
 
 class GameResultPacket extends Packet {
-    constructor(result, endTime) {
+    constructor(resultList, endTime) {
         super(Protocol.GameEnd);
-        this.result = result;
+        this.resultList = resultList;
         this.endTime = endTime;
     }
 }
