@@ -67,6 +67,12 @@ io.on('connection', (socket) => {
         Disconnect(socket);
     });
 
+    // ------ InGameServer --------
+    socket.on('message', (data) => {
+        logger.info('ingame message : ' + data);
+        SetInGameServer(socket);
+    })
+
 });
 
 server.listen(10101, () => {    
