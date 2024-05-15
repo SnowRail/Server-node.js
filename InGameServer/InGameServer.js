@@ -1,11 +1,15 @@
-const express = require('express');
-const http = require('http');
-const {Server} = require("socket.io");
-
 const process = require('process');
 const net = require('net');
 const Protocol = require('./Protocol');
 const SocketManager = require('./SoketManager');
+const logger = require('./logger');
+
+const dotenv = require('dotenv');
+dotenv.config({ path: './.env' });
+const serverIP = process.env.SERVER_IP;
+const serverPORT = process.env.SERVER_PORT;
+const io2 = require('socket.io-client');
+const interServerSocket = io2('http://'+serverIP+':'+serverPORT);
 const logger = require('./logger');
 
 const {
@@ -29,7 +33,7 @@ const server = net.createServer((socket) =>
         num = Math.floor(Math.random() * (100 - 0 + 1)) + 0;
     } while(idList.includes(num));
     idList.push(num);
-
+    
     
     socket.clientID = num;
     socket.syncCount = 0;
@@ -129,37 +133,10 @@ const server = net.createServer((socket) =>
 server.listen(30303,() => 
 {
     console.log('TCP 서버가 30303번 포트에서 실행 중입니다.');
+    console.log("서버 ip : ", serverIP);
 }).on('error',(err)=>{
     logger.error('서버 에러 : ', err);
     process.exit(1);
-});
-
-
-// OutGameServer 연결
-const server2 = http.createServer(express());
-const interServerIO = new Server(server2);
-
-interServerIO.on('connection', (socket) => {
-    logger.info(`InGame 서버에서 접속: ${socket.handshake.address}`);
-
-    socket.on('message', (data) => {
-        logger.info(`InGame 서버로부터 받은 메시지: ${data}`);
-        // 받은 메시지 처리 로직 추가
-    });
-
-    socket.on('enterInGame',(data) => {
-        console.log("받았습니다. : " , data);
-        AddGameRoomList(data);
-    });
-
-    // InGame 서버로 메시지 전송
-    socket.emit('message', '안녕하세요, InGame 서버!');
-});
-
-server2.listen(30304, () => {    
-    logger.info('서버가 30304번 포트에서 실행 중입니다. ');
-}).on('error', (err) => {
-    logger.error('Server error : ', err);
 });
 
 
