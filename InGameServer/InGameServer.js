@@ -27,7 +27,6 @@ const {
     SendKeyValue,
     Respawn,
 } = require('./ProtocolHandler');
-const { log } = require('console');
 
 const idList = [];
 

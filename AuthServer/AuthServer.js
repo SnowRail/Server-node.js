@@ -6,7 +6,7 @@ const {Server} = require("socket.io");
 const io = new Server(server);
 
 const net = require('net');
-const tcpClient = new net.Socket();
+//const tcpClient = new net.Socket();
 
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
