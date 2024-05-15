@@ -53,7 +53,6 @@ module.exports = {
     LoadGameScenePacket,
     KeyPacket,
     SyncPositionPacket,
-    PlayerMovePacket,
     CountDownPacket,
     GameResultPacket
 }

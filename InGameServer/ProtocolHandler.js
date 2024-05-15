@@ -7,14 +7,12 @@ const {
     Packet, 
     KeyPacket,
     SyncPositionPacket, 
-    PlayerMovePacket, 
     CountDownPacket, 
     LoadGameScenePacket,
     GameResultPacket
  } = require('./Packet');
 const { Vector3 } = require('./UnityClass');
 const logger = require('./logger');
-const semaphore = require('semaphore');
 const sema = require('semaphore')(1);
 
 let Goal = false;
