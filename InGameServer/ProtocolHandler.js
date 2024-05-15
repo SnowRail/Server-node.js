@@ -25,6 +25,7 @@ function AddGameRoomList(data)
 {
     const roomData = JSON.parse(data);
     gameRoomList.set(roomData.roomID, {playerList : roomData.playerList, startTime : 0, goalCount : 0, gameResult : new Map()});
+    console.log(gameRoomList.get(roomData.roomID));
 }
 
 
