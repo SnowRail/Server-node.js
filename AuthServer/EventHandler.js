@@ -183,7 +183,7 @@ function MatchMaking(msg, tcpClient)
     player.room = firstRoomID;
     player.state = 'matching';
 
-    if(matchList.length === 2 && !matchList.processed)
+    if(matchList.length === 5 && !matchList.processed)
     {
         matchList.processed = true; // 처리 플래그 설정
         processMatchList(matchList, firstRoomID);
@@ -229,16 +229,6 @@ function processMatchList(matchList, roomID) {
         readyRoomList.delete(roomID);
         // MoveInGameScene(sendList,roomID,tcpClient)
     });
-}
-
-function MoveInGameScene(sendList,roomID,tcpClient)
-{
-    // const data = {
-    //     roomID : roomID,
-    //     playerList : sendList
-    // };
-    // const jsonData = JSON.stringify(data);
-    // tcpClient.write(jsonData);
 }
 
 function ReadyGame(msg) {
