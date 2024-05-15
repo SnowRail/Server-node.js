@@ -143,12 +143,14 @@ server.listen(30303,() =>
 interServerSocket.on('connect', (socket) => {
     console.log('서버에 접속했습니다.');
     socket.emit('message', '안녕하세요, 서버!');
-  });
 
-  interServerSocket.on('message', (data) => {
-    console.log('서버로부터 받은 메시지:', data);
-  });
+    interServerSocket.on('message', (data) => {
+        console.log('서버로부터 받은 메시지:', data);
+    });
+    
+    interServerSocket.on('disconnect', () => {
+        console.log('서버 접속이 해제되었습니다.');
+    });
+});
+
   
-  interServerSocket.on('disconnect', () => {
-    console.log('서버 접속이 해제되었습니다.');
-  });
