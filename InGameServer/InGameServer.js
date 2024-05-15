@@ -150,6 +150,7 @@ interServerSocket.on('connect', () => {
 
     interServerSocket.on('enterInGame', (data) => {
         console.log('enterInGame 받은 메시지:', data);
+        AddGameRoomList(data);
     });
     
     interServerSocket.on('disconnect', () => {
