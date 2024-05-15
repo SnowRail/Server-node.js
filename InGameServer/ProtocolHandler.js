@@ -8,7 +8,6 @@ const {
     KeyPacket,
     SyncPositionPacket, 
     CountDownPacket, 
-    LoadGameScenePacket,
     GameResultPacket
  } = require('./Packet');
 const { Vector3 } = require('./UnityClass');
@@ -38,7 +37,7 @@ function SetPlayerInfo(socket, jsonData)
         room.readycnt++;
         sema.leave();
     });
-    const json2 = new LoadGameScenePacket(socket.roomID, id, userCount, idList);
+    const json2 = new Packet(Protocol.LoadGameScene, socket.roomID, jsonData.from);
     const dataBuffer2 = classToByte(json2);
     socket.write(dataBuffer2);
 
