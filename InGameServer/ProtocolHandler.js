@@ -142,7 +142,7 @@ function CountDown(protocol, roomID) {
             if(protocol === Protocol.GameStart)
             {
                 const dataBuffer = classToByte(new Packet(protocol, roomID));
-                // broadcastAll(dataBuffer);
+                broadcastAll(dataBuffer, roomID);
                 const sockets = SocketManager.getSockets();
                 gameRoomList.set(roomID, {userList : sockets, startTime : Date.now(), goalCount : 0, gameResult : new Map()});
             }
