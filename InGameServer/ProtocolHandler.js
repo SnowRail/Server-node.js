@@ -240,7 +240,6 @@ module.exports = {
     FirstConn,
     UpdatePlayerPos,
     PlayerBreak,
-    UpdatePlayerDirection,
     PlayerDisconnect,
     PlayerGoal,
     CountDown,
