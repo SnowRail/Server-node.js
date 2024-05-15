@@ -174,7 +174,7 @@ function CountDown(protocol, roomID) {
 // }
 
 function PlayerGoal(id, roomID){
-    const gameRoom = gameRoomList.get(1000);
+    const gameRoom = gameRoomList.get(roomID);
     if(gameRoom !== undefined)
     {
         if (gameRoom.goalCount === 0) {
