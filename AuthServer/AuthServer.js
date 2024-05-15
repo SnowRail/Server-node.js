@@ -8,8 +8,7 @@ const io = new Server(server);
 const net = require('net');
 
 
-const dotenv = require('dotenv');
-dotenv.config({ path: './.env' });
+const dotenv = require('dotenv').config({ path: './.env' });
 const serverIP = process.env.SERVER_IP;
 const serverPORT = process.env.SERVER_PORT;
 const io2 = require('socket.io-client');
@@ -87,6 +86,7 @@ server.listen(10101, () => {
 // InGameServer와 웹소켓으로 통신
 interServerSocket.on('connect', (intersocket) => {
     console.log('아웃게임 서버에 접속했습니다.');
+    
     SetInGameServer(intersocket);
 });
 
