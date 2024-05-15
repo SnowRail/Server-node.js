@@ -28,6 +28,13 @@ function AddGameRoomList(data)
     console.log(gameRoomList.get(roomData.roomID));
 }
 
+function SetPlayerInfo(socket, jsonData)
+{
+    socket.clientID = jsonData.from;
+    socket.roomID = jsonData.roomID;
+    console.log("아이디 잘 받아오나?? : ",socket.clientID);
+}
+
 
 function FirstConn(socket, id){ 
     // first 전송 - 아이디, otherplayerconnect~
@@ -58,7 +65,7 @@ function FirstConn(socket, id){
 
 function UpdatePlayerPos(socket, jsonData)
 {
-    const json = new SyncPositionPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.rotation, jsonData.timeStamp);
+    const json = new SyncPositionPacket(jsonData.roomID, jsonData.from, jsonData.position, jsonData.velocity, jsonData.rotation, jsonData.timeStamp);
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer, socket);
 
@@ -74,7 +81,7 @@ function UpdatePlayerPos(socket, jsonData)
 
 function PlayerBreak(socket, jsonData)
 {
-    const json = new Packet(Protocol.PlayerBreak, jsonData.from);
+    const json = new Packet(Protocol.PlayerBreak, jsonData.roomID, jsonData.from);
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer, socket);
 }
@@ -88,7 +95,7 @@ function UpdatePlayerDirection(socket, id, pos, direction)
 
 function PlayerDisconnect(socket, id){
 
-    const json = new Packet(Protocol.PlayerDisconnect,id);
+    const json = new Packet(Protocol.PlayerDisconnect, id);
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer,socket);
 
@@ -113,11 +120,11 @@ function CountDown(protocol, id) {
         let buffer;
         if(protocol === Protocol.GameStart)
         {
-            buffer = classToByte(new CountDownPacket(Protocol.GameStartCountDown, count));
+            buffer = classToByte(new CountDownPacket(Protocol.GameStartCountDown, jsonData.roomID, count));
         }
         else if(protocol === Protocol.GameEnd)
         {
-            buffer = classToByte(new CountDownPacket(Protocol.GameEndCountDown, count));
+            buffer = classToByte(new CountDownPacket(Protocol.GameEndCountDown, jsonData.roomID, count));
         }
         broadcastAll(buffer);
 
@@ -126,7 +133,7 @@ function CountDown(protocol, id) {
             logger.info("카운트다운 종료~");
             if(protocol === Protocol.GameStart)
             {
-                const dataBuffer = classToByte(new Packet(protocol));
+                const dataBuffer = classToByte(new Packet(protocol, jsonData.roomID));
                 broadcastAll(dataBuffer);
                 const sockets = SocketManager.getSockets();
                 gameRoomList.set(1000, {userList : sockets, startTime : Date.now(), goalCount : 0, gameResult : new Map()});
@@ -228,6 +235,7 @@ function classToByte(json){
 
 module.exports = {
     AddGameRoomList,
+    SetPlayerInfo,
     FirstConn,
     UpdatePlayerPos,
     PlayerBreak,
