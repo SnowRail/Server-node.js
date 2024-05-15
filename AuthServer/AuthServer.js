@@ -6,9 +6,7 @@ const {Server} = require("socket.io");
 const io = new Server(server);
 
 const net = require('net');
-
-
-const dotenv = require('dotenv').config({ path: './.env' });
+require('dotenv').config({ path: './.env' });
 const serverIP = process.env.SERVER_IP;
 const serverPORT = process.env.SERVER_PORT;
 const io2 = require('socket.io-client');
@@ -74,26 +72,16 @@ io.on('connection', (socket) => {
         Disconnect(socket);
     });
 
+    // ------ InGameServer --------
+    socket.on('message', (data) => {
+        logger.info('ingame message : ' + data);
+        SetInGameServer(socket);
+    })
+
 });
 
 server.listen(10101, () => {    
     logger.info('서버가 10101번 포트에서 실행 중입니다. ');
 }).on('error', (err) => {
     logger.error('Server error : ', err);
-});
-
-
-// InGameServer와 웹소켓으로 통신
-interServerSocket.on('connect', (intersocket) => {
-    console.log('아웃게임 서버에 접속했습니다.');
-    
-    SetInGameServer(intersocket);
-});
-
-interServerSocket.on('connect_error', (error) => {
-    console.error('아웃게임 서버 연결 에러:', error);
-});
-
-interServerSocket.on('message', (data) => {
-    console.log(`아웃게임 서버로부터 받은 메시지: ${data}`);
 });
