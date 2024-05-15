@@ -24,6 +24,8 @@ const matchRoomList = new Map();
 const readyRoomList = new Map();
 const gameRoomList = new Map();
 
+let idList = [];
+
 connection.connect((err) => {
     if (err) {
         logger.error('MySQL connection error:', err);
@@ -201,11 +203,10 @@ function MatchMaking(msg, tcpClient)
 }
 
 function processMatchList(matchList, roomID) {
-    const matchPromise = getMatchList(matchList);
+    const matchPromise = getMatchList(matchList,roomID);
     matchPromise.then(sendList => {
         sendList.forEach(element => {
             const user = getPlayer(element.id);
-            // user.socket.emit('enterRoomSucc', JSON.stringify(sendList)); 
             user.socket.emit('enterRoomSucc', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(sendList) + '}' ); 
             user.state = 'ready';      
         });
@@ -218,25 +219,14 @@ function processMatchList(matchList, roomID) {
         setTimeout(() => {
             sendList.forEach(element => {
                 const user = getPlayer(element.id);
-                user.socket.emit('moveInGameScene', 'Move to in-game scene');
+                user.socket.emit('loadGameScene', 'Move to in-game scene');
                 user.state = 'ingame'
             });
             logger.info('Move to in-game scene');
         }, 5000); // 5초 (5000ms) 후에 실행
         gameRoomList.set(roomID, {userList : matchList});
         readyRoomList.delete(roomID);
-        // MoveInGameScene(sendList,roomID,tcpClient)
     });
-}
-
-function MoveInGameScene(sendList,roomID,tcpClient)
-{
-    // const data = {
-    //     roomID : roomID,
-    //     playerList : sendList
-    // };
-    // const jsonData = JSON.stringify(data);
-    // tcpClient.write(jsonData);
 }
 
 function ReadyGame(msg) {
@@ -273,7 +263,8 @@ function makeRoomID(){
     return num;
 }
 
-function getMatchList(userList) {
+function getMatchList(userList, roomID) {
+
     const promises = userList.map(id => {
         return new Promise((resolve, reject) => {
             const player = getPlayer(id);
@@ -288,7 +279,7 @@ function getMatchList(userList) {
                     resolve();
                 }
                 else {
-                    const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
+                    const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart, roomID);
                     resolve(userInfo);
                 }
             });

@@ -4,6 +4,18 @@ const SocketManager = require('./SoketManager');
 const process = require('process');
 const logger = require('./logger');
 
+const dotenv = require('dotenv');
+dotenv.config({ path: './.env' });
+const serverIP = process.env.SERVER_IP;
+const serverPORT = process.env.SERVER_PORT;
+const io = require('socket.io-client');
+const socket = io('http://'+serverIP+":"+serverPORT, {
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    reconnectionAttempts: Infinity
+});
+
 const {
     FirstConn,
     UpdatePlayerPos,
@@ -126,4 +138,18 @@ server.listen(30303,() =>
 }).on('error',(err)=>{
     logger.error('서버 에러 : ', err);
     process.exit(1);
+});
+
+
+// OutGameServer 연결
+socket.on('connect', () => {
+    console.log('아웃게임 서버에 접속했습니다.');
+});
+
+socket.on('connect_error', (error) => {
+    console.error('아웃게임 서버 연결 에러:', error);
+});
+
+socket.on('message', (data) => {
+    console.log(`아웃게임 서버로부터 받은 메시지: ${data}`);
 });

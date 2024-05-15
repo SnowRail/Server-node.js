@@ -63,6 +63,12 @@ io.on('connection', (socket) => {
         // TODO 접속한 플레이어 리스트에서 삭제하기
         Disconnect(socket);
     });
+
+    socket.on('close', (reason) => {
+        logger.info(`클라이언트 연결 종료 : ${socket.handshake.address}, 이유 : ${reason}`);
+        Disconnect(socket);
+    });
+
 });
 
 server.listen(10101, () => {    
@@ -72,23 +78,24 @@ server.listen(10101, () => {
 });
 
 
-const tcpClient = net.connect(30304, serverIP, () => {
-    console.log('TCP 서버에 연결되었습니다.');
-    tcpClient.write('안녕하세요');
+// InGameServer와 웹소켓으로 통신
+const server2 = http.createServer(express());
+const interServerIO = new Server(server2);
+
+interServerIO.on('connection', (socket) => {
+    logger.info(`InGame 서버에서 접속: ${socket.handshake.address}`);
+
+    socket.on('message', (data) => {
+        logger.info(`InGame 서버로부터 받은 메시지: ${data}`);
+        // 받은 메시지 처리 로직 추가
+    });
+
+    // InGame 서버로 메시지 전송
+    socket.emit('message', '안녕하세요, InGame 서버!');
 });
 
-tcpClient.on('data', (data) => {
-    console.log('TCP 서버로부터 온 데이터 : ', data.toString());
-});
-
-tcpClient.on('close', () => {
-    console.log('tcp Connection closed');
-});
-
-tcpClient.on('end', () => {
-    console.log('Server closed the connection');
-});
-
-tcpClient.on('error', (err) => {
-    console.error('Error occurred:', err.message);
+server2.listen(30304, () => {    
+    logger.info('서버가 30304번 포트에서 실행 중입니다. ');
+}).on('error', (err) => {
+    logger.error('Server error : ', err);
 });
