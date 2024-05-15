@@ -29,6 +29,8 @@ const server = net.createServer((socket) =>
         num = Math.floor(Math.random() * (100 - 0 + 1)) + 0;
     } while(idList.includes(num));
     idList.push(num);
+
+    
     socket.clientID = num;
     socket.syncCount = 0;
     SocketManager.addSocket(socket);
@@ -146,6 +148,7 @@ interServerIO.on('connection', (socket) => {
     });
 
     socket.on('enterInGame',(data) => {
+        console.log("받았습니다. : " , data);
         AddGameRoomList(data);
     });
 

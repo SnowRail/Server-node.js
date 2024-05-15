@@ -6,11 +6,14 @@ const {Server} = require("socket.io");
 const io = new Server(server);
 
 const net = require('net');
-//const tcpClient = new net.Socket();
+
 
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
 const serverIP = process.env.SERVER_IP;
+const serverPORT = process.env.SERVER_PORT;
+const io2 = require('socket.io-client');
+const interServerSocket = io2('http://'+serverIP+':'+serverPORT);
 const logger = require('./logger');
 
 const {   
