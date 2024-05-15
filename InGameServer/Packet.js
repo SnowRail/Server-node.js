@@ -33,14 +33,6 @@ class SyncPositionPacket extends Packet {
     }
 }
 
-class PlayerMovePacket extends Packet {
-    constructor(playerPos, playerDirection, id) {
-        super(Protocol.PlayerMove, id);
-        this.position = playerPos;
-        this.direction = playerDirection;
-    }
-}
-
 class CountDownPacket extends Packet {
     constructor(protocol, roomID, count) {
         super(protocol, roomID);
