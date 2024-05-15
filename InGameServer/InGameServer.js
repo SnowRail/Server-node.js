@@ -6,8 +6,8 @@ const logger = require('./logger');
 
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
-let serverIP = process.env.SERVER_IP;
-let serverPORT = process.env.SERVER_PORT;
+const serverIP = process.env.NEXT_PUBLIC_SERVER_IP;
+const serverPORT = process.env.NEXT_PUBLIC_SERVER_PORT;
 const io = require('socket.io-client');
 const interServerSocket = io('http://'+serverIP+':'+serverPORT, {
     reconnection: true,
