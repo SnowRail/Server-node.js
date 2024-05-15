@@ -2,7 +2,6 @@ const process = require('process');
 const net = require('net');
 const Protocol = require('./Protocol');
 const SocketManager = require('./SoketManager');
-const logger = require('./logger');
 
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
