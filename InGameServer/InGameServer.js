@@ -4,6 +4,13 @@ const SocketManager = require('./SoketManager');
 const process = require('process');
 const logger = require('./logger');
 
+const dotenv = require('dotenv');
+dotenv.config({ path: './.env' });
+const serverIP = process.env.SERVER_IP;
+const serverPORT = process.env.SERVER_PORT;
+const io = require('socket.io-client');
+const socket = io('http://'+serverIP+":"+serverPORT);
+
 const {
     FirstConn,
     UpdatePlayerPos,
@@ -130,41 +137,11 @@ server.listen(30303,() =>
 });
 
 
-
-const outgameServer = net.createServer((socket) => {
-    socket.write('반갑습니다');
-
-    socket.on('data', (data) => {
-        console.log('outgameServer : ', data);
-        //const msg = data.toString();
-        // const receivedData = JSON.parse(msg);
-        // const roomID = receivedData.roomID;
-        // const playerList = receivedData.playerList;
-        // playerList.forEach((player) => {
-        //     const socket = SocketManager.getSocketById(player.id);
-        //     if(socket)
-        //     {
-        //         // FirstConn(socket.player.id);
-        //     }
-        // });
-        
-    });
-
-    //
-    socket.on('end',() =>
-    {
-        logger.info(`outgame 접속 종료`);
-    });
-
-    socket.on('error',(err)=>
-    {
-        logger.error('outgame 에러 : ', err);
-    });
+// OutGameServer 연결
+socket.on('connect', () => {
+    console.log('아웃게임 서버에 접속했습니다.');
 });
 
-outgameServer.listen(30304, () => {
-    console.log('TCP 서버가 30304번 포트에서 실행 중입니다.');
-}).on('error', (err) => {
-    logger.error('outgameServer 에러 : ', err);
-    process.exit(1);
+socket.on('message', (data) => {
+    console.log(`아웃게임 서버로부터 받은 메시지: ${data}`);
 });
