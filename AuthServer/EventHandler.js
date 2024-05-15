@@ -187,14 +187,14 @@ function MatchMaking(msg, tcpClient)
     {
         matchList.processed = true; // 처리 플래그 설정
         processMatchList(matchList, firstRoomID);
-        tcpClient.write('{"roomID":' + firstRoomID + ',"playerList":' + JSON.stringify(matchList) + '}');
+        //tcpClient.write('{"roomID":' + firstRoomID + ',"playerList":' + JSON.stringify(matchList) + '}');
     }
     else if(!matchList.timeoutId)
     {
         const timeoutId = setTimeout(() => {
             if (!matchList.processed) {
                 processMatchList(matchList, firstRoomID);
-                tcpClient.write('{"roomID":' + firstRoomID + ',"playerList":' + JSON.stringify(matchList) + '}');
+                //tcpClient.write('{"roomID":' + firstRoomID + ',"playerList":' + JSON.stringify(matchList) + '}');
             }
         }, 20000); // 20초 (20000ms) 후에 실행
 
