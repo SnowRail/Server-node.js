@@ -21,6 +21,13 @@ let Start = false;
 
 const gameRoomList = new Map(); // {roomID, userList, startTime, goalCount, gameResult}
 
+function AddGameRoomList(data)
+{
+    const roomData = JSON.parse(data);
+    gameRoomList.set(roomData.roomID, {playerList : roomData.playerList, startTime : 0, goalCount : 0, gameResult : new Map()});
+}
+
+
 function FirstConn(socket, id){ 
     // first 전송 - 아이디, otherplayerconnect
     const json1 = new Packet(Protocol.PlayerReconnect, id);
@@ -219,6 +226,7 @@ function classToByte(json){
 }
 
 module.exports = {
+    AddGameRoomList,
     FirstConn,
     UpdatePlayerPos,
     PlayerBreak,

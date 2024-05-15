@@ -31,6 +31,7 @@ io.on('connection', (socket) => {
         logger.info('login : ' + JSON.stringify(msg));
         Login(socket, msg);
     });
+    
     socket.on('loginSucc', (msg) => { // email 정보
         logger.info('login : ' + JSON.stringify(msg));
         Login(socket, msg);
@@ -53,7 +54,8 @@ io.on('connection', (socket) => {
     
     socket.on('matching', (msg) => { // client의 matching 요청
         logger.info('matching : ' + JSON.stringify(msg));
-        MatchMaking(msg, tcpClient);
+        MatchMaking(msg);
+        
     });
 
     socket.on('readyGame', (msg) => {
@@ -76,16 +78,16 @@ io.on('connection', (socket) => {
 
 server.listen(10101, () => {    
     logger.info('서버가 10101번 포트에서 실행 중입니다. ');
-    console.log('아이피:', serverIP );
-    console.log('포트 :', serverPORT );
 }).on('error', (err) => {
     logger.error('Server error : ', err);
 });
 
 
 // InGameServer와 웹소켓으로 통신
-interServerSocket.on('connect', () => {
+interServerSocket.on('connect', (intersocket) => {
     console.log('아웃게임 서버에 접속했습니다.');
+
+    
 });
 
 interServerSocket.on('connect_error', (error) => {
