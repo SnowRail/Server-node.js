@@ -145,6 +145,10 @@ interServerIO.on('connection', (socket) => {
         // 받은 메시지 처리 로직 추가
     });
 
+    socket.on('enterInGame',(data) => {
+        AddGameRoomList(data);
+    });
+
     // InGame 서버로 메시지 전송
     socket.emit('message', '안녕하세요, InGame 서버!');
 });
