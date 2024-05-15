@@ -32,7 +32,7 @@ function FirstConn(socket, id){
     // first 전송 - 아이디, otherplayerconnect
     const json1 = new Packet(Protocol.PlayerReconnect, id);
     const dataBuffer1 = classToByte(json1);
-
+    
     broadcast(dataBuffer1, socket);
     
 
