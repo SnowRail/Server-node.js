@@ -183,7 +183,7 @@ function MatchMaking(msg, tcpClient)
     player.room = firstRoomID;
     player.state = 'matching';
 
-    if(matchList.length === 5 && !matchList.processed)
+    if(matchList.length === 2 && !matchList.processed)
     {
         matchList.processed = true; // 처리 플래그 설정
         processMatchList(matchList, firstRoomID);
@@ -207,7 +207,6 @@ function processMatchList(matchList, roomID) {
     matchPromise.then(sendList => {
         sendList.forEach(element => {
             const user = getPlayer(element.id);
-            // user.socket.emit('enterRoomSucc', JSON.stringify(sendList)); 
             user.socket.emit('enterRoomSucc', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(sendList) + '}' ); 
             user.state = 'ready';      
         });
@@ -227,7 +226,6 @@ function processMatchList(matchList, roomID) {
         }, 5000); // 5초 (5000ms) 후에 실행
         gameRoomList.set(roomID, {userList : matchList});
         readyRoomList.delete(roomID);
-        // MoveInGameScene(sendList,roomID,tcpClient)
     });
 }
 
@@ -266,8 +264,6 @@ function makeRoomID(){
 }
 
 function getMatchList(userList, roomID) {
-    //const keyList = Array.from(userList.keys());
-    //const sendList = []; 
 
     const promises = userList.map(id => {
         return new Promise((resolve, reject) => {
@@ -283,13 +279,7 @@ function getMatchList(userList, roomID) {
                     resolve();
                 }
                 else {
-                    // let num = 0;
-                    // do {
-                    //     num = Math.floor(Math.random() * (100 - 0 + 1)) + 0;
-                    // } while(idList.includes(num));
-                    // idList.push(num);
                     const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart, roomID);
-                    // const userInfo = new MatchPacket(rows[0].id, num, rows[0].curCart, roomID);
                     resolve(userInfo);
                 }
             });
