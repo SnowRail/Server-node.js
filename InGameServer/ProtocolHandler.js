@@ -25,6 +25,8 @@ function AddGameRoomList(data)
     const roomData = JSON.parse(data);
     gameRoomList.set(roomData.roomID, {playerList : roomData.playerList, readycnt:0, startTime : 0, goalCount : 0, gameResult : new Map()});
     console.log(gameRoomList.get(roomData.roomID));
+
+    
 }
 
 function SetPlayerInfo(socket, jsonData)
@@ -36,6 +38,11 @@ function SetPlayerInfo(socket, jsonData)
         room.readycnt++;
         sema.leave();
     });
+    const json2 = new LoadGameScenePacket(socket.roomID, id, userCount, idList);
+    const dataBuffer2 = classToByte(json2);
+    socket.write(dataBuffer2);
+
+    
     if(room.readycnt === room.playerList.length)
     {
         CountDown(Protocol.GameStart, socket.roomID);
