@@ -15,6 +15,7 @@ const {
     //  ----websocket----
     AddGameRoomList,
     //  -------tcp--------
+    SetPlayerInfo,
     FirstConn,
     UpdatePlayerPos,
     PlayerBreak,
@@ -23,7 +24,6 @@ const {
     CountDown,
     ResetServer,
     SendKeyValue,
-    Respawn,
 } = require('./ProtocolHandler');
 
 const idList = [];
@@ -44,7 +44,7 @@ const server = net.createServer((socket) =>
     logger.info(`새로운 클라이언트 접속`);
     logger.info('클라이언트 ID : ' + socket.clientID);
 
-    FirstConn(socket, num);
+    // FirstConn(socket, num);
 
     let recvData = '';
     socket.on('data',(data)=> 
@@ -69,7 +69,7 @@ const server = net.createServer((socket) =>
                 
                 switch(protocol){
                     case Protocol.Login:
-                        // todo login
+                        SetPlayerInfo(socket,jsonData);
                         break;
                     case Protocol.Logout:
                         // todo logout
@@ -82,7 +82,7 @@ const server = net.createServer((socket) =>
                         break;
                     case Protocol.GameStart:
                         //GameStartCountDown(protocol);t
-                        CountDown(protocol);
+                        CountDown(protocol, jsonData.roomID);
                         break;
                     case Protocol.PlayerReady:
                         // TODO PlayerReady
@@ -92,7 +92,7 @@ const server = net.createServer((socket) =>
                         SendKeyValue(socket, jsonData);
                         break;
                     case Protocol.PlayerGoal:
-                        PlayerGoal(jsonData.from);
+                        PlayerGoal(jsonData.from,jsonData.roomID);
                         break;
                     case Protocol.Break:
                         PlayerBreak(socket, jsonData);
@@ -100,10 +100,6 @@ const server = net.createServer((socket) =>
                     case Protocol.Sync:
                         UpdatePlayerPos(socket, jsonData);
                         break;
-                    case Protocol.Respawn:
-                        Respawn(socket, jsonData);
-                        break;
-    
                     case Protocol.ResetServer:
                         ResetServer()
                         break;
@@ -141,8 +137,8 @@ server.listen(30303,() =>
 });
 
 
-// outgameserver 연결
-
+// outgameserver 연결 
+//
 interServerSocket.on('connect', () => {
     console.log('서버에 접속했습니다.');
     interServerSocket.emit('message', '안녕하세요, 서버!');
