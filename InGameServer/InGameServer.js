@@ -4,10 +4,16 @@ const SocketManager = require('./SoketManager');
 const process = require('process');
 const logger = require('./logger');
 
+
+const Index = ({params}) => {
+	console.log("process.env.TEST_URL : " + params.serverIP);
+    console.log("process.env.TEST_URL : " + params.serverPort);
+}
+
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
-const serverIP = process.env.NEXT_PUBLIC_SERVER_IP;
-const serverPORT = process.env.NEXT_PUBLIC_SERVER_PORT;
+const serverIP = process.env.SERVER_IP;
+const serverPORT = process.env.SERVER_PORT;
 const io = require('socket.io-client');
 const interServerSocket = io('http://'+serverIP+':'+serverPORT, {
     reconnection: true,
@@ -155,3 +161,18 @@ interServerSocket.on('connect_error', (error) => {
 interServerSocket.on('message', (data) => {
     console.log(`아웃게임 서버로부터 받은 메시지: ${data}`);
 });
+
+
+
+export async function getServerSideProps(ctx) {
+    return {
+        props: {
+            params: {
+                serverIP : process.env.SERVER_IP,
+                serverPort :process.env.SERVER_PORT
+            }
+        }
+    }
+}
+
+export default Index;
