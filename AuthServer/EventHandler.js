@@ -37,8 +37,8 @@ connection.connect((err) => {
     }
 });
 
-function SetInGameClient(client) {
-    IngameClient = client;
+function SetInGameServer(server) {
+    IngameServer = server;
 }
 
 function Login(socket, msg) {
@@ -331,7 +331,7 @@ function Disconnect(socket) {
 // --------------- Server <-> Server -------------------------------
 function sendMatchList(roomID, matchList)
 {
-    IngameClient.emit('enterInGame', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(matchList) + '}');
+    IngameServer.emit('enterInGame', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(matchList) + '}');
 }
 
 module.exports = {
@@ -341,5 +341,5 @@ module.exports = {
     MatchMaking,
     ReadyGame,
     Disconnect,
-    SetInGameClient
+    SetInGameServer
 }

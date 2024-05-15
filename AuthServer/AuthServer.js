@@ -20,7 +20,7 @@ const {
     MatchMaking,
     ReadyGame,
     Disconnect, 
-    SetInGameClient
+    SetInGameServer
 } = require('./EventHandler');
 
 io.on('connection', (socket) => {
@@ -84,7 +84,7 @@ server.listen(10101, () => {
 // InGameServer와 웹소켓으로 통신
 interServerSocket.on('connect', (intersocket) => {
     console.log('아웃게임 서버에 접속했습니다.');
-
+    SetInGameServer(intersocket);
 });
 
 interServerSocket.on('connect_error', (error) => {
