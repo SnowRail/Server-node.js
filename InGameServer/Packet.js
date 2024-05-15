@@ -10,14 +10,14 @@ class Packet {
 
 class KeyPacket extends Packet {
     constructor(roomID, id, acc) {
-        super(Protocol.Key, id, roomID);
+        super(Protocol.Key, roomID, id);
         this.acceleration = acc;
     }
 }
 
 class SyncPositionPacket extends Packet {
     constructor(roomID, id, pos, vel, rot, timestamp) {
-        super(Protocol.Sync, id, roomID);
+        super(Protocol.Sync, roomID, id);
         this.position = pos;
         this.velocity = vel;
         this.rotation = rot;

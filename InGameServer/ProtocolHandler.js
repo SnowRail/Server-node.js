@@ -174,7 +174,7 @@ function CountDown(protocol, roomID) {
 // }
 
 function PlayerGoal(id, roomID){
-    const gameRoom = gameRoomList.get(1000);
+    const gameRoom = gameRoomList.get(roomID);
     if(gameRoom !== undefined)
     {
         if (gameRoom.goalCount === 0) {
@@ -182,7 +182,7 @@ function PlayerGoal(id, roomID){
         }
         sema.take(function() {
             gameRoom.goalCount++;
-            gameRoom.gameResult.set(String(id).toString(), {rank : gameRoom.goalCount, goalTime : Date.now() - gameRoom.startTime });
+            gameRoom.gameResult.set(id, {rank : gameRoom.goalCount, goalTime : Date.now() - gameRoom.startTime });
             console.log("goalID : " + id);
             sema.leave();
         }); 
