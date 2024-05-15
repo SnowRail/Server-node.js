@@ -15,6 +15,7 @@ const {
     //  ----websocket----
     AddGameRoomList,
     //  -------tcp--------
+    SetPlayerInfo,
     FirstConn,
     UpdatePlayerPos,
     PlayerBreak,
@@ -69,7 +70,7 @@ const server = net.createServer((socket) =>
                 
                 switch(protocol){
                     case Protocol.Login:
-                        // todo login
+                        SetPlayerInfo(socket,jsonData);
                         break;
                     case Protocol.Logout:
                         // todo logout
