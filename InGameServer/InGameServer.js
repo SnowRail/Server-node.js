@@ -1,15 +1,8 @@
-const dotenv = require('dotenv');
-dotenv.config({ path: './.env' });
 const process = require('process');
 const net = require('net');
 const Protocol = require('./Protocol');
 const SocketManager = require('./SoketManager');
 const logger = require('./logger');
-
-const serverIP = process.env.SERVER_IP;
-const serverPORT = process.env.SERVER_PORT;
-const io = require('socket.io-client');
-const interServerSocket = io('http://'+serverIP+':'+serverPORT);
 
 const {
     FirstConn,
@@ -139,15 +132,26 @@ server.listen(30303,() =>
 
 
 // OutGameServer 연결
-interServerSocket.on('connect', () => {
-    console.log('아웃게임 서버에 접속했습니다.');
+const server2 = http.createServer(express());
+const interServerIO = new Server(server2);
+
+interServerIO.on('connection', (socket) => {
+    logger.info(`InGame 서버에서 접속: ${socket.handshake.address}`);
+
+    socket.on('message', (data) => {
+        logger.info(`InGame 서버로부터 받은 메시지: ${data}`);
+        // 받은 메시지 처리 로직 추가
+    });
+
+    // InGame 서버로 메시지 전송
+    socket.emit('message', '안녕하세요, InGame 서버!');
 });
 
-interServerSocket.on('connect_error', (error) => {
-    console.error('아웃게임 서버 연결 에러:', error);
+server2.listen(30304, () => {    
+    logger.info('서버가 30304번 포트에서 실행 중입니다. ');
+}).on('error', (err) => {
+    logger.error('Server error : ', err);
 });
 
-interServerSocket.on('message', (data) => {
-    console.log(`아웃게임 서버로부터 받은 메시지: ${data}`);
-});
+
 
