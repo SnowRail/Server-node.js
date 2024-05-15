@@ -76,6 +76,8 @@ io.on('connection', (socket) => {
 
 server.listen(10101, () => {    
     logger.info('서버가 10101번 포트에서 실행 중입니다. ');
+    console.log('아이피:', serverIP );
+    console.log('포트 :', serverPORT );
 }).on('error', (err) => {
     logger.error('Server error : ', err);
 });
