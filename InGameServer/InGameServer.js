@@ -9,7 +9,7 @@ dotenv.config({ path: './.env' });
 const serverIP = process.env.SERVER_IP;
 const serverPORT = process.env.SERVER_PORT;
 const io = require('socket.io-client');
-const socket = io('http://'+serverIP+":"+serverPORT, {
+const interServerSocket = io('http://'+serverIP+':'+serverPORT, {
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
@@ -135,6 +135,8 @@ const server = net.createServer((socket) =>
 server.listen(30303,() => 
 {
     console.log('TCP 서버가 30303번 포트에서 실행 중입니다.');
+    console.log('아이피:', serverIP );
+    console.log('포트 :', serverPORT );
 }).on('error',(err)=>{
     logger.error('서버 에러 : ', err);
     process.exit(1);
@@ -142,14 +144,14 @@ server.listen(30303,() =>
 
 
 // OutGameServer 연결
-socket.on('connect', () => {
+interServerSocket.on('connect', () => {
     console.log('아웃게임 서버에 접속했습니다.');
 });
 
-socket.on('connect_error', (error) => {
+interServerSocket.on('connect_error', (error) => {
     console.error('아웃게임 서버 연결 에러:', error);
 });
 
-socket.on('message', (data) => {
+interServerSocket.on('message', (data) => {
     console.log(`아웃게임 서버로부터 받은 메시지: ${data}`);
 });
