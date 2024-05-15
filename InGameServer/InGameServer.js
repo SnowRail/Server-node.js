@@ -12,6 +12,9 @@ const interServerSocket = io2('http://'+serverIP+':'+serverPORT);
 const logger = require('./logger');
 
 const {
+    //  ----websocket----
+    AddGameRoomList,
+    //  -------tcp--------
     FirstConn,
     UpdatePlayerPos,
     PlayerBreak,
