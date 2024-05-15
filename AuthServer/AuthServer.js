@@ -29,6 +29,7 @@ io.on('connection', (socket) => {
         logger.info('login : ' + JSON.stringify(msg));
         Login(socket, msg);
     });
+    
     socket.on('loginSucc', (msg) => { // email 정보
         logger.info('login : ' + JSON.stringify(msg));
         Login(socket, msg);
@@ -51,7 +52,8 @@ io.on('connection', (socket) => {
     
     socket.on('matching', (msg) => { // client의 matching 요청
         logger.info('matching : ' + JSON.stringify(msg));
-        MatchMaking(msg, tcpClient);
+        MatchMaking(msg);
+        
     });
 
     socket.on('readyGame', (msg) => {
@@ -80,24 +82,15 @@ server.listen(10101, () => {
 
 
 // InGameServer와 웹소켓으로 통신
-const server2 = http.createServer(express());
-const interServerIO = new Server(server2);
+interServerSocket.on('connect', (intersocket) => {
+    console.log('아웃게임 서버에 접속했습니다.');
 
-interServerIO.on('connection', (socket) => {
-    logger.info(`InGame 서버에서 접속: ${socket.handshake.address}`);
-    SetInGameClient(socket);
-
-    socket.on('message', (data) => {
-        logger.info(`InGame 서버로부터 받은 메시지: ${data}`);
-        // 받은 메시지 처리 로직 추가
-    });
-
-    // InGame 서버로 메시지 전송
-    socket.emit('message', '안녕하세요, InGame 서버!');
 });
 
-server2.listen(30304, () => {    
-    logger.info('서버가 30304번 포트에서 실행 중입니다. ');
-}).on('error', (err) => {
-    logger.error('Server error : ', err);
+interServerSocket.on('connect_error', (error) => {
+    console.error('아웃게임 서버 연결 에러:', error);
+});
+
+interServerSocket.on('message', (data) => {
+    console.log(`아웃게임 서버로부터 받은 메시지: ${data}`);
 });

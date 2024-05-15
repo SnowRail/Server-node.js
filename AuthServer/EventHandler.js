@@ -5,7 +5,7 @@ dotenv.config({ path: './.env' });
 const logger = require('./logger');
 const crypto = require('crypto');
 
-let IngameClient = null;
+let IngameServer = null;
 
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -159,7 +159,7 @@ function SetName(socket, msg) // name change
     }
 }
 
-function MatchMaking(msg, tcpClient)
+function MatchMaking(msg)
 {
     const userData = JSON.parse(msg);
     const player = getPlayer(userData.id);
@@ -285,7 +285,7 @@ function getMatchList(userList, roomID) {
                     resolve();
                 }
                 else {
-                    const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart, roomID);
+                    const userInfo = new MatchPacket(rows[0].id, rows[0].name, rows[0].curCart);
                     resolve(userInfo);
                 }
             });
