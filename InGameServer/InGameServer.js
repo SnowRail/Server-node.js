@@ -140,10 +140,9 @@ server.listen(30303,() =>
 
 // outgameserver 연결
 
-interServerSocket.on('connect', () => {
+interServerSocket.on('connect', (socket) => {
     console.log('서버에 접속했습니다.');
-    
-    interServerSocket.emit('message', '안녕하세요, 서버!');
+    socket.emit('message', '안녕하세요, 서버!');
   });
 
   interServerSocket.on('message', (data) => {
