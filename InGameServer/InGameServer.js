@@ -24,7 +24,6 @@ const {
     CountDown,
     ResetServer,
     SendKeyValue,
-    Respawn,
 } = require('./ProtocolHandler');
 
 const idList = [];
@@ -83,7 +82,7 @@ const server = net.createServer((socket) =>
                         break;
                     case Protocol.GameStart:
                         //GameStartCountDown(protocol);t
-                        CountDown(protocol);
+                        CountDown(protocol, jsonData.roomID);
                         break;
                     case Protocol.PlayerReady:
                         // TODO PlayerReady
@@ -93,7 +92,7 @@ const server = net.createServer((socket) =>
                         SendKeyValue(socket, jsonData);
                         break;
                     case Protocol.PlayerGoal:
-                        PlayerGoal(jsonData.from);
+                        PlayerGoal(jsonData.from,jsonData.roomID);
                         break;
                     case Protocol.Break:
                         PlayerBreak(socket, jsonData);
@@ -101,10 +100,6 @@ const server = net.createServer((socket) =>
                     case Protocol.Sync:
                         UpdatePlayerPos(socket, jsonData);
                         break;
-                    case Protocol.Respawn:
-                        Respawn(socket, jsonData);
-                        break;
-    
                     case Protocol.ResetServer:
                         ResetServer()
                         break;
