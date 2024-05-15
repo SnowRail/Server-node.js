@@ -132,11 +132,24 @@ const server = net.createServer((socket) =>
 server.listen(30303,() => 
 {
     console.log('TCP 서버가 30303번 포트에서 실행 중입니다.');
-    console.log("서버 ip : ", serverIP);
 }).on('error',(err)=>{
     logger.error('서버 에러 : ', err);
     process.exit(1);
 });
 
 
+// outgameserver 연결
 
+interServerSocket.on('connect', () => {
+    console.log('서버에 접속했습니다.');
+    
+    interServerSocket.emit('message', '안녕하세요, 서버!');
+  });
+
+  interServerSocket.on('message', (data) => {
+    console.log('서버로부터 받은 메시지:', data);
+  });
+  
+  interServerSocket.on('disconnect', () => {
+    console.log('서버 접속이 해제되었습니다.');
+  });
