@@ -5,6 +5,8 @@ dotenv.config({ path: './.env' });
 const logger = require('./logger');
 const crypto = require('crypto');
 
+let IngameServer = null;
+
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -34,6 +36,10 @@ connection.connect((err) => {
         logger.info('MySQL connection success');
     }
 });
+
+function SetInGameClient(client) {
+    IngameClient = client;
+}
 
 function Login(socket, msg) {
     const userData = JSON.parse(msg);
@@ -187,12 +193,14 @@ function MatchMaking(msg)
     {
         matchList.processed = true; // 처리 플래그 설정
         processMatchList(matchList, firstRoomID);
+        sendMatchList(firstRoomID, matchList);
     }
     else if(!matchList.timeoutId)
     {
         const timeoutId = setTimeout(() => {
             if (!matchList.processed) {
                 processMatchList(matchList, firstRoomID);
+                sendMatchList(firstRoomID, matchList);
             }
         }, 20000); // 20초 (20000ms) 후에 실행
 
@@ -319,11 +327,19 @@ function Disconnect(socket) {
     connectedPlayers.delete(socket.id);
 }
 
+
+// --------------- Server <-> Server -------------------------------
+function sendMatchList(roomID, matchList)
+{
+    IngameClient.emit('enterInGame', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(matchList) + '}');
+}
+
 module.exports = {
     Login,
     Signup,
     SetName,
     MatchMaking,
     ReadyGame,
-    Disconnect
+    Disconnect,
+    SetInGameClient
 }
