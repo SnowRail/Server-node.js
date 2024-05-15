@@ -6,13 +6,6 @@ const {Server} = require("socket.io");
 const io = new Server(server);
 
 const net = require('net');
-
-
-const dotenv = require('dotenv').config({ path: './.env' });
-const serverIP = process.env.SERVER_IP;
-const serverPORT = process.env.SERVER_PORT;
-const io2 = require('socket.io-client');
-const interServerSocket = io2('http://'+serverIP+':'+serverPORT);
 const logger = require('./logger');
 
 const {   
@@ -82,18 +75,3 @@ server.listen(10101, () => {
     logger.error('Server error : ', err);
 });
 
-
-// InGameServer와 웹소켓으로 통신
-interServerSocket.on('connect', (intersocket) => {
-    console.log('아웃게임 서버에 접속했습니다.');
-    
-    SetInGameServer(intersocket);
-});
-
-interServerSocket.on('connect_error', (error) => {
-    console.error('아웃게임 서버 연결 에러:', error);
-});
-
-interServerSocket.on('message', (data) => {
-    console.log(`아웃게임 서버로부터 받은 메시지: ${data}`);
-});
