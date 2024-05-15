@@ -11,9 +11,6 @@ const net = require('net');
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
 const serverIP = process.env.SERVER_IP;
-const serverPORT = process.env.SERVER_PORT;
-const io2 = require('socket.io-client');
-const interServerSocket = io2('http://'+serverIP+':'+serverPORT);
 const logger = require('./logger');
 
 const {   
@@ -22,7 +19,8 @@ const {
     SetName,
     MatchMaking,
     ReadyGame,
-    Disconnect 
+    Disconnect, 
+    SetInGameClient
 } = require('./EventHandler');
 
 io.on('connection', (socket) => {
@@ -87,7 +85,6 @@ server.listen(10101, () => {
 interServerSocket.on('connect', (intersocket) => {
     console.log('아웃게임 서버에 접속했습니다.');
 
-    
 });
 
 interServerSocket.on('connect_error', (error) => {
