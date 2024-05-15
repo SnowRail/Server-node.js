@@ -132,7 +132,6 @@ const server = net.createServer((socket) =>
 server.listen(30303,() => 
 {
     console.log('TCP 서버가 30303번 포트에서 실행 중입니다.');
-    console.log("서버 ip : ", serverIP);
 }).on('error',(err)=>{
     logger.error('서버 에러 : ', err);
     process.exit(1);
