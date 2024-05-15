@@ -32,6 +32,7 @@ function SetPlayerInfo(socket, jsonData)
 {
     socket.clientID = jsonData.from;
     socket.roomID = jsonData.roomID;
+    SocketManager.addSocket(socket);
     const room = gameRoomList.get(socket.roomID);
     sema.take(function(){
         room.readycnt++;
@@ -127,11 +128,11 @@ function CountDown(protocol, roomID) {
         let buffer;
         if(protocol === Protocol.GameStart)
         {
-            buffer = classToByte(new CountDownPacket(Protocol.GameStartCountDown, jsonData.roomID, count));
+            buffer = classToByte(new CountDownPacket(Protocol.GameStartCountDown, roomID, count));
         }
         else if(protocol === Protocol.GameEnd)
         {
-            buffer = classToByte(new CountDownPacket(Protocol.GameEndCountDown, jsonData.roomID, count));
+            buffer = classToByte(new CountDownPacket(Protocol.GameEndCountDown, roomID, count));
         }
         broadcastAll(buffer,roomID);
 
@@ -140,20 +141,20 @@ function CountDown(protocol, roomID) {
             logger.info("카운트다운 종료~");
             if(protocol === Protocol.GameStart)
             {
-                const dataBuffer = classToByte(new Packet(protocol, jsonData.roomID));
-                // broadcastAll(dataBuffer);
+                const dataBuffer = classToByte(new Packet(protocol, roomID));
+                broadcastAll(dataBuffer, roomID);
                 const sockets = SocketManager.getSockets();
-                gameRoomList.set(1000, {userList : sockets, startTime : Date.now(), goalCount : 0, gameResult : new Map()});
+                gameRoomList.set(roomID, {userList : sockets, startTime : Date.now(), goalCount : 0, gameResult : new Map()});
             }
             else if(protocol === Protocol.GameEnd)
             {
-                const gameRoom = gameRoomList.get(1000);
+                const gameRoom = gameRoomList.get(roomID);
                 const endTime = Date.now() - gameRoom.startTime;
                 const resultList = [];
                 gameRoom.gameResult.forEach((value, key) => {
                     resultList.push({nickname : key, rank : value.rank, goalTime : value.goalTime});
                 });
-                const dataBuffer = classToByte(new GameResultPacket(resultList, endTime));
+                const dataBuffer = classToByte(new GameResultPacket(roomID, resultList, endTime));
                 broadcastAll(dataBuffer, roomID);
             }
         }
