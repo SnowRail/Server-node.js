@@ -56,40 +56,18 @@ const server = net.createServer((socket) =>
                 const protocol = jsonData.type;
                 
                 switch(protocol){
-                    case Protocol.Login:
+                    case Protocol.PlayerReady:
                         SetPlayerInfo(socket,jsonData);
-                        break;
-                    case Protocol.Logout:
-                        // todo logout
-                        break;
-                    case Protocol.Signin:
-                        // todo SignIn
-                        break;
-                    case Protocol.StartMatchMaking:
-                        // TODO StartMatchMaking
                         break;
                     case Protocol.GameStart:
                         //GameStartCountDown(protocol);t
                         CountDown(protocol, jsonData.roomID);
                         break;
-                    case Protocol.PlayerReady:
-                        // TODO PlayerReady
-                        break;
-                    
-                    case Protocol.Key:
-                        SendKeyValue(socket, jsonData);
-                        break;
                     case Protocol.PlayerGoal:
                         PlayerGoal(jsonData.from,jsonData.roomID);
                         break;
-                    case Protocol.Break:
-                        PlayerBreak(socket, jsonData);
-                        break;
                     case Protocol.Sync:
                         UpdatePlayerPos(socket, jsonData);
-                        break;
-                    case Protocol.ResetServer:
-                        ResetServer()
                         break;
                     default:
                         logger.warn('알 수 없는 프로토콜 :', protocol);
