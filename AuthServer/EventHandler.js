@@ -189,7 +189,7 @@ function MatchMaking(msg)
     player.room = firstRoomID;
     player.state = 'matching';
 
-    if(matchList.length === 2 && !matchList.processed)
+    if(matchList.length === 5 && !matchList.processed)
     {
         matchList.processed = true; // 처리 플래그 설정
         processMatchList(matchList, firstRoomID);
