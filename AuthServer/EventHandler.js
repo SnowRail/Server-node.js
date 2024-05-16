@@ -148,6 +148,9 @@ function SetName(socket, msg) // name change 여기 아마 패킷 다를듯
                 return;
             }
             socket.emit('setNameSucc', "닉네임이 변경되었습니다.");
+            connectedPlayers.set(userData.nickname, {socket : socket, room : null, state : 'lobby'});
+            connectedPlayers.delete(socket.id);
+            socket.id = userData.nickname;
         });
     }
     else
