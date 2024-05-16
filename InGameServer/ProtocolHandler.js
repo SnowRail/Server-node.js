@@ -23,9 +23,6 @@ function AddGameRoomList(data)
 {
     const roomData = JSON.parse(data);
     gameRoomList.set(roomData.roomID, {playerList : roomData.playerList, readycnt:0, startTime : 0, goalCount : 0, gameResult : new Map()});
-    console.log(gameRoomList.get(roomData.roomID));
-
-    
 }
 
 function SetPlayerInfo(socket, jsonData)
@@ -47,7 +44,6 @@ function SetPlayerInfo(socket, jsonData)
     {
         CountDown(Protocol.GameStart, socket.roomID);
     }
-    console.log("아이디 잘 받아오나?? : ",socket.clientID);
 }
 
 
