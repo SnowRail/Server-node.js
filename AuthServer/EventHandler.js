@@ -147,7 +147,7 @@ function SetName(socket, msg) // name change 여기 아마 패킷 다를듯
                 socket.emit('setNameFail', 'setName fail');
                 return;
             }
-            socket.emit('setNameSucc', "닉네임이 변경되었습니다.");
+            socket.emit('setNameSucc', userData.nickname);
         });
     }
     else
