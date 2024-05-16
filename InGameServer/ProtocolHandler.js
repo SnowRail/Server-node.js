@@ -7,9 +7,7 @@ const {
     Packet, 
     KeyPacket,
     SyncPositionPacket, 
-    PlayerMovePacket, 
     CountDownPacket, 
-    LoadGameScenePacket,
     GameResultPacket
  } = require('./Packet');
 const { Vector3 } = require('./UnityClass');
@@ -24,7 +22,32 @@ const gameRoomList = new Map(); // {roomID, userList, startTime, goalCount, game
 function AddGameRoomList(data)
 {
     const roomData = JSON.parse(data);
-    gameRoomList.set(roomData.roomID, {playerList : roomData.playerList, startTime : 0, goalCount : 0, gameResult : new Map()});
+    gameRoomList.set(roomData.roomID, {playerList : roomData.playerList, readycnt:0, startTime : 0, goalCount : 0, gameResult : new Map()});
+    console.log(gameRoomList.get(roomData.roomID));
+
+    
+}
+
+function SetPlayerInfo(socket, jsonData)
+{
+    socket.clientID = jsonData.from;
+    socket.roomID = jsonData.roomID;
+    SocketManager.addSocket(socket);
+    const room = gameRoomList.get(socket.roomID);
+    sema.take(function(){
+        room.readycnt++;
+        sema.leave();
+    });
+    const json2 = new Packet(Protocol.LoadGameScene, socket.roomID, jsonData.from);
+    const dataBuffer2 = classToByte(json2);
+    socket.write(dataBuffer2);
+
+    
+    if(room.readycnt === room.playerList.length)
+    {
+        CountDown(Protocol.GameStart, socket.roomID);
+    }
+    console.log("아이디 잘 받아오나?? : ",socket.clientID);
 }
 
 
@@ -57,9 +80,9 @@ function FirstConn(socket, id){
 
 function UpdatePlayerPos(socket, jsonData)
 {
-    const json = new SyncPositionPacket(jsonData.from, jsonData.position, jsonData.velocity, jsonData.rotation, jsonData.timeStamp);
+    const json = new SyncPositionPacket(jsonData.roomID, jsonData.from, jsonData.position, jsonData.velocity, jsonData.rotation, jsonData.timeStamp);
     const dataBuffer = classToByte(json);
-    broadcast(dataBuffer, socket);
+    broadcast(dataBuffer, socket, jsonData.roomID);
 
     const userList = NetworkObjectManager.getObjects();
     userList.forEach((element)=>{
@@ -73,28 +96,21 @@ function UpdatePlayerPos(socket, jsonData)
 
 function PlayerBreak(socket, jsonData)
 {
-    const json = new Packet(Protocol.PlayerBreak, jsonData.from);
+    const json = new Packet(Protocol.PlayerBreak, jsonData.roomID, jsonData.from);
     const dataBuffer = classToByte(json);
-    broadcast(dataBuffer, socket);
-}
-
-function UpdatePlayerDirection(socket, id, pos, direction)
-{
-    const json = new PlayerMovePacket(pos, direction , id);
-    const dataBuffer = classToByte(json);
-    broadcast(dataBuffer, socket);
+    broadcast(dataBuffer, socket, jsonData.roomID);
 }
 
 function PlayerDisconnect(socket, id){
 
-    const json = new Packet(Protocol.PlayerDisconnect,id);
-    const dataBuffer = classToByte(json);
-    broadcast(dataBuffer,socket);
+    // const json = new Packet(Protocol.PlayerDisconnect, id);
+    // const dataBuffer = classToByte(json);
+    // broadcast(dataBuffer,socket);
 
     NetworkObjectManager.removeObjectByID(id);
 }
 
-function CountDown(protocol, id) {
+function CountDown(protocol, roomID) {
     let count;
     
     if(protocol === Protocol.GameStart)
@@ -112,34 +128,32 @@ function CountDown(protocol, id) {
         let buffer;
         if(protocol === Protocol.GameStart)
         {
-            buffer = classToByte(new CountDownPacket(Protocol.GameStartCountDown, count));
+            buffer = classToByte(new CountDownPacket(Protocol.GameStartCountDown, roomID, count));
         }
         else if(protocol === Protocol.GameEnd)
         {
-            buffer = classToByte(new CountDownPacket(Protocol.GameEndCountDown, count));
+            buffer = classToByte(new CountDownPacket(Protocol.GameEndCountDown, roomID, count));
         }
-        broadcastAll(buffer);
+        broadcastAll(buffer,roomID);
 
         if (count === 0) {
             clearInterval(countDown);
             logger.info("카운트다운 종료~");
             if(protocol === Protocol.GameStart)
             {
-                const dataBuffer = classToByte(new Packet(protocol));
-                broadcastAll(dataBuffer);
-                const sockets = SocketManager.getSockets();
-                gameRoomList.set(1000, {userList : sockets, startTime : Date.now(), goalCount : 0, gameResult : new Map()});
+                const dataBuffer = classToByte(new Packet(protocol, roomID));
+                broadcastAll(dataBuffer, roomID);
             }
             else if(protocol === Protocol.GameEnd)
             {
-                const gameRoom = gameRoomList.get(1000);
+                const gameRoom = gameRoomList.get(roomID);
                 const endTime = Date.now() - gameRoom.startTime;
                 const resultList = [];
                 gameRoom.gameResult.forEach((value, key) => {
                     resultList.push({nickname : key, rank : value.rank, goalTime : value.goalTime});
                 });
-                const dataBuffer = classToByte(new GameResultPacket(resultList, endTime));
-                broadcastAll(dataBuffer);
+                const dataBuffer = classToByte(new GameResultPacket(roomID, resultList, endTime));
+                broadcastAll(dataBuffer, roomID);
             }
         }
         else{
@@ -148,27 +162,27 @@ function CountDown(protocol, id) {
     }, 1000);
 }
 
-function GameStartCountDown(protocol){
-    if(Start === false)
-    {
-        const json = new Packet(protocol);
-        const dataBuffer = classToByte(json);
-        broadcastAll(dataBuffer);
-        Start = true;
-        CountDown(protocol);
-    }
-}
+// function GameStartCountDown(protocol,roomID){
+//     if(Start === false)
+//     {
+//         const json = new Packet(protocol);
+//         const dataBuffer = classToByte(json);
+//         broadcastAll(dataBuffer, roomID);
+//         Start = true;
+//         CountDown(protocol);
+//     }
+// }
 
-function PlayerGoal(id){
-    const gameRoom = gameRoomList.get(1000);
+function PlayerGoal(id, roomID){
+    const gameRoom = gameRoomList.get(roomID);
     if(gameRoom !== undefined)
     {
         if (gameRoom.goalCount === 0) {
-            CountDown(Protocol.GameEnd, id);
+            CountDown(Protocol.GameEnd, roomID);
         }
         sema.take(function() {
             gameRoom.goalCount++;
-            gameRoom.gameResult.set(String(id).toString(), {rank : gameRoom.goalCount, goalTime : Date.now() - gameRoom.startTime });
+            gameRoom.gameResult.set(id, {rank : gameRoom.goalCount, goalTime : Date.now() - gameRoom.startTime });
             console.log("goalID : " + id);
             sema.leave();
         }); 
@@ -176,10 +190,10 @@ function PlayerGoal(id){
 }
 
 function SendKeyValue(socket, jsonData){
-    const json = new KeyPacket(jsonData.from, jsonData.acceleration);
+    const json = new KeyPacket(jsonData.roomID, jsonData.from, jsonData.acceleration);
     const dataBuffer = classToByte(json);
     // broadcastAll(dataBuffer);
-    broadcast(dataBuffer, socket);
+    broadcast(dataBuffer, socket, jsonData.roomID);
 }
 
 function ResetServer(){
@@ -188,30 +202,24 @@ function ResetServer(){
     logger.info("ResetServer");
 }
 
-function Respawn(socket, jsonData){
-    const json = new Packet(Protocol.Respawn, jsonData.from);
-    const dataBuffer = classToByte(json);
-    
-    broadcast(dataBuffer, socket);
-}
 
-function broadcast(message, sender) {
-    const sockets = SocketManager.getSockets();
-
-    sockets.forEach((socket) => {
-        if (socket == sender) return;
-
+function broadcast(message, sender, roomID) {
+    const playerList = gameRoomList.get(roomID).playerList;
+    playerList.forEach(player => {
+        const socket = SocketManager.getSocketById(player);
+        if(sender == socket) return;
         socket.write(message);
     });
 }
 
-function broadcastAll(message) {
-    const sockets = SocketManager.getSockets();
-
-    sockets.forEach((socket) => {
+function broadcastAll(message, roomID) {
+    const playerList = gameRoomList.get(roomID).playerList;
+    playerList.forEach(player => {
+        const socket = SocketManager.getSocketById(player);
         socket.write(message);
     });
 }
+
 
 function classToByte(json){
     const jsonString = JSON.stringify(json);
@@ -227,15 +235,13 @@ function classToByte(json){
 
 module.exports = {
     AddGameRoomList,
+    SetPlayerInfo,
     FirstConn,
     UpdatePlayerPos,
     PlayerBreak,
-    UpdatePlayerDirection,
     PlayerDisconnect,
     PlayerGoal,
     CountDown,
-    GameStartCountDown,
     ResetServer,
     SendKeyValue,
-    Respawn,
 };
