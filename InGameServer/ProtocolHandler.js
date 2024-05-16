@@ -137,6 +137,7 @@ function CountDown(protocol, roomID) {
             logger.info("카운트다운 종료~");
             if(protocol === Protocol.GameStart)
             {
+                gameRoomList.get(roomID).startTime = Date.now();
                 const dataBuffer = classToByte(new Packet(protocol, roomID));
                 broadcastAll(dataBuffer, roomID);
             }
