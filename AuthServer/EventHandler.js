@@ -282,7 +282,7 @@ function getMatchList(userList, roomID) {
                     resolve();
                 }
                 else {
-                    const userInfo = new MatchPacket(rows[0].email, rows[0].nickname);
+                    const userInfo = new MatchPacket(rows[0].nickname, roomID);
                     resolve(userInfo);
                 }
             });
