@@ -147,7 +147,7 @@ function SetName(socket, msg) // name change 여기 아마 패킷 다를듯
                 socket.emit('setNameFail', 'setName fail');
                 return;
             }
-            socket.emit('setNameSucc', "닉네임이 변경되었습니다.");
+            socket.emit('setNameSucc', userData.nickname);
         });
     }
     else
@@ -160,11 +160,11 @@ function MatchMaking(msg)
 {
     const userData = JSON.parse(msg);
     const player = getPlayer(userData.nickname);
-    if(player.state === 'matching')
-    {
-        logger.info("여기 들어오면 매칭중이였음");
-        return;
-    }
+    // if(player.state === 'matching')
+    // {
+    //     logger.info("여기 들어오면 매칭중이였음");
+    //     return;
+    // }
     if(matchRoomList.size === 0)
     {
         const roomID = makeRoomID();
@@ -282,7 +282,7 @@ function getMatchList(userList, roomID) {
                     resolve();
                 }
                 else {
-                    const userInfo = new MatchPacket(rows[0].email, rows[0].nickname);
+                    const userInfo = new MatchPacket(rows[0].nickname, roomID);
                     resolve(userInfo);
                 }
             });
