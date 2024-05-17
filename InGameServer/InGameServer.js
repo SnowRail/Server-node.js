@@ -16,17 +16,10 @@ const {
     AddGameRoomList,
     //  -------tcp--------
     SetPlayerInfo,
-    FirstConn,
     UpdatePlayerPos,
-    PlayerBreak,
     PlayerDisconnect,
     PlayerGoal,
-    CountDown,
-    ResetServer,
-    SendKeyValue,
 } = require('./ProtocolHandler');
-
-const idList = [];
 
 const server = net.createServer((socket) =>
 {
@@ -58,10 +51,6 @@ const server = net.createServer((socket) =>
                 switch(protocol){
                     case Protocol.PlayerReady:
                         SetPlayerInfo(socket,jsonData);
-                        break;
-                    case Protocol.GameStart:
-                        //GameStartCountDown(protocol);t
-                        CountDown(protocol, jsonData.roomID);
                         break;
                     case Protocol.PlayerGoal:
                         PlayerGoal(jsonData.from,jsonData.roomID);

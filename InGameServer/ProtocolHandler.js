@@ -1,6 +1,5 @@
 const NetworkObjectManager = require('./NetworkObjectManager');
 const { intSize } = require('./typeSize');
-const UnityInstance = require('./UnityClass/UnityInstance');
 const SocketManager = require('./SoketManager');
 const Protocol = require('./Protocol');
 const { 
@@ -10,12 +9,8 @@ const {
     CountDownPacket, 
     GameResultPacket
  } = require('./Packet');
-const { Vector3 } = require('./UnityClass');
 const logger = require('./logger');
 const sema = require('semaphore')(1);
-
-let Goal = false;
-let Start = false;
 
 const gameRoomList = new Map(); // {roomID, userList, startTime, goalCount, gameResult}
 
@@ -46,34 +41,6 @@ function SetPlayerInfo(socket, jsonData)
     }
 }
 
-
-function FirstConn(socket, id){ 
-    // first 전송 - 아이디, otherplayerconnect~
-    const json1 = new Packet(Protocol.PlayerReconnect, id);
-    const dataBuffer1 = classToByte(json1);
-    
-    broadcast(dataBuffer1, socket);
-    
-
-    // second 전송 - loadgamescene
-    const userList = NetworkObjectManager.getObjects();
-    const userCount = userList.length;
-
-    let idList = [];
-
-    userList.forEach((element)=>{
-        idList.push(element.clientID);
-    });
-
-    const json2 = new LoadGameScenePacket(id, userCount, idList);
-    const dataBuffer2 = classToByte(json2);
-
-    socket.write(dataBuffer2);
-
-    const userInstance = new UnityInstance(id, new Vector3(0,0,0), new Vector3(0,0,0));
-    NetworkObjectManager.addObject(userInstance);
-}
-
 function UpdatePlayerPos(socket, jsonData)
 {
     const json = new SyncPositionPacket(jsonData.roomID, jsonData.from, jsonData.position, jsonData.velocity, jsonData.rotation, jsonData.timeStamp);
@@ -88,13 +55,6 @@ function UpdatePlayerPos(socket, jsonData)
             element.rotation = jsonData.rotation;
         }
     });
-}
-
-function PlayerBreak(socket, jsonData)
-{
-    const json = new Packet(Protocol.PlayerBreak, jsonData.roomID, jsonData.from);
-    const dataBuffer = classToByte(json);
-    broadcast(dataBuffer, socket, jsonData.roomID);
 }
 
 function PlayerDisconnect(socket, id){
@@ -159,17 +119,6 @@ function CountDown(protocol, roomID) {
     }, 1000);
 }
 
-// function GameStartCountDown(protocol,roomID){
-//     if(Start === false)
-//     {
-//         const json = new Packet(protocol);
-//         const dataBuffer = classToByte(json);
-//         broadcastAll(dataBuffer, roomID);
-//         Start = true;
-//         CountDown(protocol);
-//     }
-// }
-
 function PlayerGoal(id, roomID){
     const gameRoom = gameRoomList.get(roomID);
     if(gameRoom !== undefined)
@@ -191,12 +140,6 @@ function SendKeyValue(socket, jsonData){
     const dataBuffer = classToByte(json);
     // broadcastAll(dataBuffer);
     broadcast(dataBuffer, socket, jsonData.roomID);
-}
-
-function ResetServer(){
-    Goal = false;
-    Start = false;
-    logger.info("ResetServer");
 }
 
 
@@ -233,12 +176,8 @@ function classToByte(json){
 module.exports = {
     AddGameRoomList,
     SetPlayerInfo,
-    FirstConn,
     UpdatePlayerPos,
-    PlayerBreak,
     PlayerDisconnect,
     PlayerGoal,
-    CountDown,
-    ResetServer,
     SendKeyValue,
 };
