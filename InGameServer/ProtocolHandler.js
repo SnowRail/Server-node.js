@@ -46,6 +46,16 @@ function PlayerReady(jsonData)
             CountDown(Protocol.GameStart, jsonData.roomID);
         }, 2000); // 2초(2000ms) 후에 실행
     }
+    else if(!room.timeoutId)
+    {
+        const timeoutId = setTimeout(() => {
+            if (!room.state) {
+                gameRoomList.get(jsonData.roomID).state = true;
+                CountDown(Protocol.GameStart, jsonData.roomID);
+            }
+        }, 20000); // 20초(20000ms) 후에 실행
+        room.timeoutId = timeoutId; // 룸에 타임아웃 ID 저장
+    }
 }
 
 function UpdatePlayerPos(socket, jsonData)
