@@ -35,10 +35,12 @@ function SetPlayerInfo(socket, jsonData)
     socket.write(dataBuffer);
 
     
-    if(room.readycnt === room.playerList.length)
-    {
-        CountDown(Protocol.GameStart, socket.roomID);
-    }
+    setTimeout(() => {
+        if(room.readycnt === room.playerList.length)
+        {
+            CountDown(Protocol.GameStart, socket.roomID);
+        }
+    }, 2000); // 2초(2000ms) 후에 실행
 }
 
 function UpdatePlayerPos(socket, jsonData)
