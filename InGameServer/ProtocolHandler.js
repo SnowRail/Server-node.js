@@ -155,7 +155,7 @@ function PlayerDisconnect(socket, id){
     room.playerList.splice(room.playerList.indexOf(id),1);
     NetworkObjectManager.removeObjectByID(id);
 
-    const json = new Packet(Protocol.PlayerDisconnect, id);
+    const json = new Packet(Protocol.PlayerDisconnect, socket.roomID, id);
     const dataBuffer = classToByte(json);
     broadcast(dataBuffer, socket, socket.roomID);
 }
