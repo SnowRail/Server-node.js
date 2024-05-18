@@ -128,8 +128,8 @@ function PlayerGoal(id, roomID){
         }
         sema.take(function() {
             gameRoom.goalCount++;
-            gameRoom.gameResult.set(id, {rank : gameRoom.goalCount, goalTime : Date.now() - gameRoom.startTime });
-            console.log("goalID : " + id);
+            gameRoom.gameResult.set(id, {rank : gameRoom.goalCount, goalTime : Date.now() - gameRoom.startTime + 100 });
+            //console.log("goalID : " + id);
             sema.leave();
         }); 
     }
