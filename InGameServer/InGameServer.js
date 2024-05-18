@@ -49,6 +49,7 @@ const server = net.createServer((socket) =>
                 
                 switch(protocol){
                     case Protocol.PlayerReady:
+                        console.log("Ready : ", jsonData);
                         SetPlayerInfo(socket,jsonData);
                         break;
                     case Protocol.PlayerGoal:
