@@ -34,7 +34,7 @@ function SetPlayerInfo(socket, jsonData)
     const dataBuffer = classToByte(json);
     socket.write(dataBuffer);
 
-    if(room.readycnt === room.playerList.length && room.start === false)
+    if(room.readycnt === room.playerList.length && room.state === false)
     {
         setTimeout(() => {
             CountDown(Protocol.GameStart, socket.roomID);
