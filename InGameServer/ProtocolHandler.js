@@ -57,15 +57,6 @@ function UpdatePlayerPos(socket, jsonData)
     });
 }
 
-function PlayerDisconnect(socket, id){
-
-    // const json = new Packet(Protocol.PlayerDisconnect, id);
-    // const dataBuffer = classToByte(json);
-    // broadcast(dataBuffer,socket);
-
-    NetworkObjectManager.removeObjectByID(id);
-}
-
 function CountDown(protocol, roomID) {
     let count;
     
@@ -142,7 +133,6 @@ function SendKeyValue(socket, jsonData){
     broadcast(dataBuffer, socket, jsonData.roomID);
 }
 
-
 function broadcast(message, sender, roomID) {
     const playerList = gameRoomList.get(roomID).playerList;
     playerList.forEach(player => {
@@ -160,6 +150,15 @@ function broadcastAll(message, roomID) {
     });
 }
 
+function PlayerDisconnect(socket, id){
+    const room = gameRoomList.get(socket.roomID);
+    room.playerList.splice(room.playerList.indexOf(id),1);
+    NetworkObjectManager.removeObjectByID(id);
+
+    const json = new Packet(Protocol.PlayerDisconnect, id);
+    const dataBuffer = classToByte(json);
+    broadcast(dataBuffer, socket, socket.roomID);
+}
 
 function classToByte(json){
     const jsonString = JSON.stringify(json);

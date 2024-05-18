@@ -71,14 +71,14 @@ const server = net.createServer((socket) =>
     socket.on('end',() =>
     {
         logger.info(`클라이언트 접속 종료`);
+        PlayerDisconnect(socket, socket.clientID);
         SocketManager.removeSocket(socket);
-        PlayerDisconnect(socket,socket.clientID);
     });
 
     socket.on('error',(err)=>
     {
         logger.error('소켓 에러 : ', err);
-        PlayerDisconnect(socket,socket.clientID);
+        PlayerDisconnect(socket, socket.clientID);
         SocketManager.removeSocket(socket);
     });
 });
