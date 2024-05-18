@@ -25,7 +25,6 @@ const server = net.createServer((socket) =>
 {
 
     logger.info(`새로운 클라이언트 접속`);
-    // FirstConn(socket, num);
 
     let recvData = '';
     socket.on('data',(data)=> 
