@@ -34,13 +34,12 @@ function SetPlayerInfo(socket, jsonData)
     const dataBuffer = classToByte(json);
     socket.write(dataBuffer);
 
-    
-    setTimeout(() => {
-        if(room.readycnt === room.playerList.length)
-        {
+    if(room.readycnt === room.playerList.length && room.start === false)
+    {
+        setTimeout(() => {
             CountDown(Protocol.GameStart, socket.roomID);
-        }
-    }, 2000); // 2초(2000ms) 후에 실행
+        }, 2000); // 2초(2000ms) 후에 실행
+    }
 }
 
 function UpdatePlayerPos(socket, jsonData)
@@ -65,7 +64,7 @@ function CountDown(protocol, roomID) {
     if(protocol === Protocol.GameStart)
     {
         count = 3; // 테스트를 위해 빠르게 끝냄
-        
+        gameRoomList.get(roomID).state = true;
     }
     else if(protocol === Protocol.GameEnd)
     {
@@ -93,7 +92,6 @@ function CountDown(protocol, roomID) {
                 const dataBuffer = classToByte(new Packet(protocol, roomID));
                 broadcastAll(dataBuffer, roomID);
                 gameRoomList.get(roomID).startTime = Date.now();
-                gameRoomList.get(roomID).state = true;
             }
             else if(protocol === Protocol.GameEnd)
             {
