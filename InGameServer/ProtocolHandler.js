@@ -36,7 +36,7 @@ function SetPlayerInfo(socket, jsonData)
 
     if(room.readycnt === room.playerList.length && room.state === false)
     {
-        gameRoomList.get(roomID).state = true;
+        gameRoomList.get(jsonData.roomID).state = true;
         setTimeout(() => {
             CountDown(Protocol.GameStart, socket.roomID);
         }, 2000); // 2초(2000ms) 후에 실행
