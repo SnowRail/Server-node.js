@@ -30,9 +30,9 @@ function SetPlayerInfo(socket, jsonData)
         room.readycnt++;
         sema.leave();
     });
-    const json2 = new Packet(Protocol.LoadGameScene, socket.roomID, jsonData.from);
-    const dataBuffer2 = classToByte(json2);
-    socket.write(dataBuffer2);
+    const json = new Packet(Protocol.GameSetUp, socket.roomID, jsonData.from);
+    const dataBuffer = classToByte(json);
+    socket.write(dataBuffer);
 
     
     if(room.readycnt === room.playerList.length)

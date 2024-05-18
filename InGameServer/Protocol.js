@@ -1,6 +1,6 @@
 const Protocol = {
-    LoadGameScene : 1,         // 인게임 씬으로 전환  - 멍청 레이싱에서는 playerconnect로 사용
-    PlayerReady : 2,           // 로딩 완료
+    PlayerReady : 1,           // 로딩 완료
+    GameSetUp : 2,         // 인게임 씬으로 전환  - 멍청 레이싱에서는 playerconnect로 사용
     GameStartCountDown : 3,         // 게임 시작 / 끝 카운트 다운
     GameStart : 4,             // 게임 시작
     PlayerDisconnect : 5,
