@@ -109,8 +109,10 @@ function CountDown(protocol, roomID) {
                 gameRoom.gameResult.forEach((value, key) => {
                     resultList.push({nickname : key, rank : value.rank, goalTime : value.goalTime});
                 });
-                const dataBuffer = classToByte(new GameResultPacket(roomID, resultList, endTime));
-                broadcastAll(dataBuffer, roomID);
+                setTimeout(() => {
+                    const dataBuffer = classToByte(new GameResultPacket(roomID, resultList, endTime));
+                    broadcastAll(dataBuffer, roomID);
+                }, 2000); // 2초(2000ms) 후에 실행
             }
         }
         else{
