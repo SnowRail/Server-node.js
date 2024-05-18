@@ -12,12 +12,12 @@ const {
 const logger = require('./logger');
 const sema = require('semaphore')(1);
 
-const gameRoomList = new Map(); // {roomID, userList, startTime, goalCount, gameResult}
+const gameRoomList = new Map(); // {roomID, userList, startTime, goalCount, gameResult, state}
 
 function AddGameRoomList(data)
 {
     const roomData = JSON.parse(data);
-    gameRoomList.set(roomData.roomID, {playerList : roomData.playerList, readycnt:0, startTime : 0, goalCount : 0, gameResult : new Map()});
+    gameRoomList.set(roomData.roomID, {playerList : roomData.playerList, readycnt:0, startTime : 0, goalCount : 0, gameResult : new Map(), state : false});
 }
 
 function SetPlayerInfo(socket, jsonData)
@@ -88,14 +88,16 @@ function CountDown(protocol, roomID) {
             logger.info("카운트다운 종료~");
             if(protocol === Protocol.GameStart)
             {
-                gameRoomList.get(roomID).startTime = Date.now();
                 const dataBuffer = classToByte(new Packet(protocol, roomID));
                 broadcastAll(dataBuffer, roomID);
+                gameRoomList.get(roomID).startTime = Date.now();
+                gameRoomList.get(roomID).state = true;
             }
             else if(protocol === Protocol.GameEnd)
             {
                 const gameRoom = gameRoomList.get(roomID);
                 const endTime = Date.now() - gameRoom.startTime;
+                gameRoomList.get(roomID).state = false;
                 const resultList = [];
                 gameRoom.gameResult.forEach((value, key) => {
                     resultList.push({nickname : key, rank : value.rank, goalTime : value.goalTime});
@@ -112,7 +114,7 @@ function CountDown(protocol, roomID) {
 
 function PlayerGoal(id, roomID){
     const gameRoom = gameRoomList.get(roomID);
-    if(gameRoom !== undefined)
+    if(gameRoom !== undefined && gameRoom.state === true)
     {
         if (gameRoom.goalCount === 0) {
             CountDown(Protocol.GameEnd, roomID);
