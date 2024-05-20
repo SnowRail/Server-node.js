@@ -102,6 +102,11 @@ function CountDown(protocol, roomID) {
                 gameRoom.gameResult.forEach((value, key) => {
                     resultList.push({nickname : key, rank : value.rank, goalTime : value.goalTime});
                 });
+                gameRoom.playerList.forEach(player => {
+                    if (!gameRoom.gameResult.has(player)) {
+                        resultList.push({nickname : player, rank : 0, goalTime : 0});
+                    }
+                });
                 const dataBuffer = classToByte(new GameResultPacket(roomID, resultList, endTime));
                 broadcastAll(dataBuffer, roomID);
             }
