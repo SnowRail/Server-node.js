@@ -16,6 +16,7 @@ const {
     AddGameRoomList,
     //  -------tcp--------
     SetPlayerInfo,
+    PlayerReady,
     UpdatePlayerPos,
     PlayerDisconnect,
     PlayerGoal,
@@ -48,8 +49,11 @@ const server = net.createServer((socket) =>
                 const protocol = jsonData.type;
                 
                 switch(protocol){
-                    case Protocol.PlayerReady:
+                    case Protocol.GameSetUp:
                         SetPlayerInfo(socket,jsonData);
+                        break;
+                    case Protocol.PlayerReady:
+                        PlayerReady(jsonData);
                         break;
                     case Protocol.PlayerGoal:
                         PlayerGoal(jsonData.from,jsonData.roomID);

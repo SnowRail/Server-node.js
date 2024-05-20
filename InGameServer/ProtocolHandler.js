@@ -25,20 +25,25 @@ function SetPlayerInfo(socket, jsonData)
     socket.clientID = jsonData.from;
     socket.roomID = jsonData.roomID;
     SocketManager.addSocket(socket);
-    const room = gameRoomList.get(socket.roomID);
+    
+    const json = new Packet(Protocol.GameSetUp, socket.roomID, jsonData.from);
+    const dataBuffer = classToByte(json);
+    socket.write(dataBuffer);
+}
+
+function PlayerReady(jsonData)
+{
+    const room = gameRoomList.get(jsonData.roomID);
     sema.take(function(){
         room.readycnt++;
         sema.leave();
     });
-    const json = new Packet(Protocol.GameSetUp, socket.roomID, jsonData.from);
-    const dataBuffer = classToByte(json);
-    socket.write(dataBuffer);
 
     if(room.readycnt === room.playerList.length && room.state === false)
     {
         gameRoomList.get(jsonData.roomID).state = true;
         setTimeout(() => {
-            CountDown(Protocol.GameStart, socket.roomID);
+            CountDown(Protocol.GameStart, jsonData.roomID);
         }, 2000); // 2초(2000ms) 후에 실행
     }
 }
@@ -183,6 +188,7 @@ function classToByte(json){
 module.exports = {
     AddGameRoomList,
     SetPlayerInfo,
+    PlayerReady,
     UpdatePlayerPos,
     PlayerDisconnect,
     PlayerGoal,
