@@ -99,7 +99,7 @@ function CountDown(protocol, roomID) {
                 const endTime = Date.now() - gameRoom.startTime;
                 gameRoomList.get(roomID).state = false;
                 const resultList = [];
-                gameRoom.gameResult.forEach((value, key) => {
+                 gameRoom.gameResult.forEach((value, key) => {
                     resultList.push({nickname : key, rank : value.rank, goalTime : value.goalTime});
                 });
                 gameRoom.playerList.forEach(player => {
@@ -125,9 +125,10 @@ function PlayerGoal(id, roomID){
             CountDown(Protocol.GameEnd, roomID);
         }
         sema.take(function() {
-            gameRoom.goalCount++;
-            gameRoom.gameResult.set(id, {rank : gameRoom.goalCount, goalTime : Date.now() - gameRoom.startTime + 100 });
-            //console.log("goalID : " + id);
+            if (!gameRoom.gameResult.has(id)) { // 중복 goal 방지
+                gameRoom.goalCount++;
+                gameRoom.gameResult.set(id, {rank : gameRoom.goalCount, goalTime : Date.now() - gameRoom.startTime + 100 });
+            }
             sema.leave();
         }); 
     }
