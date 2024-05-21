@@ -28,7 +28,10 @@ function SetPlayerInfo(socket, jsonData)
     
     const json = new Packet(Protocol.GameSetUp, socket.roomID, jsonData.from);
     const dataBuffer = classToByte(json);
-    socket.write(dataBuffer);
+    if(socket)
+    {
+        socket.write(dataBuffer);
+    }
 }
 
 function PlayerReady(jsonData)
@@ -161,7 +164,9 @@ function broadcast(message, sender, roomID) {
     playerList.forEach(player => {
         const socket = SocketManager.getSocketById(player);
         if(sender == socket) return;
-        socket.write(message);
+        if (socket) {
+            socket.write(message);
+        }
     });
 }
 
@@ -169,7 +174,9 @@ function broadcastAll(message, roomID) {
     const playerList = gameRoomList.get(roomID).playerList;
     playerList.forEach(player => {
         const socket = SocketManager.getSocketById(player);
-        socket.write(message);
+        if (socket) {
+            socket.write(message);
+        }
     });
 }
 
