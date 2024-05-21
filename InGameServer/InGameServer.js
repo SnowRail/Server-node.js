@@ -16,23 +16,16 @@ const {
     AddGameRoomList,
     //  -------tcp--------
     SetPlayerInfo,
-    FirstConn,
+    PlayerReady,
     UpdatePlayerPos,
-    PlayerBreak,
     PlayerDisconnect,
     PlayerGoal,
-    CountDown,
-    ResetServer,
-    SendKeyValue,
 } = require('./ProtocolHandler');
-
-const idList = [];
 
 const server = net.createServer((socket) =>
 {
 
     logger.info(`새로운 클라이언트 접속`);
-    // FirstConn(socket, num);
 
     let recvData = '';
     socket.on('data',(data)=> 
@@ -56,12 +49,11 @@ const server = net.createServer((socket) =>
                 const protocol = jsonData.type;
                 
                 switch(protocol){
-                    case Protocol.PlayerReady:
+                    case Protocol.GameSetUp:
                         SetPlayerInfo(socket,jsonData);
                         break;
-                    case Protocol.GameStart:
-                        //GameStartCountDown(protocol);t
-                        CountDown(protocol, jsonData.roomID);
+                    case Protocol.PlayerReady:
+                        PlayerReady(jsonData);
                         break;
                     case Protocol.PlayerGoal:
                         PlayerGoal(jsonData.from,jsonData.roomID);
@@ -82,14 +74,14 @@ const server = net.createServer((socket) =>
     socket.on('end',() =>
     {
         logger.info(`클라이언트 접속 종료`);
+        PlayerDisconnect(socket, socket.clientID);
         SocketManager.removeSocket(socket);
-        PlayerDisconnect(socket,socket.clientID);
     });
 
     socket.on('error',(err)=>
     {
         logger.error('소켓 에러 : ', err);
-        PlayerDisconnect(socket,socket.clientID);
+        PlayerDisconnect(socket, socket.clientID);
         SocketManager.removeSocket(socket);
     });
 });

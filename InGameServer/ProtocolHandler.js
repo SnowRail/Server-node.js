@@ -1,6 +1,5 @@
 const NetworkObjectManager = require('./NetworkObjectManager');
 const { intSize } = require('./typeSize');
-const UnityInstance = require('./UnityClass/UnityInstance');
 const SocketManager = require('./SoketManager');
 const Protocol = require('./Protocol');
 const { 
@@ -10,19 +9,15 @@ const {
     CountDownPacket, 
     GameResultPacket
  } = require('./Packet');
-const { Vector3 } = require('./UnityClass');
 const logger = require('./logger');
 const sema = require('semaphore')(1);
 
-let Goal = false;
-let Start = false;
-
-const gameRoomList = new Map(); // {roomID, userList, startTime, goalCount, gameResult}
+const gameRoomList = new Map(); // {roomID, userList, startTime, goalCount, gameResult, state}
 
 function AddGameRoomList(data)
 {
     const roomData = JSON.parse(data);
-    gameRoomList.set(roomData.roomID, {playerList : roomData.playerList, readycnt:0, startTime : 0, goalCount : 0, gameResult : new Map()});
+    gameRoomList.set(roomData.roomID, {playerList : roomData.playerList, readycnt:0, startTime : 0, goalCount : 0, gameResult : new Map(), state : false});
 }
 
 function SetPlayerInfo(socket, jsonData)
@@ -30,48 +25,27 @@ function SetPlayerInfo(socket, jsonData)
     socket.clientID = jsonData.from;
     socket.roomID = jsonData.roomID;
     SocketManager.addSocket(socket);
-    const room = gameRoomList.get(socket.roomID);
+    
+    const json = new Packet(Protocol.GameSetUp, socket.roomID, jsonData.from);
+    const dataBuffer = classToByte(json);
+    socket.write(dataBuffer);
+}
+
+function PlayerReady(jsonData)
+{
+    const room = gameRoomList.get(jsonData.roomID);
     sema.take(function(){
         room.readycnt++;
         sema.leave();
     });
-    const json2 = new Packet(Protocol.LoadGameScene, socket.roomID, jsonData.from);
-    const dataBuffer2 = classToByte(json2);
-    socket.write(dataBuffer2);
 
-    
-    if(room.readycnt === room.playerList.length)
+    if(room.readycnt === room.playerList.length && room.state === false)
     {
-        CountDown(Protocol.GameStart, socket.roomID);
+        gameRoomList.get(jsonData.roomID).state = true;
+        setTimeout(() => {
+            CountDown(Protocol.GameStart, jsonData.roomID);
+        }, 2000); // 2초(2000ms) 후에 실행
     }
-}
-
-
-function FirstConn(socket, id){ 
-    // first 전송 - 아이디, otherplayerconnect~
-    const json1 = new Packet(Protocol.PlayerReconnect, id);
-    const dataBuffer1 = classToByte(json1);
-    
-    broadcast(dataBuffer1, socket);
-    
-
-    // second 전송 - loadgamescene
-    const userList = NetworkObjectManager.getObjects();
-    const userCount = userList.length;
-
-    let idList = [];
-
-    userList.forEach((element)=>{
-        idList.push(element.clientID);
-    });
-
-    const json2 = new LoadGameScenePacket(id, userCount, idList);
-    const dataBuffer2 = classToByte(json2);
-
-    socket.write(dataBuffer2);
-
-    const userInstance = new UnityInstance(id, new Vector3(0,0,0), new Vector3(0,0,0));
-    NetworkObjectManager.addObject(userInstance);
 }
 
 function UpdatePlayerPos(socket, jsonData)
@@ -90,29 +64,12 @@ function UpdatePlayerPos(socket, jsonData)
     });
 }
 
-function PlayerBreak(socket, jsonData)
-{
-    const json = new Packet(Protocol.PlayerBreak, jsonData.roomID, jsonData.from);
-    const dataBuffer = classToByte(json);
-    broadcast(dataBuffer, socket, jsonData.roomID);
-}
-
-function PlayerDisconnect(socket, id){
-
-    // const json = new Packet(Protocol.PlayerDisconnect, id);
-    // const dataBuffer = classToByte(json);
-    // broadcast(dataBuffer,socket);
-
-    NetworkObjectManager.removeObjectByID(id);
-}
-
 function CountDown(protocol, roomID) {
     let count;
     
     if(protocol === Protocol.GameStart)
     {
         count = 3; // 테스트를 위해 빠르게 끝냄
-        
     }
     else if(protocol === Protocol.GameEnd)
     {
@@ -137,17 +94,23 @@ function CountDown(protocol, roomID) {
             logger.info("카운트다운 종료~");
             if(protocol === Protocol.GameStart)
             {
-                gameRoomList.get(roomID).startTime = Date.now();
                 const dataBuffer = classToByte(new Packet(protocol, roomID));
                 broadcastAll(dataBuffer, roomID);
+                gameRoomList.get(roomID).startTime = Date.now();
             }
             else if(protocol === Protocol.GameEnd)
             {
                 const gameRoom = gameRoomList.get(roomID);
                 const endTime = Date.now() - gameRoom.startTime;
+                gameRoomList.get(roomID).state = false;
                 const resultList = [];
-                gameRoom.gameResult.forEach((value, key) => {
+                 gameRoom.gameResult.forEach((value, key) => {
                     resultList.push({nickname : key, rank : value.rank, goalTime : value.goalTime});
+                });
+                gameRoom.playerList.forEach(player => {
+                    if (!gameRoom.gameResult.has(player)) {
+                        resultList.push({nickname : player, rank : 0, goalTime : 0});
+                    }
                 });
                 const dataBuffer = classToByte(new GameResultPacket(roomID, resultList, endTime));
                 broadcastAll(dataBuffer, roomID);
@@ -159,28 +122,18 @@ function CountDown(protocol, roomID) {
     }, 1000);
 }
 
-// function GameStartCountDown(protocol,roomID){
-//     if(Start === false)
-//     {
-//         const json = new Packet(protocol);
-//         const dataBuffer = classToByte(json);
-//         broadcastAll(dataBuffer, roomID);
-//         Start = true;
-//         CountDown(protocol);
-//     }
-// }
-
 function PlayerGoal(id, roomID){
     const gameRoom = gameRoomList.get(roomID);
-    if(gameRoom !== undefined)
+    if(gameRoom !== undefined && gameRoom.state === true)
     {
         if (gameRoom.goalCount === 0) {
             CountDown(Protocol.GameEnd, roomID);
         }
         sema.take(function() {
-            gameRoom.goalCount++;
-            gameRoom.gameResult.set(id, {rank : gameRoom.goalCount, goalTime : Date.now() - gameRoom.startTime });
-            console.log("goalID : " + id);
+            if (!gameRoom.gameResult.has(id)) { // 중복 goal 방지
+                gameRoom.goalCount++;
+                gameRoom.gameResult.set(id, {rank : gameRoom.goalCount, goalTime : Date.now() - gameRoom.startTime + 100 });
+            }
             sema.leave();
         }); 
     }
@@ -192,13 +145,6 @@ function SendKeyValue(socket, jsonData){
     // broadcastAll(dataBuffer);
     broadcast(dataBuffer, socket, jsonData.roomID);
 }
-
-function ResetServer(){
-    Goal = false;
-    Start = false;
-    logger.info("ResetServer");
-}
-
 
 function broadcast(message, sender, roomID) {
     const playerList = gameRoomList.get(roomID).playerList;
@@ -217,6 +163,15 @@ function broadcastAll(message, roomID) {
     });
 }
 
+function PlayerDisconnect(socket, id){
+    const room = gameRoomList.get(socket.roomID);
+    room.playerList.splice(room.playerList.indexOf(id),1);
+    NetworkObjectManager.removeObjectByID(id);
+
+    const json = new Packet(Protocol.PlayerDisconnect, socket.roomID, id);
+    const dataBuffer = classToByte(json);
+    broadcast(dataBuffer, socket, socket.roomID);
+}
 
 function classToByte(json){
     const jsonString = JSON.stringify(json);
@@ -233,12 +188,9 @@ function classToByte(json){
 module.exports = {
     AddGameRoomList,
     SetPlayerInfo,
-    FirstConn,
+    PlayerReady,
     UpdatePlayerPos,
-    PlayerBreak,
     PlayerDisconnect,
     PlayerGoal,
-    CountDown,
-    ResetServer,
     SendKeyValue,
 };
