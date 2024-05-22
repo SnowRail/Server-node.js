@@ -298,7 +298,7 @@ function getMatchList(userList, roomID) {
 }
 
 function Disconnect(socket) {
-    const disconnectPlayer = connectedPlayers.get(socket.nickname);
+    const disconnectPlayer = connectedPlayers.get(socket.id);
     if (!disconnectPlayer) {
         return;
     }
@@ -307,8 +307,8 @@ function Disconnect(socket) {
             break;
         case 'matching':
             const matchList = matchRoomList.get(disconnectPlayer.room);
-            matchList.splice(matchList.indexOf(socket.nickname), 1);
-            console.log("매칭 중 접속 끊김 : ", socket.nickname);
+            matchList.splice(matchList.indexOf(socket.id), 1);
+            console.log("매칭 중 접속 끊김 : ", socket.id);
             if(matchList.length === 0)
             {
                 matchRoomList.delete(disconnectPlayer.room);
@@ -316,7 +316,7 @@ function Disconnect(socket) {
             break;
         case 'ready':
             const readyList = readyRoomList.get(disconnectPlayer.room);
-            readyList.userList.splice(readyList.userList.indexOf(socket.nickname), 1);
+            readyList.userList.splice(readyList.userList.indexOf(socket.id), 1);
             if(readyList.userList.length === 0)
             {
                 readyRoomList.delete(disconnectPlayer.room);
@@ -325,7 +325,7 @@ function Disconnect(socket) {
         case 'ingame':
             break;
     }
-    connectedPlayers.delete(socket.nickname);
+    connectedPlayers.delete(socket.id);
 }
 
 
