@@ -46,7 +46,7 @@ io.on('connection', (socket) => {
     
     socket.on('matching', (msg) => { // client의 matching 요청
         logger.info('matching : ' + JSON.stringify(msg));
-        player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
+        socket.emit('enterRoomFail', 'Enter Room Fail!!');
         MatchMaking(msg);
     });
 
