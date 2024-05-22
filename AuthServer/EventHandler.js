@@ -308,6 +308,7 @@ function Disconnect(socket) {
         case 'matching':
             const matchList = matchRoomList.get(disconnectPlayer.room);
             matchList.splice(matchList.indexOf(socket.nickname), 1);
+            console.log("매칭 중 접속 끊김 : ", socket.nickname);
             if(matchList.length === 0)
             {
                 matchRoomList.delete(disconnectPlayer.room);
