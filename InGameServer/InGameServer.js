@@ -81,9 +81,15 @@ const server = net.createServer((socket) =>
 
     socket.on('error',(err)=>
     {
-        logger.error('소켓 에러 : ', err);
-        PlayerDisconnect(socket, socket.clientID);
-        SocketManager.removeSocket(socket);
+        logger.error(`소켓 에러 : ${err}`);
+        try {
+            PlayerDisconnect(socket, socket.clientID);
+            SocketManager.removeSocket(socket);
+        }
+        catch(error){
+            logger.error(`try error ${error}`);
+        }
+        
     });
 });
 
