@@ -202,7 +202,7 @@ function MatchMaking(msg)
                 processMatchList(matchList, firstRoomID);
                 sendMatchList(firstRoomID, matchList);
             }
-        },10000); // 10초 (10000ms) 후에 실행
+        },60000); // 10초 (10000ms) 후에 실행
 
         matchList.timeoutId = timeoutId; // 매치리스트에 타임아웃 ID 저장
     }
