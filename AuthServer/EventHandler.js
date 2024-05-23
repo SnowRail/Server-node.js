@@ -62,6 +62,7 @@ function Login(socket, msg) {
                 console.log("query : ", queryResult);
                 socket.emit('loginSucc', 'default login succ');
                 socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+                socket.id = rows[0].nickname;
                 connectedPlayers.set(rows[0].nickname, {socket : socket, room : null, state : 'lobby'});
             }
         });
@@ -104,6 +105,7 @@ function Login(socket, msg) {
                 const queryResult = new Packet(rows[0].email, null, rows[0].nickname);
                 console.log("query : ", queryResult);
                 socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+                socket.id = rows[0].nickname;
                 connectedPlayers.set(rows[0].nickname, {socket : socket, room : null, state : 'lobby'});
             }
             
