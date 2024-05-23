@@ -19,6 +19,7 @@ const {
     Packet,
     MatchPacket
 } = require('./Packet');
+const { log } = require("console");
 
 const connectedPlayers = new Map();
 const matchRoomList = new Map();
@@ -28,7 +29,7 @@ const gameRoomList = new Map();
 
 connection.connect((err) => {
     if (err) {
-        logger.error('MySQL connection error:', err);
+        logger.error(`MySQL connection error: ${err}`);
         process.exit(1);
     } else {
         logger.info('MySQL connection success');
@@ -49,12 +50,12 @@ function Login(socket, msg) {
         const loginPW = userData.password;
         connection.query('SELECT * FROM User WHERE email = ? AND password = ?', [loginUser, loginPW], (err, rows) => {
             if (err) {
-                logger.error('Login query error:', err);
+                logger.error(`Login query error: ${err}`);
                 socket.emit('loginFail', 'login query fail');
                 return;
             }
             if (rows.length === 0) { // 등록되지 않은 사용자
-                logger.error('등록되지 않은 사용자:', err);
+                logger.error(`등록되지 않은 사용자: ${err}`);
                 socket.emit('loginFail', '존재하지 않는 ID 또는 비밀번호입니다');
             }
             else {
@@ -62,13 +63,14 @@ function Login(socket, msg) {
                 console.log("query : ", queryResult);
                 socket.emit('loginSucc', 'default login succ');
                 socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+                socket.id = rows[0].nickname;
                 connectedPlayers.set(rows[0].nickname, {socket : socket, room : null, state : 'lobby'});
             }
         });
     } else // google login
     {   connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
             if (err) {
-                logger.error('Login query error:', err);
+                logger.error(`Login query error: ${err}`);
                 socket.emit('loginFail', 'first login fail');
                 return;
             }
@@ -80,13 +82,13 @@ function Login(socket, msg) {
 
                 connection.query("INSERT INTO User (email, nickname) VALUES (?, ?)", [loginUser, newName], (err) => {
                     if (err) {
-                        logger.error('Signup query error:', err);
+                        logger.error(`Signup query error: ${err}`);
                         socket.emit('signupFail', '회원 등록에 실패했습니다');
                         return;
                     }
                     connection.query('SELECT * FROM User WHERE email = ?', [loginUser], (err, rows) => {
                         if (err) {
-                            logger.error('Login query error:', err);
+                            logger.error(`Login query error: ${err}`);
                             socket.emit('loginFail', 'second login fail');
                             return;
                         }
@@ -104,6 +106,7 @@ function Login(socket, msg) {
                 const queryResult = new Packet(rows[0].email, null, rows[0].nickname);
                 console.log("query : ", queryResult);
                 socket.emit('inquiryPlayer', JSON.stringify(queryResult));
+                socket.id = rows[0].nickname;
                 connectedPlayers.set(rows[0].nickname, {socket : socket, room : null, state : 'lobby'});
             }
             
@@ -116,7 +119,7 @@ function Signup(socket, msg) {
     
     connection.query('SELECT * FROM User WHERE email = ?', [userData.email], (err, rows) => {
         if (err) {
-            logger.error('Signup query error:', err);
+            logger.error(`Signup query error: ${err}`);
             socket.emit('signupFail', 'signup fail');
             return;
         }
@@ -124,7 +127,7 @@ function Signup(socket, msg) {
         if (rows.length === 0) {
             connection.query("INSERT INTO User (email, password, nickname) VALUES (?, ?, ?)", [userData.email, userData.password, userData.nickname], (err) => {
                 if (err) {
-                    logger.error('Signup query error:', err);
+                    logger.error(`Signup query error: ${err}`);
                     socket.emit('signupFail', '회원가입에 실패했습니다');
                     return;
                 }
@@ -144,7 +147,7 @@ function SetName(socket, msg) // name change 여기 아마 패킷 다를듯
     {
         connection.query('UPDATE User SET nickname = ? WHERE email = ?', [userData.nickname, userData.email], (err) => {
             if (err) {
-                logger.error('SetName query error:', err);
+                logger.error(`SetName query error: ${err}`);
                 socket.emit('setNameFail', 'setName fail');
                 return;
             }
@@ -160,15 +163,16 @@ function SetName(socket, msg) // name change 여기 아마 패킷 다를듯
     }
 }
 
-function MatchMaking(msg)
+function MatchMaking(socket, msg)
 {
     const userData = JSON.parse(msg);
     const player = getPlayer(userData.nickname);
-    // if(player.state === 'matching')
-    // {
-    //     logger.info("여기 들어오면 매칭중이였음");
-    //     return;
-    // }
+    if(player === undefined)
+    {
+        logger.error(`[MatchMaking] Player is undefined, name : ${userData.nickname}`);
+        socket.emit('enterRoomFail', 'Player is undefined');
+        return;
+    }
     if(matchRoomList.size === 0)
     {
         const roomID = makeRoomID();
@@ -184,7 +188,7 @@ function MatchMaking(msg)
     matchList.push(userData.nickname);
     
     player.socket.on('error', (err) => {
-        logger.error('Enter Room Fail!! : ', err);
+        logger.error(`Enter Room Fail!! : ${err}`);
         player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
     });
     player.room = firstRoomID;
@@ -214,10 +218,14 @@ function processMatchList(matchList, roomID) {
     matchPromise.then(sendList => {
         sendList.forEach(element => {
             const user = getPlayer(element.nickname);
-            user.socket.emit('enterRoomSucc', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(sendList) + '}' ); 
-            user.state = 'ready';      
+            if (user === undefined) {
+                logger.error(`[processMatchList] user is undefined, name : ${element.nickname}`);
+            } else {
+                user.socket.emit('enterRoomSucc', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(sendList) + '}' ); 
+                user.state = 'ready';      
+            }
         });
-        logger.info('Enter Room Succ!! room : ', );
+        logger.info(`Enter Room Succ!! room : ${roomID}`);
 
         readyRoomList.set(roomID, {userList : matchList, readyCount : 0});
         matchRoomList.delete(roomID);
@@ -226,8 +234,12 @@ function processMatchList(matchList, roomID) {
         setTimeout(() => {
             sendList.forEach(element => {
                 const user = getPlayer(element.nickname);
-                user.socket.emit('loadGameScene', 'Move to in-game scene');
-                user.state = 'ingame'
+                if (user === undefined) {
+                    logger.error(`[processMatchList] user is undefined, name : ${element.nickname}`);
+                } else {
+                    user.socket.emit('loadGameScene', 'Move to in-game scene');
+                    user.state = 'ingame'
+                }
             });
             logger.info('Move to in-game scene');
         }, 5000); // 5초 (5000ms) 후에 실행
@@ -251,7 +263,7 @@ function getPlayer(nickname){
 async function isUniqueName(nickname) { // 중복 없으면 true, 있으면 false
     await connection.query('SELECT * FROM User WHERE nickname = ?', [nickname], (err, rows) => {
         if (err) {
-            logger.error('setUniqueName query error:', err);
+            logger.error(`setUniqueName query error: ${err}`);
         }
         if (rows.length === 0) {
             return true;
@@ -275,16 +287,17 @@ function getMatchList(userList, roomID) {
         return new Promise((resolve, reject) => {
             const player = getPlayer(nickname);
             if (player === undefined) {
+                console.log("[getMatchList] player is undefined, name : ", nickname);
                 return;
             }
             connection.query('SELECT * FROM User WHERE nickname = ?', [nickname], (err, rows) => {
                 if (err) {
-                    logger.error('MatchMaking query error:', err);
+                    logger.error(`MatchMaking query error: ${err}`);
                     player.socket.emit('enterRoomFail', 'query error');
                     reject(err);
                 }
                 if (rows.length === 0) {
-                    logger.error('MatchMaking 존재하지 않는 유저:', err);
+                    logger.error(`MatchMaking 존재하지 않는 유저: ${err}`);
                     player.socket.emit('enterRoomFail', 'query error');
                     resolve();
                 }

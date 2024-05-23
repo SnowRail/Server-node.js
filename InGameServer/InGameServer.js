@@ -42,7 +42,7 @@ const server = net.createServer((socket) =>
                     jsonData = JSON.parse(msg[i]);
                 }
                 catch(e){
-                    logger.error('Json 파싱 에러 :', e);
+                    logger.error(`Json 파싱 에러 : ${e}`);
                     return;
                 }
 
@@ -62,7 +62,7 @@ const server = net.createServer((socket) =>
                         UpdatePlayerPos(socket, jsonData);
                         break;
                     default:
-                        logger.warn('알 수 없는 프로토콜 :', protocol);
+                        logger.warn(`알 수 없는 프로토콜 : ${protocol}`);
                         break;
                 }
             }
@@ -71,7 +71,7 @@ const server = net.createServer((socket) =>
         }
     });
 
-    
+
     socket.on('end',() =>
     {
         logger.info(`클라이언트 접속 종료`);
@@ -81,7 +81,7 @@ const server = net.createServer((socket) =>
 
     socket.on('error',(err)=>
     {
-        logger.error('소켓 에러 : ', err);
+        logger.error(`소켓 에러 : ${err}`);
         PlayerDisconnect(socket, socket.clientID);
         SocketManager.removeSocket(socket);
     });
@@ -91,7 +91,7 @@ server.listen(30303,() =>
 {
     console.log('TCP 서버가 30303번 포트에서 실행 중입니다.');
 }).on('error',(err)=>{
-    logger.error('서버 에러 : ', err);
+    logger.error(`서버 에러 : ${err}`);
     process.exit(1);
 });
 
