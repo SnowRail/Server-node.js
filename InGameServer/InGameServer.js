@@ -42,7 +42,7 @@ const server = net.createServer((socket) =>
                     jsonData = JSON.parse(msg[i]);
                 }
                 catch(e){
-                    logger.error('Json 파싱 에러 :', e);
+                    logger.error(`Json 파싱 에러 : ${e}`);
                     return;
                 }
 
@@ -62,7 +62,7 @@ const server = net.createServer((socket) =>
                         UpdatePlayerPos(socket, jsonData);
                         break;
                     default:
-                        logger.warn('알 수 없는 프로토콜 :', protocol);
+                        logger.warn(`알 수 없는 프로토콜 : ${protocol}`);
                         break;
                 }
             }
@@ -71,7 +71,7 @@ const server = net.createServer((socket) =>
         }
     });
 
-    
+
     socket.on('end',() =>
     {
         logger.info(`클라이언트 접속 종료`);
