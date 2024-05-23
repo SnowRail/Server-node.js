@@ -19,6 +19,7 @@ const {
     Packet,
     MatchPacket
 } = require('./Packet');
+const { log } = require("console");
 
 const connectedPlayers = new Map();
 const matchRoomList = new Map();
@@ -162,15 +163,16 @@ function SetName(socket, msg) // name change 여기 아마 패킷 다를듯
     }
 }
 
-function MatchMaking(msg)
+function MatchMaking(socket, msg)
 {
     const userData = JSON.parse(msg);
     const player = getPlayer(userData.nickname);
-    // if(player.state === 'matching')
-    // {
-    //     logger.info("여기 들어오면 매칭중이였음");
-    //     return;
-    // }
+    if(player === undefined)
+    {
+        logger.error("[MatchMaking] Player is undefined, name : ", userData.nickname);
+        socket.emit('enterRoomFail', 'Player is undefined');
+        return;
+    }
     if(matchRoomList.size === 0)
     {
         const roomID = makeRoomID();
@@ -216,8 +218,12 @@ function processMatchList(matchList, roomID) {
     matchPromise.then(sendList => {
         sendList.forEach(element => {
             const user = getPlayer(element.nickname);
-            user.socket.emit('enterRoomSucc', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(sendList) + '}' ); 
-            user.state = 'ready';      
+            if (user === undefined) {
+                logger.error("[processMatchList] user is undefined, name : ", element.nickname);
+            } else {
+                user.socket.emit('enterRoomSucc', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(sendList) + '}' ); 
+                user.state = 'ready';      
+            }
         });
         logger.info('Enter Room Succ!! room : ', roomID);
 
@@ -228,8 +234,12 @@ function processMatchList(matchList, roomID) {
         setTimeout(() => {
             sendList.forEach(element => {
                 const user = getPlayer(element.nickname);
-                user.socket.emit('loadGameScene', 'Move to in-game scene');
-                user.state = 'ingame'
+                if (user === undefined) {
+                    logger.error("[processMatchList] user is undefined, name : ", element.nickname);
+                } else {
+                    user.socket.emit('loadGameScene', 'Move to in-game scene');
+                    user.state = 'ingame'
+                }
             });
             logger.info('Move to in-game scene');
         }, 5000); // 5초 (5000ms) 후에 실행
@@ -277,7 +287,7 @@ function getMatchList(userList, roomID) {
         return new Promise((resolve, reject) => {
             const player = getPlayer(nickname);
             if (player === undefined) {
-                console.log("player is undefined name : ", nickname);
+                console.log("[getMatchList] player is undefined, name : ", nickname);
                 return;
             }
             connection.query('SELECT * FROM User WHERE nickname = ?', [nickname], (err, rows) => {
