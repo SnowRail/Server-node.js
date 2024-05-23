@@ -54,6 +54,7 @@ function Login(socket, msg) {
                 return;
             }
             if (rows.length === 0) { // 등록되지 않은 사용자
+                logger.error('등록되지 않은 사용자:', err);
                 socket.emit('loginFail', '존재하지 않는 ID 또는 비밀번호입니다');
             }
             else {
@@ -183,8 +184,8 @@ function MatchMaking(msg)
     matchList.push(userData.nickname);
     
     player.socket.on('error', (err) => {
-        player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
         logger.error('Enter Room Fail!! : ', err);
+        player.socket.emit('enterRoomFail', 'Enter Room Fail!!');
     });
     player.room = firstRoomID;
     player.state = 'matching';
@@ -216,7 +217,7 @@ function processMatchList(matchList, roomID) {
             user.socket.emit('enterRoomSucc', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(sendList) + '}' ); 
             user.state = 'ready';      
         });
-        logger.info('Enter Room Succ!!');
+        logger.info('Enter Room Succ!! room : ', );
 
         readyRoomList.set(roomID, {userList : matchList, readyCount : 0});
         matchRoomList.delete(roomID);
@@ -251,7 +252,6 @@ async function isUniqueName(nickname) { // 중복 없으면 true, 있으면 fals
     await connection.query('SELECT * FROM User WHERE nickname = ?', [nickname], (err, rows) => {
         if (err) {
             logger.error('setUniqueName query error:', err);
-            
         }
         if (rows.length === 0) {
             return true;
@@ -274,6 +274,9 @@ function getMatchList(userList, roomID) {
     const promises = userList.map(nickname => {
         return new Promise((resolve, reject) => {
             const player = getPlayer(nickname);
+            if (player === undefined) {
+                return;
+            }
             connection.query('SELECT * FROM User WHERE nickname = ?', [nickname], (err, rows) => {
                 if (err) {
                     logger.error('MatchMaking query error:', err);
@@ -281,6 +284,7 @@ function getMatchList(userList, roomID) {
                     reject(err);
                 }
                 if (rows.length === 0) {
+                    logger.error('MatchMaking 존재하지 않는 유저:', err);
                     player.socket.emit('enterRoomFail', 'query error');
                     resolve();
                 }
@@ -304,6 +308,7 @@ function Disconnect(socket) {
     }
     switch(disconnectPlayer.state){
         case 'lobby':
+            console.log("Lobby 접속 끊김 : ", socket.id);
             break;
         case 'matching':
             const matchList = matchRoomList.get(disconnectPlayer.room);
@@ -317,12 +322,14 @@ function Disconnect(socket) {
         case 'ready':
             const readyList = readyRoomList.get(disconnectPlayer.room);
             readyList.userList.splice(readyList.userList.indexOf(socket.id), 1);
+            console.log("Ready 중 접속 끊김 : ", socket.id);
             if(readyList.userList.length === 0)
             {
                 readyRoomList.delete(disconnectPlayer.room);
             }
             break;
         case 'ingame':
+            console.log("Ingame 중 접속 끊김 : ", socket.id);
             break;
     }
     connectedPlayers.delete(socket.id);
