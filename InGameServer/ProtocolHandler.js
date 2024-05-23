@@ -181,8 +181,12 @@ function broadcastAll(message, roomID) {
 }
 
 function PlayerDisconnect(socket, id){
+    console.log("clientID: ", socket.clientID, "roomid : ", socket.roomID, "id: ", id);
     const room = gameRoomList.get(socket.roomID);
+    console.log("room : ", room);
+    console.log("playerList before : ", room.playerList);
     room.playerList.splice(room.playerList.indexOf(id),1);
+    console.log("playerList after : ", room.playerList);
     NetworkObjectManager.removeObjectByID(id);
 
     const json = new Packet(Protocol.PlayerDisconnect, socket.roomID, id);
