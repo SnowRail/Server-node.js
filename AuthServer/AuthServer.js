@@ -20,37 +20,37 @@ const {
 io.on('connection', (socket) => {
     logger.info(`새로운 클라이언트 접속 : ${socket.handshake.address}`);
     socket.on('login', (msg) => { // 일반 login
-        logger.info('login : ' + JSON.stringify(msg));
+        logger.info(`login : ${JSON.stringify(msg)}`);
         Login(socket, msg);
     });
     
     socket.on('loginSucc', (msg) => { // email 정보
-        logger.info('login : ' + JSON.stringify(msg));
+        logger.info(`login : ${JSON.stringify(msg)}`);
         Login(socket, msg);
     });
     
     socket.on('signup', (msg) => {
-        logger.info('signup : ' + JSON.stringify(msg));
+        logger.info(`signup : ${JSON.stringify(msg)}`);
         Signup(socket, msg);
     });
 
     socket.on('inquiryFriend', (msg) => {
-        logger.info('setName : ' + JSON.stringify(msg));
+        logger.info(`inquiryFriend : ${JSON.stringify(msg)}`);
         SetName(socket, msg);
     });
 
     socket.on('setName', (msg) => {
-        logger.info('setName : ' + JSON.stringify(msg));
+        logger.info(`setName : ${JSON.stringify(msg)}`);
         SetName(socket, msg);
     });
     
     socket.on('matching', (msg) => { // client의 matching 요청
-        logger.info('matching : ' + JSON.stringify(msg));
+        logger.info(`matching : ${JSON.stringify(msg)}`);
         MatchMaking(socket, msg);
     });
 
     socket.on('readyGame', (msg) => {
-        logger.info('beforeStart : ' + JSON.stringify(msg));
+        logger.info(`beforeStart : ${JSON.stringify(msg)}`);
         ReadyGame(msg);
     });
 
@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
 
     // ------ InGameServer --------
     socket.on('message', (data) => {
-        logger.info('ingame message : ' + data);
+        logger.info(`ingame message : ${data}`);
         SetInGameServer(socket);
     })
 
@@ -76,6 +76,6 @@ io.on('connection', (socket) => {
 server.listen(10101, () => {    
     logger.info('서버가 10101번 포트에서 실행 중입니다. ');
 }).on('error', (err) => {
-    logger.error('Server error : ', err);
+    logger.error(`Server error : ${err}`);
 });
 
