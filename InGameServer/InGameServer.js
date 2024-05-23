@@ -81,7 +81,7 @@ const server = net.createServer((socket) =>
 
     socket.on('error',(err)=>
     {
-        logger.error('소켓 에러 : ', err);
+        logger.error(`소켓 에러 : ${err}`);
         PlayerDisconnect(socket, socket.clientID);
         SocketManager.removeSocket(socket);
     });
@@ -91,7 +91,7 @@ server.listen(30303,() =>
 {
     console.log('TCP 서버가 30303번 포트에서 실행 중입니다.');
 }).on('error',(err)=>{
-    logger.error('서버 에러 : ', err);
+    logger.error(`서버 에러 : ${err}`);
     process.exit(1);
 });
 
