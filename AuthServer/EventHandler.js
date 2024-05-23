@@ -225,7 +225,7 @@ function processMatchList(matchList, roomID) {
                 user.state = 'ready';      
             }
         });
-        logger.info('Enter Room Succ!! room : ', roomID);
+        logger.info(`Enter Room Succ!! room : ${roomID}`);
 
         readyRoomList.set(roomID, {userList : matchList, readyCount : 0});
         matchRoomList.delete(roomID);
