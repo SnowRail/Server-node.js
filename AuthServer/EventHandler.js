@@ -219,7 +219,7 @@ function processMatchList(matchList, roomID) {
             user.socket.emit('enterRoomSucc', '{"roomID":' + roomID + ',"playerList":' + JSON.stringify(sendList) + '}' ); 
             user.state = 'ready';      
         });
-        logger.info('Enter Room Succ!! room : ', );
+        logger.info('Enter Room Succ!! room : ', roomID);
 
         readyRoomList.set(roomID, {userList : matchList, readyCount : 0});
         matchRoomList.delete(roomID);
@@ -277,6 +277,7 @@ function getMatchList(userList, roomID) {
         return new Promise((resolve, reject) => {
             const player = getPlayer(nickname);
             if (player === undefined) {
+                console.log("player is undefined name : ", nickname);
                 return;
             }
             connection.query('SELECT * FROM User WHERE nickname = ?', [nickname], (err, rows) => {
