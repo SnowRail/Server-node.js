@@ -214,7 +214,8 @@ function MatchMaking(socket, msg)
 }
 
 function processMatchList(matchList, roomID) {
-    const matchPromise = getMatchList(matchList,roomID);
+    const matchPromise = getMatchList(matchList, roomID);
+    readyRoomList.set(roomID, {userList : matchList});
     matchPromise.then(sendList => {
         sendList.forEach(element => {
             const user = getPlayer(element.nickname);
@@ -227,10 +228,10 @@ function processMatchList(matchList, roomID) {
         });
         logger.info(`Enter Room Succ!! room : ${roomID}`);
 
-        readyRoomList.set(roomID, {userList : matchList, readyCount : 0});
         matchRoomList.delete(roomID);
 
         // 5초 후에 moveInGameScene 이벤트 emit
+        gameRoomList.set(roomID, {userList : matchList});
         setTimeout(() => {
             sendList.forEach(element => {
                 const user = getPlayer(element.nickname);
@@ -243,7 +244,6 @@ function processMatchList(matchList, roomID) {
             });
             logger.info('Move to in-game scene');
         }, 5000); // 5초 (5000ms) 후에 실행
-        gameRoomList.set(roomID, {userList : matchList});
         readyRoomList.delete(roomID);
     });
 }
