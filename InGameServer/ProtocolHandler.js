@@ -163,6 +163,7 @@ function broadcast(message, sender, roomID) {
     const playerList = gameRoomList.get(roomID).playerList;
     playerList.forEach(player => {
         const socket = SocketManager.getSocketById(player);
+        if (socket === undefined) return;
         if(sender == socket) return;
         if (socket) {
             socket.write(message);
@@ -174,6 +175,7 @@ function broadcastAll(message, roomID) {
     const playerList = gameRoomList.get(roomID).playerList;
     playerList.forEach(player => {
         const socket = SocketManager.getSocketById(player);
+        if (socket === undefined) return;
         if (socket) {
             socket.write(message);
         }
@@ -182,7 +184,18 @@ function broadcastAll(message, roomID) {
 
 function PlayerDisconnect(socket, id){
     console.log("clientID: ", socket.clientID, "roomid : ", socket.roomID, "id: ", id);
+    if (socket.clientID === undefined)
+    {
+        console.log("[PlayerDisconnect] clientID undefined");
+        return;
+    }
     const room = gameRoomList.get(socket.roomID);
+    if(room === undefined)
+    {
+        console.log("[PlayerDisconnect] room undefined");
+        return;
+    }
+
     room.playerList.splice(room.playerList.indexOf(id),1);
     console.log("playerList after : ", room.playerList);
     NetworkObjectManager.removeObjectByID(id);
