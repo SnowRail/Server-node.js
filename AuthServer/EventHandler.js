@@ -325,6 +325,10 @@ function Disconnect(socket) {
             break;
         case 'matching':
             const matchList = matchRoomList.get(disconnectPlayer.room);
+            if (matchList === undefined) {
+                console.log("[Disconnect] matchList is undefined");
+                return;
+            }
             matchList.splice(matchList.indexOf(socket.id), 1);
             console.log("매칭 중 접속 끊김 : ", socket.id);
             if(matchList.length === 0)
@@ -334,6 +338,10 @@ function Disconnect(socket) {
             break;
         case 'ready':
             const readyList = readyRoomList.get(disconnectPlayer.room);
+            if (readyList === undefined) {
+                console.log("[Disconnect] readyList is undefined");
+                return;
+            }
             readyList.userList.splice(readyList.userList.indexOf(socket.id), 1);
             console.log("Ready 중 접속 끊김 : ", socket.id);
             if(readyList.userList.length === 0)
