@@ -207,7 +207,7 @@ function MatchMaking(socket, msg)
                 processMatchList(matchList, firstRoomID);
                 sendMatchList(firstRoomID, matchList);
             }
-        },240000); // 240초 (240000ms) 후에 실행
+        },10000); // 240초 (240000ms) 후에 실행
 
         matchList.timeoutId = timeoutId; // 매치리스트에 타임아웃 ID 저장
     }
