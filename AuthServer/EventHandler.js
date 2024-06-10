@@ -207,14 +207,15 @@ function MatchMaking(socket, msg)
                 processMatchList(matchList, firstRoomID);
                 sendMatchList(firstRoomID, matchList);
             }
-        },60000); // 10초 (10000ms) 후에 실행
+        },120000); // 120초 (120000ms) 후에 실행
 
         matchList.timeoutId = timeoutId; // 매치리스트에 타임아웃 ID 저장
     }
 }
 
 function processMatchList(matchList, roomID) {
-    const matchPromise = getMatchList(matchList,roomID);
+    const matchPromise = getMatchList(matchList, roomID);
+    readyRoomList.set(roomID, {userList : matchList});
     matchPromise.then(sendList => {
         sendList.forEach(element => {
             const user = getPlayer(element.nickname);
@@ -227,10 +228,10 @@ function processMatchList(matchList, roomID) {
         });
         logger.info(`Enter Room Succ!! room : ${roomID}`);
 
-        readyRoomList.set(roomID, {userList : matchList, readyCount : 0});
         matchRoomList.delete(roomID);
 
         // 5초 후에 moveInGameScene 이벤트 emit
+        gameRoomList.set(roomID, {userList : matchList});
         setTimeout(() => {
             sendList.forEach(element => {
                 const user = getPlayer(element.nickname);
@@ -243,7 +244,6 @@ function processMatchList(matchList, roomID) {
             });
             logger.info('Move to in-game scene');
         }, 5000); // 5초 (5000ms) 후에 실행
-        gameRoomList.set(roomID, {userList : matchList});
         readyRoomList.delete(roomID);
     });
 }
@@ -325,6 +325,10 @@ function Disconnect(socket) {
             break;
         case 'matching':
             const matchList = matchRoomList.get(disconnectPlayer.room);
+            if (matchList === undefined) {
+                console.log("[Disconnect] matchList is undefined");
+                return;
+            }
             matchList.splice(matchList.indexOf(socket.id), 1);
             console.log("매칭 중 접속 끊김 : ", socket.id);
             if(matchList.length === 0)
@@ -334,6 +338,10 @@ function Disconnect(socket) {
             break;
         case 'ready':
             const readyList = readyRoomList.get(disconnectPlayer.room);
+            if (readyList === undefined) {
+                console.log("[Disconnect] readyList is undefined");
+                return;
+            }
             readyList.userList.splice(readyList.userList.indexOf(socket.id), 1);
             console.log("Ready 중 접속 끊김 : ", socket.id);
             if(readyList.userList.length === 0)
