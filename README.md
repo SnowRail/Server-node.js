@@ -25,7 +25,7 @@
 --
 ### OutGame 서버
 
-#### ✔️ 로그인 / 회원가입
+#### ✅ 로그인 / 회원가입
   - DB는 AWS RDS의 MySQL을 사용했습니다.
   - 일반적인 로그인, Google OAuth. 두 가지 방법을 구현했습니다.
 <details>
@@ -36,7 +36,7 @@ https://github.com/SnowRail/Server-node.js/blob/722e4df6362f3b37565e54bbf28fc783
 </details>
 <br/>
 
-#### ✔️ 닉네임 설정
+#### ✅ 닉네임 설정
 <details>
     <summary>Set Name Code 조각</summary>
 
@@ -44,7 +44,7 @@ https://github.com/SnowRail/Server-node.js/blob/722e4df6362f3b37565e54bbf28fc783
 </details>
 <br/>
 
-#### ✔️ 매치메이킹
+#### ✅ 매치메이킹
   - 1~5인까지 하나의 게임에 참여할 수 있습니다.
   - 5인이 매칭되면 즉시 게임이 시작됩니다.
   - 5인 미만일 경우, 매칭 시작 후, 일정 시간이 지나면 매칭에 참여한 인원만으로 게임이 시작됩니다.
@@ -59,16 +59,16 @@ https://github.com/SnowRail/Server-node.js/blob/722e4df6362f3b37565e54bbf28fc783
 
 ### InGame 서버
 
-#### ✔️ Game State, Event 관리
+#### ✅ Game State, Event 관리
 <details>
     <summary>CountDown Event 일부</summary>
 
 https://github.com/SnowRail/Server-node.js/blob/722e4df6362f3b37565e54bbf28fc7830da9c01c/InGameServer/ProtocolHandler.js#L105-L134
 </details>
 
-#### ✔️ 플레이어 Position broadcast
+#### ✅ 플레이어 Position broadcast
 
-#### ✔️ 최종 Ranking 판단 및 관리
+#### ✅ 최종 Ranking 판단 및 관리
   - semaphore를 이용해 여러 플레이어가 Goal에 접근한 경우의 동시성 문제를 해결했습니다.
 <details>
     <summary>Player Goal 처리 Func</summary>
